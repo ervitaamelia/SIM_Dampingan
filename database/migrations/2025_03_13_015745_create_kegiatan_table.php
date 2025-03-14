@@ -19,6 +19,7 @@ return new class extends Migration
             $table->time('waktu');
             $table->string('tempat', 100);
             $table->integer('jumlah_peserta');
+            $table->varchar('laporan')->nullable();
             $table->unsignedBigInteger('id_grup_dampingan');
 
             $table->foreign('id_grup_dampingan')->references('id_grup_dampingan')->on('grup_dampingan');
