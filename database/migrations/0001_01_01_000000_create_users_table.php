@@ -12,11 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
+            $table->id('id_user');
+            $table->string('nama_lengkap');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('nomor_telepon', 15);
+            $table->string('domisili');
+            $table->enum('role', ['superadmin', 'admin', 'fasilitator']);
+            $table->unsignedBigInteger('id_provinsi');
+            $table->unsignedBigInteger('id_kabupaten');
+            $table->unsignedBigInteger('id_kecamatan');
+            
+            $table->foreign('id_provinsi')->references('id_provinsi')->on('provinsi')->onDelete('cascade');
+            $table->foreign('id_kabupaten')->references('id_kabupaten')->on('kabupaten')->onDelete('cascade');
+            $table->foreign('id_kecamatan')->references('id_kecamatan')->on('kecamatan')->onDelete('cascade');
             $table->rememberToken();
             $table->timestamps();
         });
