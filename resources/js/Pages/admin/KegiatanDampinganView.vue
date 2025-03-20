@@ -1,6 +1,7 @@
 <script setup>
-import AdminLayout from '@/layouts/AdminLayout.vue'
-import { ref } from 'vue'
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
 
 const isMenuOpen = ref(false)
 const isDropdownOpen = ref(false)
@@ -48,6 +49,7 @@ const tambahData = () => {
 
 <template>
   <AdminLayout>
+    <Head title="Kegiatan Dampingan" />
     <div class="flex h-screen bg-gray-100 overflow-auto">
       <main
         class="grow px-10 py-6 m-6 bg-white rounded-[30px] shadow-[0_10px_60px_rgba(226,236,249,0.5)] max-md:p-4 max-md:m-3 h-auto overflow-y-auto scrollbar-hidden"

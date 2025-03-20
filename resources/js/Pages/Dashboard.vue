@@ -1,10 +1,11 @@
 <script>
-import AdminLayout from '@/Layouts/AdminLayout.vue'
+import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
 export default {
   components: {
     AdminLayout,
+    Head
   },
   data() {
     return {

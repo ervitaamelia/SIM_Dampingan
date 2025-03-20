@@ -1,11 +1,13 @@
 <script>
-import AdminLayout from '@/layouts/AdminLayout.vue'
-import Multiselect from '@vueform/multiselect'
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import Multiselect from '@vueform/multiselect';
+import { Head } from '@inertiajs/vue3';
 
 export default {
   components: {
     Multiselect,
     AdminLayout,
+    Head,
   },
   data() {
     return {
@@ -115,6 +117,7 @@ export default {
 
 <template>
   <AdminLayout>
+    <Head title="Data Fasilitator" />
     <div class="flex h-screen bg-gray-100 overflow-auto">
       <main class="flex-1 p-6">
         <div class="bg-white shadow-md rounded p-4">

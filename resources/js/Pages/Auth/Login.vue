@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3';
 
 const form = useForm({
     email: '',
@@ -16,6 +17,7 @@ const submit = () => {
 </script>
 
 <template>
+  <Head title="Login"/>
   <main class="flex h-screen w-screen bg-white max-md:flex-col">
     <!-- Form Login -->
     <section
