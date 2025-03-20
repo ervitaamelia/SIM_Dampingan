@@ -1,6 +1,5 @@
 <script>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { Head } from '@inertiajs/vue3';
 
 export default {
   components: {
@@ -35,7 +34,6 @@ export default {
 
 <template>
   <AdminLayout>
-    <Head title="Dashboard"/>
     <div class="flex h-screen bg-gray-100 overflow-auto">
       <main class="flex-1 p-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
