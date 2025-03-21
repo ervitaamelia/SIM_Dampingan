@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_user');
 
             $table->foreign('id_grup_dampingan')->references('id_grup_dampingan')->on('grup_dampingan');
-            $table->foreign('id_user')->references('id_user')->on('users');
+            $table->foreign('id_user')->references('id')->on('users');
             $table->timestamps();
         });
     }

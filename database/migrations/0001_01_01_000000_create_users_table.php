@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('id');
+            $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -20,13 +20,16 @@ return new class extends Migration
             $table->string('nomor_telepon', 15)->nullable();
             $table->string('domisili')->nullable();
             $table->enum('role', ['superadmin', 'admin', 'fasilitator']);
-            $table->unsignedBigInteger('id_provinsi')->nullable();
-            $table->unsignedBigInteger('id_kabupaten')->nullable();
-            $table->unsignedBigInteger('id_kecamatan')->nullable();
             
-            $table->foreign('id_provinsi')->references('id')->on('indonesia_provinces')->onDelete('cascade');
-            $table->foreign('id_kabupaten')->references('id')->on('indonesia_cities')->onDelete('cascade');
-            $table->foreign('id_kecamatan')->references('id')->on('indonesia_district')->onDelete('cascade');
+            // Menggunakan kode sebagai foreign key
+            $table->string('kode_provinsi')->nullable();
+            $table->string('kode_kabupaten')->nullable();
+            $table->string('kode_kecamatan')->nullable();
+
+            $table->foreign('kode_provinsi')->references('kode')->on('provinsis')->onDelete('cascade');
+            $table->foreign('kode_kabupaten')->references('kode')->on('kabupatens')->onDelete('cascade');
+            $table->foreign('kode_kecamatan')->references('kode')->on('kecamatans')->onDelete('cascade');
+            
             $table->rememberToken();
             $table->timestamps();
         });

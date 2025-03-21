@@ -13,17 +13,21 @@ return new class extends Migration
     {
         Schema::create('grup_dampingan', function (Blueprint $table) {
             $table->id('id_grup_dampingan');
-            $table->string('nama_grup_dampingan', 100);
+            $table->string('nama_grup_dampingan');
             $table->enum('jenis_dampingan', ['Pusat', 'Provinsi', 'Kabupaten', 'Kecamatan']);
-            $table->unsignedBigInteger('id_provinsi');
-            $table->unsignedBigInteger('id_kabupaten');
-            $table->unsignedBigInteger('id_kecamatan');
+
+            // Menggunakan kode wilayah, bukan id
+            $table->string('kode_provinsi')->nullable();
+            $table->string('kode_kabupaten')->nullable();
+            $table->string('kode_kecamatan')->nullable();
             $table->unsignedBigInteger('id_bidang');
 
-            $table->foreign('id_provinsi')->references('id')->on('indonesia_provinces')->onDelete('cascade');
-            $table->foreign('id_kabupaten')->references('id')->on('indonesia_cities')->onDelete('cascade');
-            $table->foreign('id_kecamatan')->references('id')->on('indonesia_district')->onDelete('cascade');
+            // Relasi ke tabel wilayah yang menggunakan kode
+            $table->foreign('kode_provinsi')->references('kode')->on('provinsis')->onDelete('cascade');
+            $table->foreign('kode_kabupaten')->references('kode')->on('kabupatens')->onDelete('cascade');
+            $table->foreign('kode_kecamatan')->references('kode')->on('kecamatans')->onDelete('cascade');
             $table->foreign('id_bidang')->references('id_bidang')->on('bidang')->onDelete('cascade');
+
             $table->timestamps();
         });
     }
