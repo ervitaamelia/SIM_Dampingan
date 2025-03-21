@@ -12,21 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('id_user');
-            $table->string('nama_lengkap');
+            $table->id('id');
+            $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('nomor_telepon', 15);
-            $table->string('domisili');
+            $table->string('nomor_telepon', 15)->nullable();
+            $table->string('domisili')->nullable();
             $table->enum('role', ['superadmin', 'admin', 'fasilitator']);
-            $table->unsignedBigInteger('id_provinsi');
-            $table->unsignedBigInteger('id_kabupaten');
-            $table->unsignedBigInteger('id_kecamatan');
+            $table->unsignedBigInteger('id_provinsi')->nullable();
+            $table->unsignedBigInteger('id_kabupaten')->nullable();
+            $table->unsignedBigInteger('id_kecamatan')->nullable();
             
-            $table->foreign('id_provinsi')->references('id_provinsi')->on('provinsi')->onDelete('cascade');
-            $table->foreign('id_kabupaten')->references('id_kabupaten')->on('kabupaten')->onDelete('cascade');
-            $table->foreign('id_kecamatan')->references('id_kecamatan')->on('kecamatan')->onDelete('cascade');
+            $table->foreign('id_provinsi')->references('id')->on('indonesia_provinces')->onDelete('cascade');
+            $table->foreign('id_kabupaten')->references('id')->on('indonesia_cities')->onDelete('cascade');
+            $table->foreign('id_kecamatan')->references('id')->on('indonesia_district')->onDelete('cascade');
             $table->rememberToken();
             $table->timestamps();
         });

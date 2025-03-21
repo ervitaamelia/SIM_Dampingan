@@ -20,9 +20,9 @@ return new class extends Migration
             $table->unsignedBigInteger('id_kecamatan');
             $table->unsignedBigInteger('id_bidang');
 
-            $table->foreign('id_provinsi')->references('id_provinsi')->on('provinsi')->onDelete('cascade');
-            $table->foreign('id_kabupaten')->references('id_kabupaten')->on('kabupaten')->onDelete('cascade');
-            $table->foreign('id_kecamatan')->references('id_kecamatan')->on('kecamatan')->onDelete('cascade');
+            $table->foreign('id_provinsi')->references('id')->on('indonesia_provinces')->onDelete('cascade');
+            $table->foreign('id_kabupaten')->references('id')->on('indonesia_cities')->onDelete('cascade');
+            $table->foreign('id_kecamatan')->references('id')->on('indonesia_district')->onDelete('cascade');
             $table->foreign('id_bidang')->references('id_bidang')->on('bidang')->onDelete('cascade');
             $table->timestamps();
         });
