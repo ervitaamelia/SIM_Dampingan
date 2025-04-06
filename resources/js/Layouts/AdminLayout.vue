@@ -1,18 +1,18 @@
 <script setup>
-import SidebarAdminContent from '@/components/SidebarAdminContent.vue'
-import FooterContent from '@/components/FooterContent.vue'
+
+import SidebarAdminContent from '@/Components/SidebarAdminContent.vue' 
+import FooterContent from '@/Components/FooterContent.vue' 
+
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen">
-    <div class="flex h-screen bg-gray-100 overflow-auto">
-      <div class="flex flex-1">
-        <SidebarAdminContent />
-        <main>
-          <slot></slot>
-        </main>
-      </div>
+  <div class="flex min-h-screen bg-gray-100">
+    <SidebarAdminContent />
+    <div class="flex-1 overflow-auto">
+      <main class="p-6 w-full">
+        <slot></slot>
+      </main>
+      <FooterContent />
     </div>
-    <FooterContent />
   </div>
 </template>
