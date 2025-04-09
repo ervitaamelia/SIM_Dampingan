@@ -7,6 +7,9 @@ use App\Http\Controllers\DataFasilitatorController;
 use App\Http\Controllers\DataMasyarakatController;
 use App\Http\Controllers\KegiatanDampinganController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\WilayahController;
+
 use App\Http\Middleware\EnsureUserRole;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -56,6 +59,12 @@ Route::get('/admin/data-dampingan', [DataDampinganController::class, 'index'])
 Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'index'])
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
     ->name('kegiatan-dampingan');
+
+//coba filter
+Route::get('/dropdown-data', [AdminController::class, 'getDropdownData']);
+Route::get('/api/provinsi', [WilayahController::class, 'getProvinsi']);
+Route::get('/api/kabupaten/{kode_provinsi}', [WilayahController::class, 'getKabupaten']);
+Route::get('/api/kecamatan/{kode_kabupaten}', [WilayahController::class, 'getKecamatan']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

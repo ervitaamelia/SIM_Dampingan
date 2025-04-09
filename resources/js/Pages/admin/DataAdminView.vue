@@ -28,51 +28,55 @@ export default {
     },
 
     data() {
-        return {
-            isMenuOpen: false,
-            isDropdownOpen: false,
-            showPopup: false,
-            showPopupHapus: false,
-            searchQuery: "",
+    return {
+        selectedProvinsi: null,
+        selectedKabupaten: null,
+        selectedKecamatan: null,
+        selectedDampingan: null,
 
-            selectedProvinsi: null,
-            selectedKabupaten: null,
-            selectedKecamatan: null,
-            selectedDampingan: null,
-            provinsiList: ["Jawa Tengah", "Jawa Barat", "Jawa Timur"],
-            kabupatenList: ["Semarang", "Bandung", "Surabaya"],
-            kecamatanList: ["Tembalang", "Cibadak", "Rungkut"],
-            dampinganList: ["Dampingan A", "Dampingan B"],
-        };
+        provinsiList: [],
+        kabupatenList: [],
+        kecamatanList: [],
+        dampinganList: [],
+    };
+},
+mounted() {
+    this.fetchProvinsi();
+},
+methods: {
+    fetchProvinsi() {
+        fetch('/api/provinsi')
+            .then(res => res.json())
+            .then(data => {
+                this.provinsiList = data.map(item => ({ label: item.nama, value: item.kode }));
+            });
     },
-
-    methods: {
-        toggleDropdown(event) {
-            event.stopPropagation();
-            this.isDropdownOpen = !this.isDropdownOpen;
-        },
-        selectDaerah(daerah) {
-            console.log("Dipilih:", daerah);
-            this.isDropdownOpen = false;
-        },
-        closeDropdown(event) {
-            if (!this.$el.contains(event.target)) {
-                this.isDropdownOpen = false;
-            }
-        },
-        tambahData() {
-            console.log("Tombol ditekan!");
-        },
+    fetchKabupaten(kodeProvinsi) {
+        this.selectedKabupaten = null;
+        this.kabupatenList = [];
+        this.kecamatanList = [];
+        if (kodeProvinsi) {
+            fetch(`/api/kabupaten/${kodeProvinsi}`)
+                .then(res => res.json())
+                .then(data => {
+                    this.kabupatenList = data.map(item => ({ label: item.nama, value: item.kode }));
+                });
+        }
     },
-
-    mounted() {
-        document.addEventListener("click", this.closeDropdown);
+    fetchKecamatan(kodeKabupaten) {
+        this.selectedKecamatan = null;
+        this.kecamatanList = [];
+        if (kodeKabupaten) {
+            fetch(`/api/kecamatan/${kodeKabupaten}`)
+                .then(res => res.json())
+                .then(data => {
+                    this.kecamatanList = data.map(item => ({ label: item.nama, value: item.kode }));
+                });
+        }
     },
-
-    beforeUnmount() {
-        document.removeEventListener("click", this.closeDropdown);
-    },
+}
 };
+
 </script>
 
 <template>
@@ -101,38 +105,41 @@ export default {
                     <div class="flex flex-wrap gap-4 mb-8">
                         <!-- Dropdown Provinsi -->
                         <div class="w-1 min-w-[200px]">
+                                                    <!-- Provinsi -->
                             <Multiselect
-                                v-model="selectedProvinsi"
-                                :options="provinsiList"
-                                placeholder="Pilih Provinsi"
-                                :searchable="true"
-                                :class="{ 'transparent-dropdown': showPopup }"
-                                class="w-full"
+                            v-model="selectedProvinsi"
+                            :options="provinsiList"
+                            placeholder="Pilih Provinsi"
+                            :searchable="true"
+                            class="w-full"
+                            @update:modelValue="fetchKabupaten"
                             />
+
                         </div>
 
                         <!-- Dropdown Kabupaten -->
-                        <div class="w-1 min-w-[200px]">
+                        <!-- Kabupaten -->
                             <Multiselect
-                                v-model="selectedKabupaten"
-                                :options="kabupatenList"
-                                placeholder="Pilih Kabupaten"
-                                :searchable="true"
-                                :class="{ 'transparent-dropdown': showPopup }"
-                                class="w-full"
-                            />
-                        </div>
+                            v-model="selectedKabupaten"
+                            :options="kabupatenList"
+                            placeholder="Pilih Kabupaten"
+                            :searchable="true"
+                            class="w-full"
+                            :disabled="!selectedProvinsi"
+                            @update:modelValue="fetchKecamatan"
+/>
 
                         <!-- Dropdown Kecamatan -->
                         <div class="w-1 min-w-[200px]">
-                            <Multiselect
+                            <!-- Kecamatan -->
+                                <Multiselect
                                 v-model="selectedKecamatan"
                                 :options="kecamatanList"
                                 placeholder="Pilih Kecamatan"
                                 :searchable="true"
-                                :class="{ 'transparent-dropdown': showPopup }"
                                 class="w-full"
-                            />
+                                :disabled="!selectedKabupaten"
+                                />
                         </div>
 
                         <!-- Dropdown Dampingan -->
