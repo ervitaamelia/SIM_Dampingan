@@ -2,6 +2,7 @@
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import Multiselect from "@vueform/multiselect";
 import { Head } from "@inertiajs/vue3";
+import '@vueform/multiselect/themes/default.css'
 
 export default {
     components: {
@@ -84,7 +85,7 @@ export default {
                         <h2 class="text-xl font-bold">Data Admin</h2>
                         <div class="flex space-x-2">
                             <a
-                                href="TambahAdmin"
+                                :href="route('admin.create')"
                                 class="bg-blue-500 text-white px-3 py-2 rounded"
                                 >+ Tambah</a
                             >
@@ -151,12 +152,14 @@ export default {
                         <table class="w-full min-w-[600px] border-collapse">
                             <thead>
                                 <tr class="bg-gray-200">
-                                    <th class="border p-2">Id</th>
+                                    <th class="border p-2">No.</th>
                                     <th class="border p-2">Nama Lengkap</th>
                                     <th class="border p-2">Email</th>
                                     <th class="border p-2">Alamat</th>
                                     <th class="border p-2">Nomor Telepon</th>
-                                    <th class="border p-2">Role</th>
+                                    <th class="border p-2">Provinsi</th>
+                                    <th class="border p-2">Kabupaten</th>
+                                    <th class="border p-2">Kecamatan</th>
                                     <th class="border p-2">Aksi</th>
                                 </tr>
                             </thead>
@@ -164,21 +167,17 @@ export default {
                                 <tr
                                     v-for="admin in admins"
                                     :key="admin.id"
-                                    class="text-center"
+                                    class="text-left"
                                 >
-                                    <td class="border p-2">{{ admin.id }}</td>
+                                    <td class="border p-2 text-center">{{ admin.id }}</td>
                                     <td class="border p-2">{{ admin.name }}</td>
-                                    <td class="border p-2">
-                                        {{ admin.email }}
-                                    </td>
-                                    <td class="border p-2">
-                                        {{ admin.alamat }}
-                                    </td>
-                                    <td class="border p-2">
-                                        {{ admin.nomor_telepon }}
-                                    </td>
-                                    <td class="border p-2">{{ admin.role }}</td>
-                                    <td class="border p-2">
+                                    <td class="border p-2">{{ admin.email }}</td>
+                                    <td class="border p-2">{{ admin.alamat }}</td>
+                                    <td class="border p-2">{{ admin.nomor_telepon }}</td>
+                                    <td class="border p-2">{{ admin.nama_provinsi }}</td>
+                                    <td class="border p-2">{{ admin.nama_kabupaten }}</td>
+                                    <td class="border p-2">{{ admin.nama_kecamatan }}</td>
+                                    <td class="border p-2 text-center w-20">
                                         <a
                                             href="EditAdmin"
                                             class="text-blue-500 mr-2"

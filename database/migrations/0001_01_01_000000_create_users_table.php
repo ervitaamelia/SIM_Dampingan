@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('nomor_telepon', 15)->nullable();
-            $table->string('domisili')->nullable();
+            $table->string('alamat')->nullable();
             $table->enum('role', ['superadmin', 'admin', 'fasilitator']);
             
             // Menggunakan kode sebagai foreign key
