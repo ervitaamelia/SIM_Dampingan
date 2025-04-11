@@ -8,9 +8,22 @@ use App\Models\Kabupaten;
 use App\Models\Kecamatan;
 use App\Models\BidangDampingan;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+
 
 class AdminController extends Controller
 {
+
+    public function create()
+{
+    return Inertia::render('Admin/FormAdmin', [
+        'provinsis' => Provinsi::select('kode', 'nama')->get(),
+        'kabupatens' => Kabupaten::select('kode', 'nama', 'kode_provinsi')->get(),
+        'kecamatans' => Kecamatan::select('kode', 'nama', 'kode_kabupaten')->get(),
+    ]);
+}
+
+
     public function getDropdownData()
     {
         return response()->json([

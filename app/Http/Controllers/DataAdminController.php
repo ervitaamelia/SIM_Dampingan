@@ -74,7 +74,13 @@ class DataAdminController extends Controller
         $admin = User::findOrFail($id);
 
         return inertia('admin/FormAdminView', [
-            'admin' => $admin,
+            'admin' => [
+                'id' => $admin->id,
+                'name' => $admin->name,
+                'email' => $admin->email,
+                'nomor_telepon' => $admin->nomor_telepon,
+                'alamat' => $admin->alamat,
+            ],
         ]);
     }
 

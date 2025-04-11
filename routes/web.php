@@ -28,12 +28,18 @@ Route::get('/admin', [DashboardAdminController::class, 'index'])
     ->name('dashboard');
 
 //Data fasilitator route
-Route::get('/admin/data-fasilitator', [DataFasilitatorController::class, 'index'])
-    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
-    ->name('data-fasilitator');
+Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/data-fasilitator', [DataFasilitatorController::class, 'index'])->name('fasilitator.index');
+        Route::get('/data-fasilitator/create', [DataFasilitatorController::class, 'create'])->name('fasilitator.create');
+        Route::post('/data-fasilitator', [DataFasilitatorController::class, 'store'])->name('fasilitator.store');
+        Route::get('/data-fasilitator/{id}/edit', [DataFasilitatorController::class, 'edit'])->name('fasilitator.edit');
+        Route::put('/data-fasilitator/{id}', [DataFasilitatorController::class, 'update'])->name('fasilitator.update');
+        Route::delete('/data-fasilitator/{id}', [DataFasilitatorController::class, 'destroy'])->name('fasilitator.destroy');
+    });
 
 //Data admin route
-// Grup route untuk pengelolaan admin
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
     ->prefix('admin')
     ->group(function () {
