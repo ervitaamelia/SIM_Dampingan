@@ -32,7 +32,7 @@ export default {
           id: 1,
           photo:
             'https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/1dd7fcfb3c814633ca11f4f1acd30619ae561e09609f62ad6d6eeae305379255?placeholderIfAbsent=true',
-          name: 'Dinda',
+          name: 'Dinda Cilvy Puspita',
           birthDate: '1990-01-01',
           birthPlace: 'Jakarta',
           Jenis: 'Perempuan',
@@ -251,47 +251,69 @@ export default {
           </div>
         </div>
 
+        <!-- Detail Member -->
         <div
           v-if="selectedMember"
-          class="popup fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50"
+          class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
-          <div
-            class="popup-content bg-white p-6 rounded-lg shadow-lg flex w-[550px] items-center"
-          >
-            <!-- Bagian Gambar -->
-            <div class="flex-shrink-0">
+          <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative">
+            <!-- Tombol close -->
+            <button
+              @click="closePopup"
+              class="absolute top-4 right-4 text-gray-600 hover:text-red-500 text-xl"
+            >
+              ✖
+            </button>
+
+            <!-- Header: Foto + Nama -->
+            <div class="flex items-center gap-4 mb-6">
               <img
                 :src="selectedMember.photo"
-                alt="Foto Anggota"
-                class="w-28 h-28 rounded-full object-cover mx-16"
+                alt="Foto"
+                class="w-16 h-16 rounded-full object-cover border"
               />
+              <h3 class="text-2xl font-bold">{{ selectedMember.name }}</h3>
             </div>
 
-            <!-- Bagian Detail -->
-            <div class="flex-grow">
-              <h3 class="text-lg font-semibold mb-2">Detail Anggota</h3>
-              <p><strong>Nama Lengkap:</strong> {{ selectedMember.name }}</p>
-              <p>
-                <strong>Tanggal Lahir:</strong> {{ selectedMember.birthDate }}
-              </p>
-              <p>
-                <strong>Tempat Lahir:</strong> {{ selectedMember.birthPlace }}
-              </p>
-              <p><strong>Jenis Kelamin:</strong> {{ selectedMember.Jenis }}</p>
-              <p><strong>Agama:</strong> {{ selectedMember.Agama }}</p>
-              <p><strong>Pekerjaan:</strong> {{ selectedMember.Job }}</p>
-              <p><strong>No Telepon:</strong> {{ selectedMember.Number }}</p>
-              <p><strong>Alamat:</strong> {{ selectedMember.address }}</p>
-              <p><strong>Dampingan:</strong> {{ selectedMember.Dampingan }}</p>
-              <p><strong>Status:</strong> {{ selectedMember.status }}</p>
-              <p><strong>Email:</strong> {{ selectedMember.email }}</p>
-              <button
-                @click="closePopup"
-                class="bg-blue-500 text-white px-3 py-2 mt-3 rounded ml-auto block"
-              >
-                Tutup
-              </button>
-            </div>
+            <!-- Tabel Detail -->
+            <table class="w-full text-sm">
+              <tbody>
+                <tr class="border-b">
+                  <td class="font-semibold py-2 pr-4 w-1/3">Tempat, Tanggal Lahir</td>
+                  <td class="py-2">
+                    {{ selectedMember.birthPlace }}, {{ selectedMember.birthDate }}
+                  </td>
+                </tr>
+                <tr class="border-b">
+                  <td class="font-semibold py-2 pr-4">Jenis Kelamin</td>
+                  <td class="py-2">{{ selectedMember.Jenis }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="font-semibold py-2 pr-4">Agama</td>
+                  <td class="py-2">{{ selectedMember.Agama }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="font-semibold py-2 pr-4">Pekerjaan</td>
+                  <td class="py-2">{{ selectedMember.Job }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="font-semibold py-2 pr-4">No. HP</td>
+                  <td class="py-2">{{ selectedMember.Number }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="font-semibold py-2 pr-4">Email</td>
+                  <td class="py-2">{{ selectedMember.email }}</td>
+                </tr>
+                <tr class="border-b">
+                  <td class="font-semibold py-2 pr-4">Alamat</td>
+                  <td class="py-2">{{ selectedMember.address }}</td>
+                </tr>
+                <tr>
+                  <td class="font-semibold py-2 pr-4">Dampingan</td>
+                  <td class="py-2">{{ selectedMember.Dampingan }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </main>
