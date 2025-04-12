@@ -24,9 +24,9 @@ class User extends Authenticatable
         'nomor_telepon',
         'alamat',
         'role',
-        'id_provinsi',
-        'id_kabupaten',
-        'id_kecamatan'
+        'kode_provinsi',
+        'kode_kabupaten',
+        'kode_kecamatan'
     ];
 
     /**
@@ -51,4 +51,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function bidangs()
+    {
+        return $this->belongsToMany(Bidang::class, 'bidang_dampingan', 'id_user', 'id_bidang')
+            ->withTimestamps(); // karena tabel ada `created_at` & `updated_at`
+    }
+
 }

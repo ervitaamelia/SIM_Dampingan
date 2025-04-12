@@ -9,6 +9,7 @@ use App\Http\Controllers\KegiatanDampinganController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 use App\Http\Middleware\EnsureUserRole;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +22,10 @@ Route::get('/', function () {
 Route::post('/', function () {
     return Inertia::render('Auth/Login');
 });
+
+//Logout route
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->name('logout');
 
 //Dashboard admin route
 Route::get('/admin', [DashboardAdminController::class, 'index'])

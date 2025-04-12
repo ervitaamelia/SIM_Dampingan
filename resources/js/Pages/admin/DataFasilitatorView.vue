@@ -71,6 +71,7 @@ export default {
                   <th class="border p-2">No. Telepon</th>
                   <th class="border p-2">Alamat</th>
                   <th class="border p-2">Email</th>
+                  <th class="border p-2">Bidang Dampingan</th>
                   <th class="border p-2">Aksi</th>
                 </tr>
               </thead>
@@ -81,6 +82,12 @@ export default {
                   <td class="border p-2">{{ fasilitator.nomor_telepon }}</td>
                   <td class="border p-2">{{ fasilitator.alamat }}</td>
                   <td class="border p-2">{{ fasilitator.email }}</td>
+                  <td class="border p-2">
+                    <!-- Tampilkan nama bidang yang terkait dengan fasilitator -->
+                    <span v-for="(bidang, index) in fasilitator.bidangs" :key="index">
+                      {{ bidang.nama_bidang }}<span v-if="index < fasilitator.bidangs.length - 1">, </span>
+                    </span>
+                  </td>
                   <td class="border p-2 text-center w-20">
                     <a :href="route('fasilitator.edit', fasilitator.id)" class="text-blue-500 mx-2">✏️</a>
                     <button @click="selectedFasilitatorId = fasilitator.id; showPopupHapus = true"

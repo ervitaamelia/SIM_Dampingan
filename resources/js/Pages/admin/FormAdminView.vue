@@ -40,16 +40,6 @@ onMounted(() => {
     form.email = admin.email
     form.nomor_telepon = admin.nomor_telepon
     form.alamat = admin.alamat
-    form.role = admin.role
-    form.admin_level = admin.admin_level
-    form.kode_provinsi = admin.kode_provinsi
-    form.kode_kabupaten = admin.kode_kabupaten
-    form.kode_kecamatan = admin.kode_kecamatan
-
-    selectedRole.value = roleOptions.find(
-      (r) => r.value === admin.role && r.level === admin.admin_level
-    )
-    filterData()
   }
 })
 
@@ -83,7 +73,7 @@ const filterData = () => {
 
 const handleSubmit = () => {
   if (admin) {
-    form.put(`/admin/data-admin/${props.admin.id}`)
+    form.put(`/admin/data-admin/${admin.id}`)
   } else {
     form.post('/admin/data-admin')
   }
@@ -105,7 +95,7 @@ const handleSubmit = () => {
           <form @submit.prevent="handleSubmit" class="mt-6 w-full">
 
             <!-- Role -->
-            <div class="flex flex-col gap-2 pb-2">
+            <div class="flex flex-col gap-2 pb-2" v-if="!admin">
               <label for="role" class="text-sm font-medium text-gray-600">Role</label>
               <select id="role" v-model="selectedRole"
                 class="w-full py-3 px-3 mt-1 border border-gray-300 rounded-md shadow-sm text-base">
@@ -158,7 +148,7 @@ const handleSubmit = () => {
 
             <!--filter-->
             <div v-if="selectedRole?.level === 'provinsi'" class="flex flex-col gap-2 pb-2">
-              <label for="provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
+              <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
               <select v-model="form.kode_provinsi" class="w-full py-3 px-3 border rounded-md">
                 <option value="" disabled>Pilih Provinsi</option>
                 <option v-for="p in provinsis" :key="p.kode" :value="p.kode">{{ p.nama }}</option>
@@ -167,13 +157,13 @@ const handleSubmit = () => {
 
             <!-- Jika Admin Kabupaten -->
             <div v-if="selectedRole?.level === 'kabupaten'" class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Provinsi</label>
+              <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
               <select v-model="form.kode_provinsi" class="w-full py-3 px-3 border rounded-md">
                 <option value="" disabled>Pilih Provinsi</option>
                 <option v-for="p in provinsis" :key="p.kode" :value="p.kode">{{ p.nama }}</option>
               </select>
 
-              <label class="text-sm font-medium text-gray-600">Kabupaten</label>
+              <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
               <select v-model="form.kode_kabupaten" class="w-full py-3 px-3 border rounded-md">
                 <option value="" disabled>Pilih Kabupaten</option>
                 <option v-for="k in filteredKabupatens" :key="k.kode" :value="k.kode">{{ k.nama }}</option>
@@ -182,19 +172,19 @@ const handleSubmit = () => {
 
             <!-- Jika Admin Kecamatan -->
             <div v-if="selectedRole?.level === 'kecamatan'" class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Provinsi</label>
+              <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
               <select v-model="form.kode_provinsi" class="w-full py-3 px-3 border rounded-md">
                 <option value="" disabled>Pilih Provinsi</option>
                 <option v-for="p in provinsis" :key="p.kode" :value="p.kode">{{ p.nama }}</option>
               </select>
 
-              <label class="text-sm font-medium text-gray-600">Kabupaten</label>
+              <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
               <select v-model="form.kode_kabupaten" class="w-full py-3 px-3 border rounded-md">
                 <option value="" disabled>Pilih Kabupaten</option>
                 <option v-for="k in filteredKabupatens" :key="k.kode" :value="k.kode">{{ k.nama }}</option>
               </select>
 
-              <label class="text-sm font-medium text-gray-600">Kecamatan</label>
+              <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
               <select v-model="form.kode_kecamatan" class="w-full py-3 px-3 border rounded-md">
                 <option value="" disabled>Pilih Kecamatan</option>
                 <option v-for="kec in filteredKecamatans" :key="kec.kode" :value="kec.kode">{{ kec.nama }}</option>

@@ -29,6 +29,9 @@ export default {
 
     data() {
         return {
+            showPopup: false,
+            showPopupHapus: false,
+
             selectedProvinsi: null,
             selectedKabupaten: null,
             selectedKecamatan: null,
@@ -54,6 +57,7 @@ export default {
         },
         fetchKabupaten(kodeProvinsi) {
             this.selectedKabupaten = null;
+            this.selectedKecamatan = null;
             this.kabupatenList = [];
             this.kecamatanList = [];
             if (kodeProvinsi) {
@@ -111,10 +115,12 @@ export default {
                         </div>
 
                         <!-- Dropdown Kabupaten -->
-                        <!-- Kabupaten -->
-                        <Multiselect v-model="selectedKabupaten" :options="kabupatenList" placeholder="Pilih Kabupaten"
-                            :searchable="true" class="w-full" :disabled="!selectedProvinsi"
-                            @update:modelValue="fetchKecamatan" />
+                        <div class="w-1 min-w-[200px]">
+                            <!-- Kabupaten -->
+                            <Multiselect v-model="selectedKabupaten" :options="kabupatenList"
+                                placeholder="Pilih Kabupaten" :searchable="true" class="w-full"
+                                :disabled="!selectedProvinsi" @update:modelValue="fetchKecamatan" />
+                        </div>
 
                         <!-- Dropdown Kecamatan -->
                         <div class="w-1 min-w-[200px]">
@@ -159,7 +165,8 @@ export default {
                                     <td class="border p-2">{{ admin.nama_kecamatan }}</td>
                                     <td class="border p-2 text-center w-20">
                                         <a :href="route('admin.edit', admin.id)" class="text-blue-500 mr-2">✏️</a>
-                                        <button @click="selectedAdminId = admin.id; showPopupHapus = true" class="text-red-500">
+                                        <button @click="selectedAdminId = admin.id; showPopupHapus = true"
+                                            class="text-red-500">
                                             🗑️
                                         </button>
 
