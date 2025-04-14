@@ -15,14 +15,13 @@ class AdminController extends Controller
 {
 
     public function create()
-{
-    return Inertia::render('Admin/FormAdmin', [
-        'provinsis' => Provinsi::select('kode', 'nama')->get(),
-        'kabupatens' => Kabupaten::select('kode', 'nama', 'kode_provinsi')->get(),
-        'kecamatans' => Kecamatan::select('kode', 'nama', 'kode_kabupaten')->get(),
-    ]);
-}
-
+    {
+        return Inertia::render('Admin/FormAdmin', [
+            'provinsis' => Provinsi::select('kode', 'nama')->get(),
+            'kabupatens' => Kabupaten::select('kode', 'nama', 'kode_provinsi')->get(),
+            'kecamatans' => Kecamatan::select('kode', 'nama', 'kode_kabupaten')->get(),
+        ]);
+    }
 
     public function getDropdownData()
     {

@@ -134,14 +134,15 @@ const handleSubmit = () => {
                 placeholder="Masukkan Password" />
             </div>
 
-            <div class="flex justify-between mt-4">
-              <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md">
-                {{ props.fasilitator ? "Update" : "Tambah" }}
-              </button>
-              <a href="/admin/data-fasilitator" class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">
+            <div class="flex gap-4 mt-4 justify-end">
+              <a :href="route('fasilitator.index')" class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">
                 Batal
               </a>
+              <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md">
+                {{ props.fasilitator ? "Simpan Perubahan" : "Tambah" }}
+              </button>
             </div>
+
           </form>
         </div>
       </section>

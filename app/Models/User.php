@@ -58,4 +58,9 @@ class User extends Authenticatable
             ->withTimestamps(); // karena tabel ada `created_at` & `updated_at`
     }
 
+    public function grupDampingan()
+    {
+        return $this->belongsToMany(GrupDampingan::class, 'fasilitator', 'id_user', 'id_grup_dampingan');
+    }
+
 }

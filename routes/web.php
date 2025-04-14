@@ -62,16 +62,23 @@ Route::get('/admin/data-masyarakat', [DataMasyarakatController::class, 'index'])
     ->name('data-masyarakat');
 
 //Data dampingan route
-Route::get('/admin/data-dampingan', [DataDampinganController::class, 'index'])
-    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
-    ->name('data-dampingan');
+Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/data-dampingan', [DataDampinganController::class, 'index'])->name('dampingan.index');
+        Route::get('/data-dampingan/create', [DataDampinganController::class, 'create'])->name('dampingan.create');
+        Route::post('/data-dampingan', [DataDampinganController::class, 'store'])->name('dampingan.store');
+        Route::get('/data-dampingan/{id}/edit', [DataDampinganController::class, 'edit'])->name('dampingan.edit');
+        Route::put('/data-dampingan/{id}', [DataDampinganController::class, 'update'])->name('dampingan.update');
+        Route::delete('/data-dampingan/{id}', [DataDampinganController::class, 'destroy'])->name('dampingan.destroy');
+    });
 
 //Kegiatan dampingan route
 Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'index'])
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
     ->name('kegiatan-dampingan');
 
-//coba filter
+//Coba filter
 Route::get('/dropdown-data', [AdminController::class, 'getDropdownData']);
 Route::get('/api/provinsi', [WilayahController::class, 'getProvinsi']);
 Route::get('/api/kabupaten/{kode_provinsi}', [WilayahController::class, 'getKabupaten']);
