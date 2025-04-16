@@ -3,18 +3,41 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Multiselect from '@vueform/multiselect';
 import { Head } from '@inertiajs/vue3';
 import '@vueform/multiselect/themes/default.css';
+import FilterComponent from '@/Components/Filter.vue';
+import axios from 'axios';
 
 export default {
   components: {
     Multiselect,
     AdminLayout,
+    FilterComponent,
     Head,
   },
 
   computed: {
     grups() {
       return this.$page.props.data || [];
-    }
+    },
+
+    filteredAdmins() {
+      return this.originalAdmins.filter(admin => {
+        // Exact matching for each level
+        //const matchProvinsi = !this.selectedProvinsi || admin.provinsi === this.selectedProvinsi;
+        //const matchKabupaten = !this.selectedKabupaten || admin.kabupaten === this.selectedKabupaten;
+        //const matchKecamatan = !this.selectedKecamatan || admin.kecamatan === this.selectedKecamatan;
+
+        const provinsiMatch = !this.selectedProvinsi ||
+          (admin.provinsi_id === this.selectedProvinsi.value);
+
+        const kabupatenMatch = !this.selectedKabupaten ||
+          (admin.kabupaten_id === this.selectedKabupaten.value);
+
+        const kecamatanMatch = !this.selectedKecamatan ||
+          (admin.kecamatan_id === this.selectedKecamatan.value);
+
+        return provinsiMatch && kabupatenMatch && kecamatanMatch;
+      });
+    },
   },
 
   data() {
@@ -33,21 +56,83 @@ export default {
 
       selectedDampinganId: null,
 
-      provinsiList: ["Jawa Tengah", "Jawa Barat", "Jawa Timur"],
-      kabupatenList: ["Semarang", "Bandung", "Surabaya"],
-      kecamatanList: ["Tembalang", "Cibadak", "Rungkut"],
-      dampinganList: ["Dampingan A", "Dampingan B"],
+      provinsiList: [],
+      kabupatenList: [],
+      kecamatanList: [],
+      dampinganList: [],
     }
   },
 
   methods: {
+    // Ambil data dampingan dari API
+    fetchDampinganList() {
+      axios.get('/api/dampingan-list')
+        .then(response => {
+          this.dampinganList = response.data;
+        })
+        .catch(error => {
+          console.error('Gagal mengambil data dampingan:', error);
+        });
+    },
+    // Filter fasilitator berdasarkan dampingan
+    filterByDampingan() {
+      this.$inertia.get(route('fasilitator.index'), {
+        bidang: this.selectedDampingan,
+      });
+    },
+    fetchProvinsi() {
+      fetch('/api/provinsi')
+        .then(res => res.json())
+        .then(data => {
+          this.provinsiList = data.map(item => ({
+            label: item.nama,
+            value: item.kode
+          }));
+        });
+    },
+    fetchKabupaten(kodeProvinsi) {
+      this.selectedKabupaten = null;
+      this.selectedKecamatan = null;
+      this.kabupatenList = [];
+      this.kecamatanList = [];
+
+      if (kodeProvinsi) {
+        fetch(`/api/kabupaten/${kodeProvinsi}`)
+          .then(res => res.json())
+          .then(data => {
+            this.kabupatenList = data.map(item => ({
+              label: item.nama,
+              value: item.kode
+            }));
+          });
+      }
+    },
+    fetchKecamatan(kodeKabupaten) {
+      this.selectedKecamatan = null;
+      this.kecamatanList = [];
+
+      if (kodeKabupaten) {
+        fetch(`/api/kecamatan/${kodeKabupaten}`)
+          .then(res => res.json())
+          .then(data => {
+            this.kecamatanList = data.map(item => ({
+              label: item.nama,
+              value: item.kode
+            }));
+          });
+      }
+    },
     deleteItem(id) {
       this.$inertia.delete(route('dampingan.destroy', id));
     },
-
     toggleShowMore(grupId) {
       this.showMore[grupId] = !this.showMore[grupId];
     }
+  },
+
+  mounted() {
+    this.fetchProvinsi();
+    this.fetchDampinganList();
   },
 }
 </script>
@@ -75,25 +160,25 @@ export default {
             <!-- Dropdown Provinsi -->
             <div class="w-1 min-w-[200px]">
               <Multiselect v-model="selectedProvinsi" :options="provinsiList" placeholder="Pilih Provinsi"
-                :searchable="true" :class="{ 'transparent-dropdown': showPopup }" class="w-full" />
+                :searchable="true" class="w-full" @update:modelValue="fetchKabupaten" />
             </div>
 
             <!-- Dropdown Kabupaten -->
             <div class="w-1 min-w-[200px]">
               <Multiselect v-model="selectedKabupaten" :options="kabupatenList" placeholder="Pilih Kabupaten"
-                :searchable="true" :class="{ 'transparent-dropdown': showPopup }" class="w-full" />
+                :searchable="true" class="w-full" :disabled="!selectedProvinsi" @update:modelValue="fetchKecamatan" />
             </div>
 
             <!-- Dropdown Kecamatan -->
             <div class="w-1 min-w-[200px]">
               <Multiselect v-model="selectedKecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
-                :searchable="true" :class="{ 'transparent-dropdown': showPopup }" class="w-full" />
+                :searchable="true" class="w-full" :disabled="!selectedKabupaten" />
             </div>
 
             <!-- Dropdown Dampingan -->
             <div class="w-1 min-w-[200px]">
               <Multiselect v-model="selectedDampingan" :options="dampinganList" placeholder="Pilih Dampingan"
-                :searchable="true" :class="{ 'transparent-dropdown': showPopup }" class="w-full" />
+                :searchable="true" class="w-full" />
             </div>
           </div>
           <div class="overflow-auto">

@@ -78,6 +78,16 @@ Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'in
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
     ->name('kegiatan-dampingan');
 
+//Dampingan route
+Route::get('/api/dampingan-list', function () {
+    return \App\Models\Bidang::all()->map(function ($bidang) {
+        return [
+            'value' => $bidang->id_bidang,
+            'label' => $bidang->nama_bidang,
+        ];
+    });
+});
+
 //Coba filter
 Route::get('/dropdown-data', [AdminController::class, 'getDropdownData']);
 Route::get('/api/provinsi', [WilayahController::class, 'getProvinsi']);

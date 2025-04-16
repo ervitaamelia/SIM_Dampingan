@@ -3,7 +3,8 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import FilterComponent from '@/Components/Filter.vue';
 import Multiselect from "@vueform/multiselect";
-import '@vueform/multiselect/themes/default.css'
+import '@vueform/multiselect/themes/default.css';
+import axios from 'axios';
 
 export default {
   components: {
@@ -32,9 +33,30 @@ export default {
   },
 
   methods: {
+    // Ambil data dampingan dari API
+    fetchDampinganList() {
+      axios.get('/api/dampingan-list')
+        .then(response => {
+          this.dampinganList = response.data;
+        })
+        .catch(error => {
+          console.error('Gagal mengambil data dampingan:', error);
+        });
+    },
+    // Filter fasilitator berdasarkan dampingan
+    filterByDampingan() {
+      this.$inertia.get(route('fasilitator.index'), {
+        bidang: this.selectedDampingan,
+      });
+    },
+
     deleteItem(id) {
       this.$inertia.delete(route('fasilitator.destroy', id));
     }
+  },
+
+  mounted() {
+    this.fetchDampinganList();
   },
 };
 </script>
@@ -54,11 +76,10 @@ export default {
             </div>
           </div>
 
-          <!-- Dropdown Filter Wilayah -->
+          <!-- Dropdown Dampingan -->
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 my-4">
-            <!-- Dampingan -->
             <Multiselect v-model="selectedDampingan" :options="dampinganList" placeholder="Pilih Dampingan"
-              :searchable="true" class="w-full" :class="{ 'transparent-dropdown': showPopup }" />
+                :searchable="true" class="w-full" />
           </div>
 
           <!-- Tabel Data Fasilitator -->

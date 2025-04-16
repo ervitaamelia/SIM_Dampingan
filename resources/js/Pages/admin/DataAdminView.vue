@@ -2,7 +2,7 @@
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import Multiselect from "@vueform/multiselect";
 import { Head } from "@inertiajs/vue3";
-import '@vueform/multiselect/themes/default.css'
+import '@vueform/multiselect/themes/default.css';
 
 export default {
     components: {
@@ -35,13 +35,12 @@ export default {
             selectedProvinsi: null,
             selectedKabupaten: null,
             selectedKecamatan: null,
-            selectedDampingan: null,
             selectedAdminId: null,
 
             provinsiList: [],
             kabupatenList: [],
             kecamatanList: [],
-            dampinganList: [],
+            searchQuery: "",
         };
     },
     mounted() {
@@ -128,13 +127,6 @@ export default {
                             <Multiselect v-model="selectedKecamatan" :options="kecamatanList"
                                 placeholder="Pilih Kecamatan" :searchable="true" class="w-full"
                                 :disabled="!selectedKabupaten" />
-                        </div>
-
-                        <!-- Dropdown Dampingan -->
-                        <div class="w-1 min-w-[200px]">
-                            <Multiselect v-model="selectedDampingan" :options="dampinganList"
-                                placeholder="Pilih Dampingan" :searchable="true"
-                                :class="{ 'transparent-dropdown': showPopup }" class="w-full" />
                         </div>
                     </div>
 

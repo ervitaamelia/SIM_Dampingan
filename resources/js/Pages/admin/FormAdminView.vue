@@ -1,7 +1,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { ref, watch, onMounted } from 'vue'
-import { Head, useForm } from '@inertiajs/vue3'
+import { ref, watch, onMounted, computed } from 'vue'
+import { Head, useForm, router } from '@inertiajs/vue3'
 
 const { admin, provinsis, kabupatens, kecamatans } = defineProps({
   admin: Object,
@@ -34,6 +34,15 @@ const selectedRole = ref(null)
 const filteredKabupatens = ref([])
 const filteredKecamatans = ref([])
 
+// Search inputs
+const searchProvinsi = ref('')
+const searchKabupaten = ref('')
+const searchKecamatan = ref('')
+
+const showProvDropdown = ref(false)
+const showKabDropdown = ref(false)
+const showKecDropdown = ref(false)
+
 onMounted(() => {
   if (admin) {
     form.name = admin.name
@@ -51,31 +60,76 @@ watch(selectedRole, (val) => {
     form.kode_provinsi = ''
     form.kode_kabupaten = ''
     form.kode_kecamatan = ''
+
+    filteredKabupatens.value = []
+    filteredKecamatans.value = []
   }
 })
 
 watch(() => form.kode_provinsi, () => {
-  filterData()
+  filteredKabupatens.value = kabupatens.filter(k => k.kode_provinsi === form.kode_provinsi)
+  form.kode_kabupaten = ''
+  form.kode_kecamatan = ''
+  filteredKecamatans.value = []
 })
 
 watch(() => form.kode_kabupaten, () => {
-  filterData()
+  filteredKecamatans.value = kecamatans.filter(k => k.kode_kabupaten === form.kode_kabupaten)
+  form.kode_kecamatan = ''
 })
 
-const filterData = () => {
-  filteredKabupatens.value = kabupatens.filter(
-    (k) => k.kode_provinsi === form.kode_provinsi
-  )
-  filteredKecamatans.value = kecamatans.filter(
-    (kec) => kec.kode_kabupaten === form.kode_kabupaten
-  )
-}
+const filteredProvinsis = computed(() => {
+  if (!searchProvinsi.value) return provinsis
+  return provinsis.filter(p => p.nama.toLowerCase().includes(searchProvinsi.value.toLowerCase()))
+})
+
+const filteredKabupatenSearch = computed(() => {
+  if (!searchKabupaten.value) return filteredKabupatens.value
+  return filteredKabupatens.value.filter(k => k.nama.toLowerCase().includes(searchKabupaten.value.toLowerCase()))
+})
+
+const filteredKecamatanSearch = computed(() => {
+  if (!searchKecamatan.value) return filteredKecamatans.value
+  return filteredKecamatans.value.filter(kec => kec.nama.toLowerCase().includes(searchKecamatan.value.toLowerCase()))
+})
 
 const handleSubmit = () => {
   if (admin) {
     form.put(`/admin/data-admin/${admin.id}`)
   } else {
     form.post('/admin/data-admin')
+  }
+}
+
+const resetSearch = (type) => {
+  if (type === 'provinsi') {
+    searchProvinsi.value = ''
+    form.kode_provinsi = ''
+    form.kode_kabupaten = ''
+    form.kode_kecamatan = ''
+  } else if (type === 'kabupaten') {
+    searchKabupaten.value = ''
+    form.kode_kabupaten = ''
+    form.kode_kecamatan = ''
+  } else if (type === 'kecamatan') {
+    searchKecamatan.value = ''
+    form.kode_kecamatan = ''
+  }
+}
+
+const clearSelection = (type) => {
+  if (type === 'provinsi') {
+    form.kode_provinsi = ''
+    form.kode_kabupaten = ''
+    form.kode_kecamatan = ''
+    filteredKabupatens.value = []
+    filteredKecamatans.value = []
+  } else if (type === 'kabupaten') {
+    form.kode_kabupaten = ''
+    form.kode_kecamatan = ''
+    filteredKecamatans.value = []
+  } else if (type === 'kecamatan') {
+    form.kode_kecamatan = ''
   }
 }
 </script>
@@ -146,49 +200,214 @@ const handleSubmit = () => {
                 placeholder="Masukkan Alamat"></textarea>
             </div>
 
-            <!--filter-->
-            <div v-if="selectedRole?.level === 'provinsi'" class="flex flex-col gap-2 pb-2">
-              <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
-              <select v-model="form.kode_provinsi" class="w-full py-3 px-3 border rounded-md">
-                <option value="" disabled>Pilih Provinsi</option>
-                <option v-for="p in provinsis" :key="p.kode" :value="p.kode">{{ p.nama }}</option>
-              </select>
+            <!-- Provinsi -->
+            <div v-if="selectedRole?.level === 'provinsi' || selectedRole?.level === 'kabupaten' || selectedRole?.level === 'kecamatan'">
+              <label class="text-sm font-medium text-gray-600">Provinsi</label>
+              <div class="relative">
+                <div class="flex items-center mt-1 border border-gray-400 rounded-md">
+                  <select 
+                    v-model="form.kode_provinsi" 
+                    @focus="showProvDropdown = true"
+                    @blur="setTimeout(() => showProvDropdown = false, 200)"
+                    class="w-full py-3 px-3 text-base appearance-none bg-transparent"
+                  >
+                    <option disabled value="">Pilih Provinsi</option>
+                    <option v-if="form.kode_provinsi" :value="form.kode_provinsi">
+                      {{ provinsis.find(p => p.kode === form.kode_provinsi)?.nama }}
+                    </option>
+                  </select>
+                  <button 
+                    v-if="form.kode_provinsi" 
+                    @click="clearSelection('provinsi')" 
+                    type="button"
+                    class="px-3 text-gray-500 hover:text-gray-700"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div 
+                  v-if="showProvDropdown" 
+                  class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg"
+                >
+                  <div class="relative p-2 border-b border-gray-300">
+                    <input 
+                      v-model="searchProvinsi" 
+                      placeholder="Cari Provinsi"
+                      class="w-full p-2 pl-8 pr-8 border rounded focus:outline-none"
+                      @click.stop
+                    />
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </span>
+                    <button 
+                      v-if="searchProvinsi" 
+                      @click="resetSearch('provinsi')" 
+                      type="button"
+                      class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div class="max-h-60 overflow-y-auto">
+                    <div 
+                      v-for="p in filteredProvinsis" 
+                      :key="p.kode" 
+                      class="block w-full p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      @mousedown="form.kode_provinsi = p.kode; showProvDropdown = false"
+                    >
+                      {{ p.nama }}
+                    </div>
+                    <div 
+                      v-if="filteredProvinsis.length === 0" 
+                      class="p-3 text-gray-500 text-center"
+                    >
+                      Tidak ditemukan
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- Jika Admin Kabupaten -->
-            <div v-if="selectedRole?.level === 'kabupaten'" class="flex flex-col gap-2 pb-2">
-              <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
-              <select v-model="form.kode_provinsi" class="w-full py-3 px-3 border rounded-md">
-                <option value="" disabled>Pilih Provinsi</option>
-                <option v-for="p in provinsis" :key="p.kode" :value="p.kode">{{ p.nama }}</option>
-              </select>
-
-              <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
-              <select v-model="form.kode_kabupaten" class="w-full py-3 px-3 border rounded-md">
-                <option value="" disabled>Pilih Kabupaten</option>
-                <option v-for="k in filteredKabupatens" :key="k.kode" :value="k.kode">{{ k.nama }}</option>
-              </select>
+            <!-- Kabupaten -->
+            <div v-if="selectedRole?.level === 'kabupaten' || selectedRole?.level === 'kecamatan'">
+              <label class="text-sm font-medium text-gray-600">Kabupaten</label>
+              <div class="relative">
+                <div class="flex items-center mt-1 border border-gray-400 rounded-md">
+                  <select 
+                    v-model="form.kode_kabupaten" 
+                    @focus="showKabDropdown = true"
+                    @blur="setTimeout(() => showKabDropdown = false, 200)"
+                    class="w-full py-3 px-3 text-base appearance-none bg-transparent"
+                  >
+                    <option disabled value="">Pilih Kabupaten</option>
+                    <option v-if="form.kode_kabupaten" :value="form.kode_kabupaten">
+                      {{ kabupatens.find(k => k.kode === form.kode_kabupaten)?.nama }}
+                    </option>
+                  </select>
+                  <button 
+                    v-if="form.kode_kabupaten" 
+                    @click="clearSelection('kabupaten')" 
+                    type="button"
+                    class="px-3 text-gray-500 hover:text-gray-700"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div 
+                  v-if="showKabDropdown" 
+                  class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg"
+                >
+                  <div class="relative p-2 border-b border-gray-300">
+                    <input 
+                      v-model="searchKabupaten" 
+                      placeholder="Cari Kabupaten"
+                      class="w-full p-2 pl-8 pr-8 border rounded focus:outline-none"
+                      @click.stop
+                    />
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </span>
+                    <button 
+                      v-if="searchKabupaten" 
+                      @click="resetSearch('kabupaten')" 
+                      type="button"
+                      class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div class="max-h-60 overflow-y-auto">
+                    <div 
+                      v-for="k in filteredKabupatenSearch" 
+                      :key="k.kode" 
+                      class="block w-full p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      @mousedown="form.kode_kabupaten = k.kode; showKabDropdown = false"
+                    >
+                      {{ k.nama }}
+                    </div>
+                    <div 
+                      v-if="filteredKabupatenSearch.length === 0" 
+                      class="p-3 text-gray-500 text-center"
+                    >
+                      Tidak ditemukan
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <!-- Jika Admin Kecamatan -->
-            <div v-if="selectedRole?.level === 'kecamatan'" class="flex flex-col gap-2 pb-2">
-              <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
-              <select v-model="form.kode_provinsi" class="w-full py-3 px-3 border rounded-md">
-                <option value="" disabled>Pilih Provinsi</option>
-                <option v-for="p in provinsis" :key="p.kode" :value="p.kode">{{ p.nama }}</option>
-              </select>
-
-              <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
-              <select v-model="form.kode_kabupaten" class="w-full py-3 px-3 border rounded-md">
-                <option value="" disabled>Pilih Kabupaten</option>
-                <option v-for="k in filteredKabupatens" :key="k.kode" :value="k.kode">{{ k.nama }}</option>
-              </select>
-
-              <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
-              <select v-model="form.kode_kecamatan" class="w-full py-3 px-3 border rounded-md">
-                <option value="" disabled>Pilih Kecamatan</option>
-                <option v-for="kec in filteredKecamatans" :key="kec.kode" :value="kec.kode">{{ kec.nama }}</option>
-              </select>
+            <!-- Kecamatan -->
+            <div v-if="selectedRole?.level === 'kecamatan'">
+              <label class="text-sm font-medium text-gray-600">Kecamatan</label>
+              <div class="relative">
+                <div class="flex items-center mt-1 border border-gray-400 rounded-md">
+                  <select 
+                    v-model="form.kode_kecamatan" 
+                    @focus="showKecDropdown = true"
+                    @blur="setTimeout(() => showKecDropdown = false, 200)"
+                    class="w-full py-3 px-3 text-base appearance-none bg-transparent"
+                  >
+                    <option disabled value="">Pilih Kecamatan</option>
+                    <option v-if="form.kode_kecamatan" :value="form.kode_kecamatan">
+                      {{ kecamatans.find(k => k.kode === form.kode_kecamatan)?.nama }}
+                    </option>
+                  </select>
+                  <button 
+                    v-if="form.kode_kecamatan" 
+                    @click="clearSelection('kecamatan')" 
+                    type="button"
+                    class="px-3 text-gray-500 hover:text-gray-700"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div 
+                  v-if="showKecDropdown" 
+                  class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg"
+                >
+                  <div class="relative p-2 border-b border-gray-300">
+                    <input 
+                      v-model="searchKecamatan" 
+                      placeholder="Cari Kecamatan"
+                      class="w-full p-2 pl-8 pr-8 border rounded focus:outline-none"
+                      @click.stop
+                    />
+                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </span>
+                    <button 
+                      v-if="searchKecamatan" 
+                      @click="resetSearch('kecamatan')" 
+                      type="button"
+                      class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                  <div class="max-h-60 overflow-y-auto">
+                    <div 
+                      v-for="k in filteredKecamatanSearch" 
+                      :key="k.kode" 
+                      class="block w-full p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      @mousedown="form.kode_kecamatan = k.kode; showKecDropdown = false"
+                    >
+                      {{ k.nama }}
+                    </div>
+                    <div 
+                      v-if="filteredKecamatanSearch.length === 0" 
+                      class="p-3 text-gray-500 text-center"
+                    >
+                      Tidak ditemukan
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Tombol -->
