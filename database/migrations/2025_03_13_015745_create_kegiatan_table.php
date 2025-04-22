@@ -13,16 +13,20 @@ return new class extends Migration
     {
         Schema::create('kegiatan', function (Blueprint $table) {
             $table->id('id_kegiatan');
-            $table->string('judul', 150);
+            $table->string('judul', 100);
             $table->text('deskripsi');
+            $table->text('masalah');
+            $table->text('solusi');
             $table->date('tanggal');
             $table->time('waktu');
-            $table->string('tempat', 100);
-            $table->integer('jumlah_peserta');
-            $table->string('laporan')->nullable();
-            $table->unsignedBigInteger('id_grup_dampingan');
+            $table->string('tempat', 50);
+            $table->tinyInteger('jumlah_peserta');
+            $table->string('laporan', 100)->nullable();
+            $table->unsignedBigInteger('id_fasilitator');
+            $table->unsignedBigInteger('id_kecamatan');
 
-            $table->foreign('id_grup_dampingan')->references('id_grup_dampingan')->on('grup_dampingan');
+            $table->foreign('id_fasilitator')->references('id_fasilitator')->on('fasilitator');
+            $table->foreign('id_kecamatan')->references('id_kecamatan')->on('kecamatan');
             $table->timestamps();
         });
     }
