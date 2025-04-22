@@ -23,10 +23,10 @@ return new class extends Migration
             $table->tinyInteger('jumlah_peserta');
             $table->string('laporan', 100)->nullable();
             $table->unsignedBigInteger('id_fasilitator');
-            $table->unsignedBigInteger('id_kecamatan');
+            $table->string('kode_kecamatan');
 
             $table->foreign('id_fasilitator')->references('id_fasilitator')->on('fasilitator');
-            $table->foreign('id_kecamatan')->references('id_kecamatan')->on('kecamatan');
+            $table->foreign('kode_kecamatan')->references('kode')->on('kecamatans');
             $table->timestamps();
         });
     }
