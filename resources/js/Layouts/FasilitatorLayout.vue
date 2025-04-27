@@ -1,14 +1,18 @@
 <script setup>
-import SidebarFasilitatorContent from '@/components/SidebarFasilitatorContent.vue'
-import FooterContent from '@/components/FooterContent.vue'
+
+import SidebarFasilitatorContent from '@/Components/SidebarFasilitatorContent.vue' 
+import FooterContent from '@/Components/FooterContent.vue' 
+
 </script>
 
 <template>
-  <div class="flex h-screen bg-gray-100 overflow-auto">
+  <div class="flex min-h-screen bg-gray-100">
     <SidebarFasilitatorContent />
-    <main>
-      <slot></slot>
-    </main>
+    <div class="flex-1 overflow-auto">
+      <main class="p-6 w-full">
+        <slot></slot>
+      </main>
+      <FooterContent />
+    </div>
   </div>
-  <FooterContent />
 </template>

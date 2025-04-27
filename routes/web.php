@@ -9,7 +9,10 @@ use App\Http\Controllers\KegiatanDampinganController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
+
 
 use App\Http\Middleware\EnsureUserRole;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +25,19 @@ Route::get('/', function () {
 Route::post('/', function () {
     return Inertia::render('Auth/Login');
 });
+
+
+Route::middleware(['auth', 'role:admin'])->get('/admin', function () {
+    return Inertia::render('admin/Dashboard');
+});
+
+Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator', function () {
+    return Inertia::render('fasilitator/Dashboard');
+});
+
+
+
+
 
 //Logout route
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
@@ -43,6 +59,16 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
         Route::put('/data-fasilitator/{id}', [DataFasilitatorController::class, 'update'])->name('fasilitator.update');
         Route::delete('/data-fasilitator/{id}', [DataFasilitatorController::class, 'destroy'])->name('fasilitator.destroy');
     });
+
+    Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/data-kegiatan', function () {
+        return Inertia::render('fasilitator/DataKegiatan');
+    });
+    Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/FormKegiatan', function () {
+        return Inertia::render('fasilitator/FormKegiatan');
+    });
+    
+   
+   
 
 //Data admin route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
@@ -77,6 +103,10 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
 Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'index'])
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
     ->name('kegiatan-dampingan');
+
+
+//Data Kegiatan
+
 
 //Dampingan route
 Route::get('/api/dampingan-list', function () {

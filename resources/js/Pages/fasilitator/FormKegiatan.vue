@@ -1,5 +1,5 @@
 <script>
-import FasilitatorLayout from '@/layouts/FasilitatorLayout.vue'
+import FasilitatorLayout from '@/Layouts/FasilitatorLayout.vue'
 
 export default {
   components: {

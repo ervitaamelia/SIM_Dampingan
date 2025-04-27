@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import FasilitatorLayout from '@/layouts/FasilitatorLayout.vue'
+import FasilitatorLayout from "@/Layouts/FasilitatorLayout.vue";
+
 
 const isDropdownOpen = ref(false)
 const showPopup = ref(false)
@@ -137,7 +138,9 @@ const tableData = [
 </script>
 
 <template>
-  <FasilitatorLayout>
+
+<FasilitatorLayout>
+
     <main
       class="grow px-6 py-4 m-4 bg-white rounded-3xl shadow-lg max-md:p-4 max-md:m-3 h-[calc(100vh-50px)] w-full overflow-auto scrollbar-hidden"
     >
@@ -223,7 +226,7 @@ const tableData = [
         </div>
       </section>
     </main>
-  </FasilitatorLayout>
+    </FasilitatorLayout>
 </template>
 
 <style>
