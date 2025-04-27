@@ -83,9 +83,16 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
     });
 
 //Data masyarakat route
-Route::get('/admin/data-masyarakat', [DataMasyarakatController::class, 'index'])
-    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
-    ->name('data-masyarakat');
+Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+    ->prefix('admin')
+    ->group(function () {
+        Route::get('/data-masyarakat', [DataMasyarakatController::class, 'index'])->name('masyarakat.index');
+        Route::get('/data-masyarakat/create', [DataMasyarakatController::class, 'create'])->name('masyarakat.create');
+        Route::post('/data-masyarakat', [DataMasyarakatController::class, 'store'])->name('masyarakat.store');
+        Route::get('/data-masyarakat/{id}/edit', [DataMasyarakatController::class, 'edit'])->name('masyarakat.edit');
+        Route::put('/data-masyarakat/{id}', [DataMasyarakatController::class, 'update'])->name('masyarakat.update');
+        Route::delete('/data-masyarakat/{id}', [DataMasyarakatController::class, 'destroy'])->name('masyarakat.destroy');
+    });
 
 //Data dampingan route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
