@@ -41,23 +41,23 @@ export default {
     <nav class="flex flex-col items-start py-5 pr-7 pl-2 w-full">
       <header class="flex gap-4 items-center text-2xl font-semibold text-black">
         <img
-          src="https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/bb85d5e3d957075707b815e47b52006b5b02cf69f26fa4fd8f985d630e49f5bc?placeholderIfAbsent=true"
-          class="object-contain w-10" alt="Dashboard logo" />
+          src="/images/logo-mpm.png"
+          class="object-contain w-10" alt="Logo MPM" />
         <h1>Dashboard</h1>
       </header>
     </nav>
 
     <!-- Profile Section -->
-    <div class="mt-auto bg-gray-300 p-4 rounded-lg flex items-center gap-3">
-      <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Admin Profile"
+    <div class="mt-auto bg-gray-100 p-4 rounded-lg flex items-center gap-3">
+      <img src="/images/default-profile.png" alt="Default Profile"
         class="w-12 h-12 rounded-full object-cover border-2 border-gray-300" />
       <div>
-        <h2 class="text-md font-semibold text-gray-800">John Doe</h2>
-        <p class="text-sm text-gray-500">Admin</p>
+        <h2 class="text-md font-semibold text-gray-800">{{ $page.props.auth.user.name }}</h2>
+        <p class="text-sm text-gray-500">{{ $page.props.auth.user.role }}</p>
       </div>
     </div>
 
-    <ul class="w-full mt-10 space-y-3">
+    <ul class="w-full mt-4 space-y-3">
 
       <!-- Dashboard -->
       <li>
@@ -139,8 +139,8 @@ export default {
 
     <!-- Logout -->
     <Link as="button" method="post" href="/logout"
-      class="w-full py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 mt-20">
-    Keluar
+      class="w-full py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 mt-24">
+      Keluar
     </Link>
   </aside>
 </template>

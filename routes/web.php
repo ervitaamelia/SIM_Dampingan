@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardAdminController;
+use App\Http\Controllers\DashboardFasilitatorController;
 use App\Http\Controllers\DataAdminController;
 use App\Http\Controllers\DataDampinganController;
 use App\Http\Controllers\DataFasilitatorController;
@@ -9,16 +10,12 @@ use App\Http\Controllers\KegiatanDampinganController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WilayahController;
-use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-
-
-
 use App\Http\Middleware\EnsureUserRole;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-//Login route
+// Login route
 Route::get('/', function () {
     return Inertia::render('Auth/Login');
 });
@@ -26,18 +23,12 @@ Route::post('/', function () {
     return Inertia::render('Auth/Login');
 });
 
+// Route::middleware(['auth', 'role:admin'])->get('/admin', function () {
+//     return Inertia::render('admin/Dashboard');
+// });
 
-Route::middleware(['auth', 'role:admin'])->get('/admin', function () {
-    return Inertia::render('admin/Dashboard');
-});
-
-Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator', function () {
-    return Inertia::render('fasilitator/Dashboard');
-});
-
-
-
-
+//Dashboard Fasilitator
+Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator', [DashboardFasilitatorController::class, 'index']);
 
 //Logout route
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
@@ -47,6 +38,10 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 Route::get('/admin', [DashboardAdminController::class, 'index'])
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
     ->name('dashboard');
+
+// Route::get('/fasilitator', [DashboardFasilitatorController::class, 'index'])
+//     ->middleware(['auth', 'verified', 'role:fasilitator', EnsureUserRole::class . ':fasilitator'])
+//     ->name('dashboard');
 
 //Data fasilitator route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
@@ -60,15 +55,12 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
         Route::delete('/data-fasilitator/{id}', [DataFasilitatorController::class, 'destroy'])->name('fasilitator.destroy');
     });
 
-    Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/data-kegiatan', function () {
-        return Inertia::render('fasilitator/DataKegiatan');
-    });
-    Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/FormKegiatan', function () {
-        return Inertia::render('fasilitator/FormKegiatan');
-    });
-    
-   
-   
+Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/data-kegiatan', function () {
+    return Inertia::render('fasilitator/DataKegiatan');
+});
+Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/FormKegiatan', function () {
+    return Inertia::render('fasilitator/FormKegiatan');
+});
 
 //Data admin route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
@@ -110,10 +102,6 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
 Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'index'])
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
     ->name('kegiatan-dampingan');
-
-
-//Data Kegiatan
-
 
 //Dampingan route
 Route::get('/api/dampingan-list', function () {

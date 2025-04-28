@@ -410,14 +410,13 @@ const clearSelection = (type) => {
               </div>
             </div>
 
-            <!-- Tombol -->
-            <div class="flex justify-between mt-4">
+            <!-- Tombol Submit -->
+            <div class="flex gap-4 mt-4 justify-end">
+              <a :href="route('admin.index')"
+                class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">Batal</a>
               <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md">
-                {{ admin ? 'Update' : 'Tambah' }}
+                {{ admin ? "Simpan Perubahan" : "Tambah" }}
               </button>
-              <a href="/admin/data-admin" class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">
-                Batal
-              </a>
             </div>
           </form>
         </div>

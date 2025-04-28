@@ -142,8 +142,8 @@ export default {
 
     <Head title="Data Dampingan" />
     <div class="flex h-screen bg-gray-100 overflow-auto">
-      <main class="flex-1 p-6">
-        <div class="bg-white shadow-md rounded p-4">
+      <main class="flex-1">
+        <div class="bg-white shadow-md rounded-lg p-4">
           <div class="flex justify-between mb-4">
             <h2 class="text-xl font-bold">Data Dampingan</h2>
             <div class="flex space-x-2">
@@ -181,7 +181,7 @@ export default {
                 :searchable="true" class="w-full" />
             </div>
           </div>
-          <div class="overflow-auto">
+          <div class="overflow-auto rounded-lg">
             <table class="w-full min-w-[600px] border-collapse">
               <thead>
                 <tr class="bg-gray-200">

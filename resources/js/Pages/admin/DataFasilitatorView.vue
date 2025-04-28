@@ -3,7 +3,6 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import Multiselect from "@vueform/multiselect";
 import '@vueform/multiselect/themes/default.css';
-import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -43,16 +42,10 @@ export default {
 
       selectedDampingan: null,
       selectedFasilitatorId: null,
-
-      // Tidak perlu dampinganList dari API lagi
     };
   },
 
   methods: {
-    deleteItem(id) {
-      this.$inertia.delete(route('fasilitator.destroy', id));
-    },
-
     downloadExcel() {
       const filteredData = this.filteredFasilitators;
 
@@ -75,18 +68,10 @@ export default {
       const fileName = 'data-fasilitator.xlsx';
       saveAs(file, fileName);
     },
-
-    formatTanggal(tanggal) {
-      if (!tanggal) return '';
-      const date = new Date(tanggal);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}-${month}-${year}`;
+    deleteItem(id) {
+      this.$inertia.delete(route('fasilitator.destroy', id));
     },
   },
-
-  // Tidak perlu mounted/fetchDampinganList lagi
 };
 </script>
 
@@ -94,13 +79,13 @@ export default {
   <AdminLayout>
     <Head title="Data Fasilitator" />
     <div class="flex h-screen bg-gray-100 overflow-auto">
-      <main class="flex-1 p-6">
-        <div class="bg-white shadow-md rounded p-4">
+      <main class="flex-1">
+        <div class="bg-white rounded-lg shadow-md rounded p-4">
           <div class="flex justify-between mb-4">
             <h2 class="text-xl font-bold">Data Fasilitator</h2>
             <div class="flex space-x-2">
               <a :href="route('fasilitator.create')" class="bg-blue-500 text-white px-3 py-2 rounded">+ Tambah</a>
-              <button @click="downloadExcel" class="bg-green-500 text-white px-3 py-2 rounded">🖨 Cetak Excel</button>
+              <button @click="downloadExcel" class="bg-green-500 text-white px-3 py-2 rounded">🖨 Cetak</button>
             </div>
           </div>
 
@@ -117,7 +102,7 @@ export default {
           </div>
 
           <!-- Tabel Data Fasilitator -->
-          <div class="overflow-auto">
+          <div class="overflow-auto rounded-lg">
             <table class="w-full min-w-[600px] border-collapse">
               <thead>
                 <tr class="bg-gray-200 text-center">

@@ -2,6 +2,8 @@
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import Multiselect from "@vueform/multiselect";
 import { Head } from "@inertiajs/vue3";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import '@vueform/multiselect/themes/default.css';
 
 export default {
@@ -12,19 +14,24 @@ export default {
     },
 
     computed: {
-        // Ambil data dari props yang dikirim oleh Inertia
         admins() {
-            return this.$page.props.data || []; // Jika props kosong, kembalikan array kosong agar tidak error
+            return this.$page.props.data || [];
         },
-
-        filteredDaerah() {
-            const daerahList = [
-                ...new Set(this.admins.map((admin) => admin.location)),
-            ];
-            return daerahList.filter((daerah) =>
-                daerah.toLowerCase().includes(this.searchQuery.toLowerCase())
-            );
-        },
+        filteredAdmins() {
+            return this.admins.filter(admin => {
+                const matchProvinsi = this.selectedProvinsi 
+                    ? admin.kode_provinsi === this.selectedProvinsi 
+                    : true;
+                const matchKabupaten = this.selectedKabupaten 
+                    ? admin.kode_kabupaten === this.selectedKabupaten 
+                    : true;
+                const matchKecamatan = this.selectedKecamatan 
+                    ? admin.kode_kecamatan === this.selectedKecamatan 
+                    : true;
+                
+                return matchProvinsi && matchKabupaten && matchKecamatan;
+            });
+        }
     },
 
     data() {
@@ -43,9 +50,11 @@ export default {
             searchQuery: "",
         };
     },
+
     mounted() {
         this.fetchProvinsi();
     },
+
     methods: {
         fetchProvinsi() {
             fetch('/api/provinsi')
@@ -78,6 +87,32 @@ export default {
                     });
             }
         },
+        downloadExcel() {
+            const filteredData = this.filteredAdmins;
+
+            const exportData = filteredData.map((admin) => ({
+                'ID': admin.id,
+                'Nama Lengkap': admin.name,
+                'Email': admin.email,
+                'Alamat': admin.alamat,
+                'Nomor Telepon': admin.nomor_telepon,
+                'Provinsi': admin.nama_provinsi,
+                'Kabupaten': admin.nama_kabupaten,
+                'Kecamatan': admin.nama_kecamatan,
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Admin');
+
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const file = new Blob([excelBuffer], { 
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            });
+
+            const fileName = 'data-admin.xlsx';
+            saveAs(file, fileName);
+        },
         deleteItem(id) {
             this.$inertia.delete(route('admin.destroy', id));
         }
@@ -90,20 +125,19 @@ export default {
 
         <Head title="Data Admin" />
         <div class="flex h-screen bg-gray-100 overflow-auto">
-            <main class="flex-1 p-6">
-                <div class="bg-white shadow-md rounded p-4">
+            <main class="flex-1">
+                <div class="bg-white shadow-md rounded-lg p-4">
                     <div class="flex justify-between mb-2">
                         <h2 class="text-xl font-bold">Data Admin</h2>
                         <div class="flex space-x-2">
                             <a :href="route('admin.create')" class="bg-blue-500 text-white px-3 py-2 rounded">+
                                 Tambah</a>
-                            <button class="bg-green-500 text-white px-3 py-2 rounded">
+                            <button @click="downloadExcel" class="bg-green-500 text-white px-3 py-2 rounded">
                                 🖨 Cetak
                             </button>
                         </div>
                     </div>
 
-                    <!-- Wrapper untuk Dropdown (Pindahkan ke bawah tombol Tambah) -->
                     <div class="flex flex-wrap gap-4 mb-8">
                         <!-- Dropdown Provinsi -->
                         <div class="w-1 min-w-[200px]">
@@ -130,7 +164,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="overflow-auto">
+                    <div class="overflow-auto rounded-lg">
                         <table class="w-full min-w-[600px] border-collapse">
                             <thead>
                                 <tr class="bg-gray-200">
@@ -146,7 +180,7 @@ export default {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="admin in admins" :key="admin.id" class="text-left">
+                                <tr v-for="admin in filteredAdmins" :key="admin.id" class="text-left">
                                     <td class="border p-2 text-center">{{ admin.id }}</td>
                                     <td class="border p-2">{{ admin.name }}</td>
                                     <td class="border p-2">{{ admin.email }}</td>

@@ -155,8 +155,8 @@ export default {
     <Head title="Data Masyarakat" />
 
     <div class="flex h-screen bg-gray-100 overflow-auto">
-      <main class="flex-1 p-6">
-        <div class="bg-white shadow-md rounded p-4">
+      <main class="flex-1">
+        <div class="bg-white shadow-md rounded-lg p-4">
           <div class="flex justify-between mb-4">
             <h2 class="text-xl font-bold">Data Masyarakat</h2>
             <div class="flex space-x-2">
@@ -181,10 +181,10 @@ export default {
             </div>
           </div>
 
-          <div class="overflow-auto">
+          <div class="overflow-auto rounded-lg">
             <table class="w-full min-w-[600px] border-collapse">
-              <thead class="bg-gray-100">
-                <tr>
+              <thead>
+                <tr class="bg-gray-200">
                   <th class="w-32">No. Anggota</th>
                   <th>Nama</th>
                   <th class="w-32">Jenis Kelamin</th>
@@ -210,7 +210,7 @@ export default {
                   </td>
                   <td class="text-center">
                     <button @click="showDetails(masyarakat)"
-                      class="bg-blue-500 text-white px-3 py-2 rounded">Detail</button>
+                      class="bg-blue-500 text-white px-3 py-2 rounded-lg">Detail</button>
                   </td>
                 </tr>
               </tbody>
