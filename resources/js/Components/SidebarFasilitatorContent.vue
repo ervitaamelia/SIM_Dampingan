@@ -40,15 +40,13 @@ export default {
   <aside :class="isMenuOpen ? 'block' : 'hidden'" class="w-72 bg-white shadow-md p-4 lg:block">
     <nav class="flex flex-col items-start py-5 pr-7 pl-2 w-full">
       <header class="flex gap-4 items-center text-2xl font-semibold text-black">
-        <img
-          src="/images/logo-mpm.png"
-          class="object-contain w-10" alt="Logo MPM" />
+        <img src="/images/logo-mpm.png" class="object-contain w-10" alt="Logo MPM" />
         <h1>Dashboard</h1>
       </header>
     </nav>
 
     <!-- Profile Section -->
-    <div class="mt-auto bg-gray-300 p-4 rounded-lg flex items-center gap-3">
+    <div class="mt-auto bg-gray-100 p-4 rounded-lg flex items-center gap-3">
       <img src="/images/default-profile.png" alt="Default Profile"
         class="w-12 h-12 rounded-full object-cover border-2 border-gray-300" />
       <div>
@@ -57,7 +55,7 @@ export default {
       </div>
     </div>
 
-    <ul class="w-full mt-10 space-y-3">
+    <ul class="w-full mt-4 space-y-3">
 
       <!-- Dashboard -->
       <li>
@@ -76,9 +74,9 @@ export default {
         </Link>
       </li>
 
-      <!-- Data Fasilitator -->
+      <!-- Data Kegiatan -->
       <li>
-        <Link href="/fasilitator/data-kegiatan" :class="isPrefixActive('/admin/data-fasilitator').value
+        <Link href="/fasilitator/data-kegiatan" :class="isPrefixActive('/fasilitator/data-kegiatan').value
           ? 'flex items-center gap-3 px-4 py-3 w-full text-white bg-sky-600 rounded-lg hover:bg-sky-700'
           : 'flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-blue-200'">
         <img
@@ -87,12 +85,12 @@ export default {
         <span>Data Kegiatan</span>
         </Link>
       </li>
-      </ul>
+    </ul>
 
     <!-- Logout -->
     <Link as="button" method="post" href="/logout"
-      class="w-full py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 mt-20">
-    Keluar
+      class="w-full py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 mt-80">
+      Keluar
     </Link>
   </aside>
 </template>

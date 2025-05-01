@@ -1,69 +1,31 @@
 <script>
 import FasilitatorLayout from '@/Layouts/FasilitatorLayout.vue'
+import { Head } from '@inertiajs/vue3'
 
 export default {
   components: {
     FasilitatorLayout,
+    Head
   },
-  data() {
-    return {
-      isMenuOpen: false,
-      isDropdownOpen: false,
-      showPopup: false,
-      events: [
-        {
-          image:
-            'https://cdn.builder.io/api/v1/image/assets/TEMP/43b5a174a5c9b8be591289512abba2d75768c2d4',
-          title:
-            'Peluncuran BLASMU: Beras Sehat Inovasi Jamaah Tani Muhammadiyah (JATAM) Lebong Bengkulu',
-          description:
-            'Jamaah Tani Muhammadiyah (JATAM) Lebong sukses menyelenggarakan panen raya padi sehat yang berlangsung pada Rabu (5/2) di Kampung Jawa, Lebong.',
-          date: '05 Februari 2025',
-          time: '10.00 WIB',
-        },
-        {
-          image:
-            'https://cdn.builder.io/api/v1/image/assets/TEMP/dc7488aab7f45cca0173cf65958b4a21cc722e1f',
-          title:
-            'JATAM Difabel Bejen Dampingan MPM Muhammadiyah Bagikan Kisah Sukses Peternakan Ayam Petelur Inklusif',
-          description:
-            'Jamaah Tani Muhammadiyah (JATAM) Lebong sukses menyelenggarakan panen raya padi sehat yang berlangsung pada Rabu (5/2) di Kampung Jawa, Lebong.',
-          date: '14 Desember 2024',
-          time: '10.00 WIB',
-        },
-        {
-          image:
-            'https://cdn.builder.io/api/v1/image/assets/TEMP/0e1465ff78b072509abf47b0b7f2336f1a75d9c7',
-          title:
-            'MPM Muhammadiyah Kuatkan Kaderisasi untuk Pemberdayaan Masyarakat di Kalimantan Timur',
-          description:
-            'MPM Pimpinan Pusat Muhammadiyah dan Pimpinan Wilayah Muhammadiyah (PWM) Kalimantan Timur resmi membuka Sekolah Kader Pemberdayaan Masyarakat (SEKAM) Angkatan I Tahun 2025 di Kampus Universitas Muhammadiyah Kalimantan Timur (UMKT)',
-          date: '25 Januari 2025',
-          time: '10.00 WIB',
-        },
-      ],
+
+  computed: {
+    kegiatans() {
+      return this.$page.props.data || []
     }
-  },
-  methods: {
-    toggleDropdown() {
-      this.isDropdownOpen = !this.isDropdownOpen
-    },
-    tambahData() {
-      console.log('Tombol ditekan!')
-    },
   },
 }
 </script>
 
 <template>
   <FasilitatorLayout>
+    <Head title="Data Kegiatan" />
     <section
-      class="p-4 bg-white rounded-lg shadow-md border border-gray-200 max-w-[1000px] mx-auto mt-10"
+      class="p-4 bg-white rounded-lg shadow-md border border-gray-200 h-auto"
     >
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-bold text-zinc-800">Tambah Kegiatan</h2>
+        <h2 class="text-2xl font-bold text-zinc-800">Data Kegiatan</h2>
         <a
-          href="FormKegiatan"
+          :href="route('kegiatan.create')"
           class="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2"
         >
           <img
@@ -90,20 +52,20 @@ export default {
       <!-- Kontainer Scroll -->
       <div class="max-h-[400px] overflow-y-auto scrollbar-hidden">
         <div
-          v-for="(event, index) in events"
-          :key="index"
+          v-for="kegiatan in kegiatans"
+          :key="kegiatan.id_kegiatan"
           class="grid gap-4 px-0 py-6 border-b border-solid border-b-zinc-100 grid-cols-[210px_1fr_1fr_140px_80px_40px] max-md:grid-cols-[150px_1fr_1fr_120px_80px_40px] max-sm:grid-cols-[120px_1fr_1fr_100px_70px_40px] max-sm:min-w-[800px]"
         >
           <img
-            :src="event.image"
-            :alt="event.title"
+            :src="foto"
+            :alt="kegiatan.judul"
             class="object-cover rounded h-[120px] w-[210px] max-md:w-[150px] max-sm:w-[120px]"
           />
-          <div class="text-sm text-zinc-800">{{ event.title }}</div>
-          <div class="text-sm text-zinc-800">{{ event.description }}</div>
-          <div class="text-sm text-zinc-800">{{ event.date }}</div>
-          <div class="text-sm text-zinc-800">{{ event.time }}</div>
-          <a href="FormKegiatan">
+          <div class="text-sm text-zinc-800">{{ kegiatan.judul }}</div>
+          <div class="text-sm text-zinc-800">{{ kegiatan.deskripsi }}</div>
+          <div class="text-sm text-zinc-800">{{ kegiatan.tanggal }}</div>
+          <div class="text-sm text-zinc-800">{{ kegiatan.waktu }}</div>
+          <a :href="route('kegiatan.edit', kegiatan.id_kegiatan)">
             <svg
               width="18"
               height="18"

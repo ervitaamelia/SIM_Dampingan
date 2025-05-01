@@ -154,7 +154,7 @@ export default {
 
     <Head title="Data Masyarakat" />
 
-    <div class="flex h-screen bg-gray-100 overflow-auto">
+    <div class="flex bg-gray-100 overflow-auto">
       <main class="flex-1">
         <div class="bg-white shadow-md rounded-lg p-4">
           <div class="flex justify-between mb-4">
@@ -218,57 +218,56 @@ export default {
           </div>
 
           <!-- Template Kartu Digital (Hidden) -->
-          <div v-if="selectedMasyarakatForKartu" id="kartu-digital" class="fixed top-0 left-0 invisible">
-            <div class="p-6 bg-white rounded shadow text-black w-[600px] h-[450px] flex flex-col items-center">
-              <!-- Judul -->
-              <h2 class="text-center text-[24px] font-bold leading-tight mb-4">
-                Majelis Pemberdayaan Masyarakat (MPM) Muhammadiyah
-              </h2>
+          <div v-if="selectedMasyarakatForKartu" id="kartu-digital" class="invisible fixed top-0 left-0 p-10">
+            <div class="w-[720px] bg-gray-200 shadow-2xl rounded-xl overflow-hidden border border-gray-500 flex flex-col">
 
-              <!-- Foto dan Data -->
-              <div class="flex w-full gap-6 mt-2">
-                <!-- Pas Foto -->
-                <div class="flex-shrink-0 mt-2">
-                  <img v-if="selectedMasyarakatForKartu?.foto" :src="`/storage/${selectedMasyarakatForKartu.foto}`"
-                    alt="Foto" class="w-24 h-32 object-cover border" />
+              <!-- Header -->
+              <div class="bg-blue-700 text-center pt-7 pb-4">
+                <div class="text-3xl font-bold text-white">Kartu Tanda Anggota Dampingan</div>
+                <div class="text-base font-medium text-white mt-1">MPM Muhammadiyah</div>
+              </div>
+
+              <!-- Isi Kartu -->
+              <div class="flex px-6 py-4 gap-6">
+
+                <!-- Foto -->
+                <div class="w-[160px] flex items-center justify-center">
+                  <img v-if="selectedMasyarakatForKartu?.foto" :src="`/storage/${ selectedMasyarakatForKartu.foto }`"
+                    alt="Foto" class="w-30 h-40 object-cover border rounded-md" />
                 </div>
 
-                <!-- Data -->
-                <div class="flex flex-col text-[18px] gap-2">
-                  <div class="flex">
-                    <div class="w-52 font-bold">No. Anggota</div>
-                    <div>: {{ selectedMasyarakatForKartu?.nomor_anggota }}</div>
-                  </div>
-                  <div class="flex">
-                    <div class="w-52 font-bold">Nama</div>
-                    <div>: {{ selectedMasyarakatForKartu?.nama_lengkap }}</div>
-                  </div>
-                  <div class="flex">
-                    <div class="w-52 font-bold">Tempat, Tanggal Lahir</div>
-                    <div>: {{ selectedMasyarakatForKartu?.tempat_lahir }}, {{
-                      formatTanggal(selectedMasyarakatForKartu?.tanggal_lahir) }}</div>
-                  </div>
-                  <div class="flex">
-                    <div class="w-52 font-bold">Jenis Kelamin</div>
-                    <div>: {{ selectedMasyarakatForKartu?.jenis_kelamin }}</div>
-                  </div>
-                  <div class="flex">
-                    <div class="w-52 font-bold">Agama</div>
-                    <div>: {{ selectedMasyarakatForKartu?.agama }}</div>
-                  </div>
-                  <div class="flex">
-                    <div class="w-52 font-bold">Pekerjaan Utama</div>
-                    <div>: {{ selectedMasyarakatForKartu?.pekerjaan?.nama_pekerjaan }}</div>
-                  </div>
-                  <div class="flex">
-                    <div class="w-52 font-bold">Bidang Dampingan</div>
-                    <div>: {{ selectedMasyarakatForKartu?.bidang?.nama_bidang || '' }}</div>
-                  </div>
-                  <div class="flex">
-                    <div class="w-52 font-bold">Grup Dampingan</div>
-                    <div>: {{ selectedMasyarakatForKartu?.grup?.nama_grup_dampingan || '' }}</div>
-                  </div>
+                <!-- Data Anggota -->
+                <div class="flex-1 grid grid-cols-2 gap-y-2 text-[15px] text-gray-800">
+                  <div class="font-medium">No. Anggota</div>
+                  <div>: {{ selectedMasyarakatForKartu.nomor_anggota }}</div>
+
+                  <div class="font-medium">Nama</div>
+                  <div>: {{ selectedMasyarakatForKartu.nama_lengkap }}</div>
+
+                  <div class="font-medium">Tempat, Tgl Lahir</div>
+                  <div>: {{ selectedMasyarakatForKartu.tempat_lahir }}, {{
+                    formatTanggal(selectedMasyarakatForKartu.tanggal_lahir) }}</div>
+
+                  <div class="font-medium">Jenis Kelamin</div>
+                  <div>: {{ selectedMasyarakatForKartu.jenis_kelamin }}</div>
+
+                  <div class="font-medium">Agama</div>
+                  <div>: {{ selectedMasyarakatForKartu.agama }}</div>
+
+                  <div class="font-medium">Pekerjaan</div>
+                  <div>: {{ selectedMasyarakatForKartu.pekerjaan?.nama_pekerjaan }}</div>
+
+                  <div class="font-medium">Grup Dampingan</div>
+                  <div>: {{ selectedMasyarakatForKartu.grup?.nama_grup_dampingan }}</div>
+
+                  <div class="font-medium">Bidang Dampingan</div>
+                  <div>: {{ selectedMasyarakatForKartu.bidang?.nama_bidang }}</div>
                 </div>
+              </div>
+
+              <!-- Footer -->
+              <div class="flex justify-end px-6 pb-4">
+                <div class="text-gray-400 text-xs">Generated by D3 TI UNS</div>
               </div>
             </div>
           </div>

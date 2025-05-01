@@ -50,9 +50,9 @@ const tambahData = () => {
 <template>
   <AdminLayout>
     <Head title="Kegiatan Dampingan" />
-    <div class="flex h-screen bg-gray-100 overflow-auto">
+    <div class="flex bg-gray-100 overflow-auto">
       <main
-        class="grow px-10 py-6 m-6 bg-white rounded-[30px] shadow-[0_10px_60px_rgba(226,236,249,0.5)] max-md:p-4 max-md:m-3 h-auto overflow-y-auto scrollbar-hidden"
+        class="grow px-10 py-6 bg-white rounded-lg shadow-md max-md:p-4 max-md:m-3 h-auto overflow-y-auto scrollbar-hidden"
       >
         <h2 class="mb-6 text-2xl font-semibold text-black">
           Kegiatan Dampingan

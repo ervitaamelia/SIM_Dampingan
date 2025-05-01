@@ -16,11 +16,11 @@ return new class extends Migration
             $table->string('nama_lengkap', 100);
             $table->string('tempat_lahir', 50);
             $table->date('tanggal_lahir');
-            $table->enum('jenis_kelamin', ['laki-laki', 'perempuan']);
-            $table->string('agama', 20);
+            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
+            $table->enum('agama', ['Islam', 'Kristen Protestan', 'Kristen Katolik', 'Hindu', 'Buddha', 'Konghucu']);
             $table->string('nomor_telepon', 15);
             $table->text('alamat');
-            $table->enum('status', ['aktif', 'nonaktif']);
+            $table->enum('status', ['Aktif', 'Non Aktif']);
             $table->string('foto', 255);
             $table->unsignedBigInteger('id_pekerjaan');
             $table->unsignedBigInteger('id_bidang');

@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardFasilitatorController;
 use App\Http\Controllers\DataAdminController;
 use App\Http\Controllers\DataDampinganController;
 use App\Http\Controllers\DataFasilitatorController;
+use App\Http\Controllers\DataKegiatanController;
 use App\Http\Controllers\DataMasyarakatController;
 use App\Http\Controllers\KegiatanDampinganController;
 use App\Http\Controllers\ProfileController;
@@ -16,12 +17,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Login route
-Route::get('/', function () {
-    return Inertia::render('Auth/Login');
-});
-Route::post('/', function () {
-    return Inertia::render('Auth/Login');
-});
+Route::get('/', [AuthenticatedSessionController::class, 'create'])
+    ->name('login');
+
+Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
 // Route::middleware(['auth', 'role:admin'])->get('/admin', function () {
 //     return Inertia::render('admin/Dashboard');
@@ -54,13 +53,6 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
         Route::put('/data-fasilitator/{id}', [DataFasilitatorController::class, 'update'])->name('fasilitator.update');
         Route::delete('/data-fasilitator/{id}', [DataFasilitatorController::class, 'destroy'])->name('fasilitator.destroy');
     });
-
-Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/data-kegiatan', function () {
-    return Inertia::render('fasilitator/DataKegiatan');
-});
-Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/FormKegiatan', function () {
-    return Inertia::render('fasilitator/FormKegiatan');
-});
 
 //Data admin route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
@@ -102,6 +94,25 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
 Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'index'])
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
     ->name('kegiatan-dampingan');
+
+//Data kegiatan route
+Route::middleware(['auth', 'verified', EnsureUserRole::class . ':fasilitator'])
+    ->prefix('fasilitator')
+    ->group(function () {
+        Route::get('/data-kegiatan', [DataKegiatanController::class, 'index'])->name('kegiatan.index');
+        Route::get('/data-kegiatan/create', [DataKegiatanController::class, 'create'])->name('kegiatan.create');
+        Route::post('/data-kegiatan', [DataKegiatanController::class, 'store'])->name('kegiatan.store');
+        Route::get('/data-kegiatan/{id}/edit', [DataKegiatanController::class, 'edit'])->name('kegiatan.edit');
+        Route::put('/data-kegiatan/{id}', [DataKegiatanController::class, 'update'])->name('kegiatan.update');
+        Route::delete('/data-kegiatan/{id}', [DataKegiatanController::class, 'destroy'])->name('kegiatan.destroy');
+    });
+
+// Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/data-kegiatan', function () {
+//     return Inertia::render('fasilitator/DataKegiatan');
+// });
+// Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/FormKegiatan', function () {
+//     return Inertia::render('fasilitator/FormKegiatan');
+// });
 
 //Dampingan route
 Route::get('/api/dampingan-list', function () {

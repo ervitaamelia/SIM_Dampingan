@@ -78,7 +78,7 @@ export default {
 <template>
   <AdminLayout>
     <Head title="Data Fasilitator" />
-    <div class="flex h-screen bg-gray-100 overflow-auto">
+    <div class="flex bg-gray-100 overflow-auto">
       <main class="flex-1">
         <div class="bg-white rounded-lg shadow-md rounded p-4">
           <div class="flex justify-between mb-4">

@@ -52,7 +52,6 @@ const fasilitatorOptions = computed(() => {
     }))
 })
 
-
 const bidangOptions = props.bidangs.map(b => ({
   value: b.id_bidang,
   label: b.nama_bidang,

@@ -124,7 +124,7 @@ export default {
     <AdminLayout>
 
         <Head title="Data Admin" />
-        <div class="flex h-screen bg-gray-100 overflow-auto">
+        <div class="flex bg-gray-100 overflow-auto">
             <main class="flex-1">
                 <div class="bg-white shadow-md rounded-lg p-4">
                     <div class="flex justify-between mb-2">

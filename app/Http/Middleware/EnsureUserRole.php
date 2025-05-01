@@ -1,6 +1,4 @@
 <?php
-// app/Http/Middleware/EnsureUserRole.php
-
 namespace App\Http\Middleware;
 
 use Closure;
@@ -9,13 +7,24 @@ use Illuminate\Support\Facades\Auth;
 
 class EnsureUserRole
 {
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
-        // Jika pengguna belum login atau perannya tidak sesuai, larang akses
-        if (!Auth::check() || Auth::user()->role !== $role) {
-            return redirect('/');  // Atau ke halaman lain sesuai kebutuhan
+        if (!Auth::check()) {
+            return redirect('/');
         }
 
-        return $next($request);
+        // Jika tidak ada roles yang ditentukan, izinkan akses
+        if (empty($roles)) {
+            return $next($request);
+        }
+
+        // Periksa apakah user memiliki salah satu dari roles yang diizinkan
+        foreach ($roles as $role) {
+            if (Auth::user()->role === $role) {
+                return $next($request);
+            }
+        }
+
+        return redirect('/'); // Atau abort(403) jika ingin forbidden
     }
 }

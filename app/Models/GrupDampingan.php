@@ -48,4 +48,9 @@ class GrupDampingan extends Model
             ->withTimestamps();
     }
 
+    public function kegiatans()
+    {
+        return $this->belongsToMany(Kegiatan::class, 'grup_kegiatan', 'id_grup_dampingan', 'id_kegiatan')
+            ->withTimestamps();
+    }
 }
