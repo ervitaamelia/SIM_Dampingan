@@ -87,7 +87,7 @@ class DataKegiatanController extends Controller
         foreach ($request->foto as $foto) {
             $fotoPath = $foto->store('foto_kegiatan', 'public');
 
-            $kegiatan->galeri()->create([
+            $kegiatan->galeris()->create([
                 'foto' => $fotoPath,
             ]);
         }

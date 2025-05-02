@@ -24,7 +24,7 @@ const form = useForm({
   laporan: null,
   kode_kecamatan: '',
   id_bidang: '',
-  id_grup_dampingan: [''],
+  id_grup_dampingan: [""],
   foto: [],
 })
 
@@ -37,6 +37,7 @@ onMounted(() => {
     form.tanggal = props.kegiatan.tanggal
     form.waktu = props.kegiatan.waktu
     form.tempat = props.kegiatan.tempat
+    form.laporan = props.kegiatan.laporan
     form.jumlah_peserta = props.kegiatan.jumlah_peserta
     form.kode_kecamatan = props.kegiatan.kode_kecamatan
     form.id_bidang = props.kegiatan.id_bidang
@@ -78,34 +79,24 @@ const removeGrup = (index) => {
 };
 
 const fileInputs = ref([{ file: null }])
-const isDropdownOpen = ref(false)
-
-// Methods
-const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value
-}
 
 const addFileInput = () => {
   fileInputs.value.push({ file: null })
-}
-
-const removeFileInput = (index) => {
-  fileInputs.value.splice(index, 1)
 }
 
 const handleFileChange = (event, index) => {
   fileInputs.value[index].file = event.target.files[0]
 }
 
-const batal = () => {
-  fileInputs.value = [{ file: null }]
-}
-
 const handleSubmit = () => {
+  form.foto = fileInputs.value
+    .map(input => input.file)
+    .filter(file => file !== null);
+
   if (props.kegiatan) {
     form.put(`/fasilitator/data-kegiatan/${props.kegiatan.id_kegiatan}`);
   } else {
-    form.post("/fasilitator/data-kegiatan");
+    form.post('/fasilitator/data-kegiatan')
   }
 }
 </script>
@@ -122,7 +113,7 @@ const handleSubmit = () => {
             {{ props.kegiatan ? "Form Edit Kegiatan" : "Form Tambah Kegiatan" }}
           </h2>
 
-          <form @submit.prevent="handleSubmit" class="mt-6 w-full">
+          <form @submit.prevent="handleSubmit" enctype="multipart/form-data" class="mt-6 w-full">
             <div class="mb-2">
               <label class="text-sm font-medium text-gray-600">Judul Kegiatan</label>
               <input v-model="form.judul" type="text" placeholder="Masukkan Judul Kegiatan di sini"
@@ -144,7 +135,7 @@ const handleSubmit = () => {
             <div class="mb-2">
               <label class="text-sm font-medium text-gray-600">Solusi (Opsional)</label>
               <textarea v-model="form.solusi" placeholder="Masukkan Solusi"
-                class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" required></textarea>
+                class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm"></textarea>
             </div>
 
             <div class="mb-2">
@@ -155,8 +146,8 @@ const handleSubmit = () => {
 
             <div class="mb-2">
               <label class="text-sm font-medium text-gray-600">Kecamatan</label>
-              <Multiselect v-model="form.kode_kecamatan" :options="kecamatanOptions" :searchable="true" placeholder="Pilih Kecamatan"
-                class="w-full border border-gray-300 rounded-md shadow-sm text-sm" />
+              <Multiselect v-model="form.kode_kecamatan" :options="kecamatanOptions" :searchable="true"
+                placeholder="Pilih Kecamatan" class="w-full border border-gray-300 rounded-md shadow-sm text-sm" />
             </div>
 
             <div class="mb-2 flex gap-4">
@@ -191,7 +182,8 @@ const handleSubmit = () => {
             <div class="flex flex-col gap-2 pb-2">
               <label class="text-sm font-medium text-gray-600">Grup Dampingan</label>
 
-              <div v-for="(item, index) in form.id_grup_dampingan" :key="index" class="flex gap-2 items-center gap-2 mb-2">
+              <div v-for="(item, index) in form.id_grup_dampingan" :key="index"
+                class="flex gap-2 items-center gap-2 mb-2">
                 <Multiselect v-model="form.id_grup_dampingan[index]" :options="grupOptions" placeholder="Pilih Grup"
                   class="w-full border border-gray-300 rounded-md shadow-sm text-sm" :searchable="true" />
                 <button type="button" @click="addGrup"
@@ -209,18 +201,19 @@ const handleSubmit = () => {
 
             <div class="mb-2">
               <label class="text-sm font-medium text-gray-600">Foto Dokumentasi</label>
-              <div v-for="(file, index) in fileInputs" :key="index" class="flex items-center gap-2 mb-2">
-                <input type="file" @change="handleFileChange($event, index)"
+              <div v-for="(input, index) in fileInputs" :key="index" class="mb-2">
+                <input type="file" @change="(e) => handleFileChange(e, index)"
                   class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" />
-                <button @click="addFileInput" class="p-2 bg-blue-500 text-white rounded-md">
-                  +
-                </button>
+                <button v-if="fileInputs.length > 1" @click.prevent="fileInputs.splice(index, 1)"
+                  class="text-red-500 text-xs mt-1">Hapus</button>
               </div>
+              <button @click.prevent="addFileInput" class="text-blue-500 text-xs">+ Tambah Foto Lain</button>
+            </div>
 
-              <div class="mb-2">
-                <label class="text-sm font-medium text-gray-600">Laporan Kegiatan (Opsional)</label>
-                <input type="file" class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" />
-              </div>
+            <div class="mb-2">
+              <label class="text-sm font-medium text-gray-600">Laporan Kegiatan (Opsional)</label>
+              <input type="file" @change="e => form.laporan = e.target.files[0]"
+                class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" />
             </div>
 
             <div class="flex gap-4 mt-4 justify-end">

@@ -35,7 +35,7 @@ class Kegiatan extends Model
 
     public function kecamatan()
     {
-        return $this->belongsTo(Kecamatan::class, 'kode_kecamatan', 'kode_kecamatan');
+        return $this->belongsTo(Kecamatan::class, 'kode_kecamatan', 'kode');
     }
 
     public function bidang()
@@ -45,8 +45,7 @@ class Kegiatan extends Model
 
     public function galeris()
     {
-        return $this->hasMany(Galeri::class, 'id_kegiatan')
-            ->withTimestamps();
+        return $this->hasMany(Galeri::class, 'id_kegiatan');
     }
 
     public function grups()

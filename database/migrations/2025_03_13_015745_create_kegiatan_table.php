@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('tanggal');
             $table->time('waktu');
             $table->string('tempat', 50);
-            $table->tinyInteger('jumlah_peserta');
+            $table->unsignedSmallInteger('jumlah_peserta');
             $table->string('laporan', 100)->nullable();
             $table->unsignedBigInteger('id_user');
             $table->string('kode_kecamatan');

@@ -11,6 +11,7 @@ use App\Http\Controllers\KegiatanDampinganController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\BidangController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Middleware\EnsureUserRole;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,11 @@ Route::get('/admin', [DashboardAdminController::class, 'index'])
 // Route::get('/fasilitator', [DashboardFasilitatorController::class, 'index'])
 //     ->middleware(['auth', 'verified', 'role:fasilitator', EnsureUserRole::class . ':fasilitator'])
 //     ->name('dashboard');
+
+//Bidang route
+Route::get('/bidang', [BidangController::class, 'index'])->name('bidang.index');
+Route::post('/bidang', [BidangController::class, 'store'])->name('bidang.store');
+Route::delete('/bidang/{id}', [BidangController::class, 'destroy'])->name('bidang.destroy');
 
 //Data fasilitator route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
