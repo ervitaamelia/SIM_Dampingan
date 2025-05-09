@@ -1,7 +1,7 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { ref, watch, onMounted, computed } from 'vue'
-import { Head, useForm, router } from '@inertiajs/vue3'
+import { Head, useForm } from '@inertiajs/vue3'
 
 const { admin, provinsis, kabupatens, kecamatans } = defineProps({
   admin: Object,
@@ -12,9 +12,9 @@ const { admin, provinsis, kabupatens, kecamatans } = defineProps({
 
 const roleOptions = [
   { value: 'superadmin', label: 'Admin Pusat', level: '' },
-  { value: 'admin', label: 'Admin Provinsi', level: 'provinsi' },
-  { value: 'admin', label: 'Admin Kabupaten', level: 'kabupaten' },
-  { value: 'admin', label: 'Admin Kecamatan', level: 'kecamatan' }
+  { value: 'admin-provinsi', label: 'Admin Provinsi', level: 'provinsi' },
+  { value: 'admin-kabupaten', label: 'Admin Kabupaten', level: 'kabupaten' },
+  { value: 'admin-kecamatan', label: 'Admin Kecamatan', level: 'kecamatan' }
 ]
 
 const form = useForm({
@@ -54,7 +54,7 @@ onMounted(() => {
 
 watch(selectedRole, (val) => {
   if (val) {
-    form.role = val.value === 'superadmin' ? 'superadmin' : 'admin'
+    form.role = val.value
     form.admin_level = val.level
     // Reset kode saat role berubah
     form.kode_provinsi = ''
@@ -132,12 +132,29 @@ const clearSelection = (type) => {
     form.kode_kecamatan = ''
   }
 }
+
+const isFormIncomplete = computed(() => {
+  if (!form.name || !form.email || !form.nomor_telepon || !form.alamat) return true
+
+  if (!admin && !form.password) return true
+
+  if (!admin && !selectedRole.value) return true
+
+  if (!admin) {
+    if (selectedRole.value?.level === 'provinsi' && !form.kode_provinsi) return true
+    if (selectedRole.value?.level === 'kabupaten' && (!form.kode_provinsi || !form.kode_kabupaten)) return true
+    if (selectedRole.value?.level === 'kecamatan' && (!form.kode_provinsi || !form.kode_kabupaten || !form.kode_kecamatan)) return true
+  }
+
+  return false
+})
+
 </script>
 
 <template>
   <AdminLayout>
 
-    <Head title="Form Admin" />
+    <Head :title="admin ? 'Edit Admin' : 'Tambah Admin'" />
 
     <div class="ml-5 w-full max-md:w-full mx-auto flex justify-center">
       <section
@@ -162,7 +179,7 @@ const clearSelection = (type) => {
 
             <!-- Nama Lengkap -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="name" class="text-sm font-medium text-gray-600">Nama Lengkap</label>
+              <label for="name" class="text-sm font-medium text-gray-600">Nama</label>
               <input id="name" type="text" v-model="form.name"
                 class="w-full py-3 px-3 mt-1 border border-gray-400 rounded-md outline-none text-base"
                 placeholder="Masukkan Nama Lengkap" />
@@ -280,6 +297,7 @@ const clearSelection = (type) => {
                     @focus="showKabDropdown = true"
                     @blur="setTimeout(() => showKabDropdown = false, 200)"
                     class="w-full py-3 px-3 text-base appearance-none bg-transparent"
+                    :disabled="!form.kode_provinsi"
                   >
                     <option disabled value="">Pilih Kabupaten</option>
                     <option v-if="form.kode_kabupaten" :value="form.kode_kabupaten">
@@ -350,6 +368,7 @@ const clearSelection = (type) => {
                     @focus="showKecDropdown = true"
                     @blur="setTimeout(() => showKecDropdown = false, 200)"
                     class="w-full py-3 px-3 text-base appearance-none bg-transparent"
+                    :disabled="!form.kode_kabupaten"
                   >
                     <option disabled value="">Pilih Kecamatan</option>
                     <option v-if="form.kode_kecamatan" :value="form.kode_kecamatan">
@@ -414,7 +433,7 @@ const clearSelection = (type) => {
             <div class="flex gap-4 mt-4 justify-end">
               <a :href="route('admin.index')"
                 class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">Batal</a>
-              <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md">
+              <button type="submit" :disabled="isFormIncomplete" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ admin ? "Simpan Perubahan" : "Tambah" }}
               </button>
             </div>

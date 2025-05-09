@@ -40,9 +40,7 @@ export default {
   <aside :class="isMenuOpen ? 'block' : 'hidden'" class="w-72 bg-white shadow-md p-4 lg:block">
     <nav class="flex flex-col items-start py-5 pr-7 pl-2 w-full">
       <header class="flex gap-4 items-center text-2xl font-semibold text-black">
-        <img
-          src="/images/logo-mpm.png"
-          class="object-contain w-10" alt="Logo MPM" />
+        <img src="/images/logo-mpm.png" class="object-contain w-10" alt="Logo MPM" />
         <h1>Dashboard</h1>
       </header>
     </nav>
@@ -76,18 +74,6 @@ export default {
         </Link>
       </li>
 
-      <!-- Data Fasilitator -->
-      <li>
-        <Link href="/admin/data-fasilitator" :class="isPrefixActive('/admin/data-fasilitator').value
-          ? 'flex items-center gap-3 px-4 py-3 w-full text-white bg-sky-600 rounded-lg hover:bg-sky-700'
-          : 'flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-blue-200'">
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/b162be8a0c28dfc7547cedfb4d9b5bfc761b405e9d2ed8ccd4447b54a75941c8?placeholderIfAbsent=true"
-          class="w-6 shrink-0" alt="Facilitator icon" />
-        <span>Data Fasilitator</span>
-        </Link>
-      </li>
-
       <!-- Data Admin -->
       <li>
         <Link href="/admin/data-admin" :class="isPrefixActive('/admin/data-admin').value
@@ -100,15 +86,15 @@ export default {
         </Link>
       </li>
 
-      <!-- Data Masyarakat -->
+      <!-- Data Fasilitator -->
       <li>
-        <Link href="/admin/data-masyarakat" :class="isPrefixActive('/admin/data-masyarakat').value
+        <Link href="/admin/data-fasilitator" :class="isPrefixActive('/admin/data-fasilitator').value
           ? 'flex items-center gap-3 px-4 py-3 w-full text-white bg-sky-600 rounded-lg hover:bg-sky-700'
           : 'flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-blue-200'">
         <img
-          src="https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/0bd9fafaddbf12073acb6d22718aa1fbbaa6da1f2897a8ca58c13e1963513b88?placeholderIfAbsent=true"
-          class="w-6 shrink-0" alt="User icon" />
-        <span>Data Masyarakat</span>
+          src="https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/b162be8a0c28dfc7547cedfb4d9b5bfc761b405e9d2ed8ccd4447b54a75941c8?placeholderIfAbsent=true"
+          class="w-6 shrink-0" alt="Facilitator icon" />
+        <span>Data Fasilitator</span>
         </Link>
       </li>
 
@@ -120,7 +106,19 @@ export default {
         <img
           src="https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/c089238d6fd542b8b9009bfa90175af913a34227304625c56c5947f0d0805040?placeholderIfAbsent=true"
           class="w-6 shrink-0" alt="Data icon" />
-        <span>Data Dampingan</span>
+        <span>Data Grup Dampingan</span>
+        </Link>
+      </li>
+
+      <!-- Data Masyarakat -->
+      <li>
+        <Link href="/admin/data-masyarakat" :class="isPrefixActive('/admin/data-masyarakat').value
+          ? 'flex items-center gap-3 px-4 py-3 w-full text-white bg-sky-600 rounded-lg hover:bg-sky-700'
+          : 'flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-blue-200'">
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/0bd9fafaddbf12073acb6d22718aa1fbbaa6da1f2897a8ca58c13e1963513b88?placeholderIfAbsent=true"
+          class="w-6 shrink-0" alt="User icon" />
+        <span>Data Masyarakat</span>
         </Link>
       </li>
 
@@ -140,7 +138,7 @@ export default {
     <!-- Logout -->
     <Link as="button" method="post" href="/logout"
       class="w-full py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 mt-24">
-      Keluar
+    Keluar
     </Link>
   </aside>
 </template>

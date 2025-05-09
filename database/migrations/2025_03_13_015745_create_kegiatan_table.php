@@ -19,14 +19,18 @@ return new class extends Migration
             $table->text('solusi')->nullable();
             $table->date('tanggal');
             $table->time('waktu');
-            $table->string('tempat', 50);
+            $table->text('alamat');
             $table->unsignedSmallInteger('jumlah_peserta');
             $table->string('laporan', 100)->nullable();
             $table->unsignedBigInteger('id_user');
+            $table->string('kode_provinsi');
+            $table->string('kode_kabupaten');
             $table->string('kode_kecamatan');
             $table->unsignedBigInteger('id_bidang');
 
             $table->foreign('id_user')->references('id')->on('users');
+            $table->foreign('kode_provinsi')->references('kode')->on('provinsis');
+            $table->foreign('kode_kabupaten')->references('kode')->on('kabupatens');
             $table->foreign('kode_kecamatan')->references('kode')->on('kecamatans');
             $table->foreign('id_bidang')->references('id_bidang')->on('bidang');
             $table->timestamps();

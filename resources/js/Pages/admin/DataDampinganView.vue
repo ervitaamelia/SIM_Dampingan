@@ -40,11 +40,16 @@ export default {
           ? grup.kode_kecamatan === this.selectedKecamatan
           : true;
 
+        // Jenis filter
+        const matchJenis = this.selectedJenis
+          ? grup.jenis_dampingan === this.selectedJenis
+          : true;
+
         // Bidang dampingan filter
         const bidangMatch = !this.selectedDampingan ||
           (grup.bidang?.nama_bidang === this.selectedDampingan);
 
-        return matchProvinsi && matchKabupaten && matchKecamatan && bidangMatch;
+        return matchProvinsi && matchKabupaten && matchKecamatan && bidangMatch && matchJenis;
       });
     }
   },
@@ -61,6 +66,7 @@ export default {
       selectedKabupaten: null,
       selectedKecamatan: null,
       selectedDampingan: null,
+      selectedJenis: null,
       selectedDampinganId: null,
 
       provinsiList: [],
@@ -125,8 +131,8 @@ export default {
     downloadExcel() {
       const filteredData = this.filteredGrups;
 
-      const exportData = filteredData.map((grup) => ({
-        'ID': grup.id_grup_dampingan,
+      const exportData = filteredData.map((grup, index) => ({
+        'No': index + 1,
         'Grup Dampingan': grup.nama_grup_dampingan,
         'Bidang Dampingan': grup.bidang?.nama_bidang,
         'Jenis Dampingan': grup.jenis_dampingan,
@@ -155,12 +161,12 @@ export default {
 <template>
   <AdminLayout>
 
-    <Head title="Data Dampingan" />
+    <Head title="Data Grup Dampingan" />
     <div class="flex bg-gray-100 overflow-auto">
       <main class="flex-1">
         <div class="bg-white shadow-md rounded-lg p-4">
           <div class="flex justify-between mb-4">
-            <h2 class="text-xl font-bold">Data Dampingan</h2>
+            <h2 class="text-xl font-bold mt-2">Data Grup Dampingan</h2>
             <div class="flex space-x-2">
               <a :href="route('dampingan.create')" class="bg-blue-500 text-white px-3 py-2 rounded">+ Tambah</a>
               <button @click="downloadExcel" class="bg-green-500 text-white px-3 py-2 rounded">
@@ -171,12 +177,23 @@ export default {
 
           <!-- Filter Section -->
           <div class="flex flex-wrap gap-4 mb-4">
+            <!-- Dropdown Bidang Dampingan -->
+            <div class="w-1 min-w-[200px]">
+              <Multiselect v-model="selectedDampingan" :options="availableDampinganList" placeholder="Pilih Bidang"
+                :searchable="true" class="w-full" :clearable="true" />
+            </div>
+
+            <!-- Dropdown Jenis Dampingan -->
+            <div class="w-1 min-w-[200px]">
+              <Multiselect v-model="selectedJenis" :options="['Pusat','Provinsi','Kabupaten','Kecamatan']" placeholder="Pilih Jenis"
+                :searchable="true" class="w-full" :clearable="true" />
+            </div>
+
             <!-- Dropdown Provinsi -->
             <div class="w-1 min-w-[200px]">
               <!-- Provinsi -->
               <Multiselect v-model="selectedProvinsi" :options="provinsiList" placeholder="Pilih Provinsi"
                 :searchable="true" class="w-full" @update:modelValue="fetchKabupaten" />
-
             </div>
 
             <!-- Dropdown Kabupaten -->
@@ -192,19 +209,13 @@ export default {
               <Multiselect v-model="selectedKecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
                 :searchable="true" class="w-full" :disabled="!selectedKabupaten" />
             </div>
-
-            <!-- Dropdown Bidang Dampingan -->
-            <div class="w-1 min-w-[200px]">
-              <Multiselect v-model="selectedDampingan" :options="availableDampinganList" placeholder="Pilih Bidang"
-                :searchable="true" class="w-full" :clearable="true" />
-            </div>
           </div>
 
           <div class="overflow-auto rounded-lg">
             <table class="w-full min-w-[600px] border-collapse">
               <thead>
                 <tr class="bg-gray-200">
-                  <th class="border p-2">Id</th>
+                  <th class="border p-2">No</th>
                   <th class="border p-2">Grup Dampingan</th>
                   <th class="border p-2">Bidang Dampingan</th>
                   <th class="border p-2">Jenis Dampingan</th>
@@ -216,8 +227,8 @@ export default {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="grup in filteredGrups" :key="grup.id_grup_dampingan" class="text-left">
-                  <td class="border p-2 text-center">{{ grup.id_grup_dampingan }}</td>
+                <tr v-for="(grup, index) in filteredGrups" :key="grup.id_grup_dampingan" class="text-left">
+                  <td class="border p-2 text-center">{{ index + 1 }}</td>
                   <td class="border p-2">{{ grup.nama_grup_dampingan }}</td>
                   <td class="border p-2">{{ grup.bidang?.nama_bidang }}</td>
                   <td class="border p-2">{{ grup.jenis_dampingan }}</td>
@@ -249,7 +260,7 @@ export default {
                 </tr>
                 <tr v-if="filteredGrups.length === 0">
                   <td colspan="9" class="border p-2 text-center">
-                    Tidak ada data yang sesuai dengan filter
+                    Tidak ada data yang sesuai
                   </td>
                 </tr>
               </tbody>

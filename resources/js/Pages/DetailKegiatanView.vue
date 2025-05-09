@@ -1,5 +1,5 @@
 <script>
-import DetailKegiatanLayout from '@/layouts/DetailKegiatanLayout.vue'
+import DetailKegiatanLayout from '@/Layouts/DetailKegiatanLayout.vue'
 
 export default {
   components: {

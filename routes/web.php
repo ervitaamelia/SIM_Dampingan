@@ -23,10 +23,6 @@ Route::get('/', [AuthenticatedSessionController::class, 'create'])
 
 Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
-// Route::middleware(['auth', 'role:admin'])->get('/admin', function () {
-//     return Inertia::render('admin/Dashboard');
-// });
-
 //Dashboard Fasilitator
 Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator', [DashboardFasilitatorController::class, 'index']);
 
@@ -36,7 +32,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 
 //Dashboard admin route
 Route::get('/admin', [DashboardAdminController::class, 'index'])
-    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
     ->name('dashboard');
 
 // Route::get('/fasilitator', [DashboardFasilitatorController::class, 'index'])
@@ -49,7 +45,7 @@ Route::post('/bidang', [BidangController::class, 'store'])->name('bidang.store')
 Route::delete('/bidang/{id}', [BidangController::class, 'destroy'])->name('bidang.destroy');
 
 //Data fasilitator route
-Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/data-fasilitator', [DataFasilitatorController::class, 'index'])->name('fasilitator.index');
@@ -61,7 +57,7 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
     });
 
 //Data admin route
-Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/data-admin', [DataAdminController::class, 'index'])->name('admin.index'); // List Admin
@@ -73,7 +69,7 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
     });
 
 //Data masyarakat route
-Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/data-masyarakat', [DataMasyarakatController::class, 'index'])->name('masyarakat.index');
@@ -85,7 +81,7 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
     });
 
 //Data dampingan route
-Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
     ->prefix('admin')
     ->group(function () {
         Route::get('/data-dampingan', [DataDampinganController::class, 'index'])->name('dampingan.index');
@@ -98,7 +94,7 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
 
 //Kegiatan dampingan route
 Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'index'])
-    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin'])
+    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
     ->name('kegiatan-dampingan');
 
 //Data kegiatan route
@@ -110,6 +106,7 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':fasilitator'])
         Route::post('/data-kegiatan', [DataKegiatanController::class, 'store'])->name('kegiatan.store');
         Route::get('/data-kegiatan/{id}/edit', [DataKegiatanController::class, 'edit'])->name('kegiatan.edit');
         Route::put('/data-kegiatan/{id}', [DataKegiatanController::class, 'update'])->name('kegiatan.update');
+        Route::post('/data-kegiatan/{id}', [DataKegiatanController::class, 'update'])->name('kegiatan.update');
         Route::delete('/data-kegiatan/{id}', [DataKegiatanController::class, 'destroy'])->name('kegiatan.destroy');
     });
 
@@ -130,11 +127,12 @@ Route::get('/api/dampingan-list', function () {
     });
 });
 
-//Coba filter
+//api
 Route::get('/dropdown-data', [AdminController::class, 'getDropdownData']);
 Route::get('/api/provinsi', [WilayahController::class, 'getProvinsi']);
 Route::get('/api/kabupaten/{kode_provinsi}', [WilayahController::class, 'getKabupaten']);
 Route::get('/api/kecamatan/{kode_kabupaten}', [WilayahController::class, 'getKecamatan']);
+Route::get('/api/check-nama-grup', [DataDampinganController::class, 'checkNamaGrup']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

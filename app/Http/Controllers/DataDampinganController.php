@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\GrupDampingan;
 use App\Models\Bidang;
-use App\Models\Provinsi;
-use App\Models\Kabupaten;
-use App\Models\Kecamatan;
 use App\Models\User;
 use Inertia\Inertia;
 
@@ -39,9 +36,6 @@ class DataDampinganController extends Controller
     {
         return Inertia::render('admin/FormDampinganView', [
             'bidangs' => Bidang::all(['id_bidang', 'nama_bidang']),
-            'provinsis' => Provinsi::all(['kode', 'nama']),
-            'kabupatens' => Kabupaten::all(['kode', 'nama', 'kode_provinsi']),
-            'kecamatans' => Kecamatan::all(['kode', 'nama', 'kode_kabupaten']),
             'users' => User::where('role', 'fasilitator')->with(['bidangs:id_bidang,nama_bidang'])->get(['id', 'name']),
         ]);
     }
@@ -49,7 +43,7 @@ class DataDampinganController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_grup_dampingan' => 'required|string|max:100',
+            'nama_grup_dampingan' => 'required|unique|string|max:100',
             'jenis_dampingan' => 'required|in:Pusat,Provinsi,Kabupaten,Kecamatan',
             'kode_provinsi' => 'required|exists:provinsis,kode',
             'kode_kabupaten' => 'required|exists:kabupatens,kode',
@@ -90,9 +84,6 @@ class DataDampinganController extends Controller
                 'users' => $grup->users,
             ],
             'bidangs' => Bidang::all(['id_bidang', 'nama_bidang']),
-            'provinsis' => Provinsi::all(['kode', 'nama']),
-            'kabupatens' => Kabupaten::all(['kode', 'nama', 'kode_provinsi']),
-            'kecamatans' => Kecamatan::all(['kode', 'nama', 'kode_kabupaten']),
             'users' => User::where('role', 'fasilitator')->with(['bidangs:id_bidang,nama_bidang'])->get(['id', 'name']),
         ]);
     }
@@ -102,7 +93,7 @@ class DataDampinganController extends Controller
         $grup = GrupDampingan::findOrFail($id);
 
         $request->validate([
-            'nama_grup_dampingan' => 'required|string|max:100',
+            'nama_grup_dampingan' => 'required|unique|string|max:100',
             'jenis_dampingan' => 'required|in:Pusat,Provinsi,Kabupaten,Kecamatan',
             'kode_provinsi' => 'required|exists:provinsis,kode',
             'kode_kabupaten' => 'required|exists:kabupatens,kode',
@@ -137,4 +128,21 @@ class DataDampinganController extends Controller
 
         return redirect()->route('dampingan.index')->with('success', 'Data grup dampingan berhasil dihapus!');
     }
+
+    public function checkNamaGrup(Request $request)
+    {
+        $nama = $request->query('nama');
+        $id = $request->query('id'); // untuk pengecualian saat edit
+
+        $query = GrupDampingan::where('nama_grup_dampingan', $nama);
+
+        if ($id) {
+            $query->where('id_grup_dampingan', '!=', $id);
+        }
+
+        $exists = $query->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+
 }

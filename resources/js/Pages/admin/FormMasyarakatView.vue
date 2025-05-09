@@ -62,6 +62,24 @@ const grupOptions = computed(() => {
     }))
 })
 
+const isFormValid = computed(() => {
+  const allFieldsFilled = 
+    form.nama_lengkap &&
+    form.tempat_lahir &&
+    form.tanggal_lahir &&
+    form.jenis_kelamin &&
+    form.agama &&
+    form.nomor_telepon &&
+    form.alamat &&
+    form.status &&
+    form.id_pekerjaan &&
+    form.id_bidang &&
+    form.id_grup_dampingan
+
+  // Jika sedang create, pastikan foto juga diisi
+  return props.masyarakat ? allFieldsFilled : allFieldsFilled && form.foto
+})
+
 function handleSubmit() {
   if (props.masyarakat) {
     // Untuk update, gunakan post dengan _method PUT
@@ -86,7 +104,7 @@ function handleSubmit() {
         class="flex flex-col items-center px-8 pt-6 pb-8 mt-12 w-full max-w-4xl bg-white rounded-[20px] shadow-lg overflow-y-auto scrollbar-hide max-h-[80vh]">
         <div class="flex flex-col w-full">
           <h2 class="self-center text-2xl font-bold text-black">
-            {{ masyarakat ? "Form Edit Masyarakat Dampingan" : "Form Tambah Masyarakat Dampingan" }}
+            {{ masyarakat ? "Form Edit Masyarakat" : "Form Tambah Masyarakat" }}
           </h2>
           <form @submit.prevent="handleSubmit" enctype="multipart/form-data" class="mt-6 w-full">
             <!-- Nama Lengkap -->
@@ -222,7 +240,7 @@ function handleSubmit() {
               <label class="text-sm font-medium text-gray-600">
                 Grup Dampingan
               </label>
-              <Multiselect v-model="form.id_grup_dampingan" :options="grupOptions" placeholder="Pilih Grup Dampingan"
+              <Multiselect v-model="form.id_grup_dampingan" :options="grupOptions" :disabled="!form.id_bidang" placeholder="Pilih Grup Dampingan"
                 class="w-full border border-gray-300 rounded-md shadow-sm text-sm" :searchable="true" />
               <div v-if="form.errors.id_grup_dampingan" class="text-red-500 text-sm">
                 {{ form.errors.id_grup_dampingan }}
@@ -247,8 +265,8 @@ function handleSubmit() {
             <div class="flex gap-4 mt-4 justify-end">
               <a :href="route('masyarakat.index')"
                 class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">Batal</a>
-              <button type="submit" :disabled="form.processing"
-                class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50">
+              <button type="submit" :disabled="form.processing || !isFormValid"
+                class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ form.processing ? 'Memproses...' : (masyarakat ? 'Simpan Perubahan' : 'Tambah') }}
               </button>
             </div>

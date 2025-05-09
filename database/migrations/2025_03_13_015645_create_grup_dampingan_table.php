@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('grup_dampingan', function (Blueprint $table) {
             $table->id('id_grup_dampingan');
-            $table->string('nama_grup_dampingan');
+            $table->string('nama_grup_dampingan')->unique();
             $table->enum('jenis_dampingan', ['Pusat', 'Provinsi', 'Kabupaten', 'Kecamatan']);
 
             // Menggunakan kode wilayah, bukan id

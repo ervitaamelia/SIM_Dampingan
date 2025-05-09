@@ -19,7 +19,9 @@ class DataMasyarakatController extends Controller
             'bidang',
             'grup',
         ])
+            ->orderBy('nama_lengkap', 'asc')
             ->get();
+
         $bidangs = Bidang::all();
         $grups = GrupDampingan::all();
 

@@ -23,7 +23,7 @@ class DataAdminController extends Controller
             ->leftJoin('provinsis', 'users.kode_provinsi', '=', 'provinsis.kode')
             ->leftJoin('kabupatens', 'users.kode_kabupaten', '=', 'kabupatens.kode')
             ->leftJoin('kecamatans', 'users.kode_kecamatan', '=', 'kecamatans.kode')
-            ->whereIn('users.role', ['superadmin', 'admin'])
+            ->whereIn('users.role', ['superadmin', 'admin-provinsi', 'admin-kabupaten', 'admin-kecamatan'])
             ->get();
 
         return Inertia::render('admin/DataAdminView', [
@@ -48,7 +48,7 @@ class DataAdminController extends Controller
             'password' => 'required|min:6',
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
-            'role' => 'required|in:admin,superadmin',
+            'role' => 'required|in:superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan',
             'kode_provinsi' => 'nullable|string',
             'kode_kabupaten' => 'nullable|string',
             'kode_kecamatan' => 'nullable|string',

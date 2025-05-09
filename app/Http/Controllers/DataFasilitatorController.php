@@ -12,8 +12,9 @@ class DataFasilitatorController extends Controller
 {
     public function index()
     {
-        $fasilitators = User::where('users.role', ['fasilitator'])
+        $fasilitators = User::where('users.role', 'fasilitator')
             ->with('bidangs')
+            ->orderBy('name', 'asc')
             ->get();
 
         return Inertia::render('admin/DataFasilitatorView', [

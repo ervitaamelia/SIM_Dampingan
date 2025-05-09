@@ -157,7 +157,7 @@ export default {
     <div class="flex bg-gray-100 overflow-auto">
       <main class="flex-1">
         <div class="bg-white shadow-md rounded-lg p-4">
-          <div class="flex justify-between mb-4">
+          <div class="flex justify-between mb-2">
             <h2 class="text-xl font-bold">Data Masyarakat</h2>
             <div class="flex space-x-2">
               <a :href="route('masyarakat.create')" class="bg-blue-500 text-white px-3 py-2 rounded">+ Tambah</a>

@@ -19,16 +19,16 @@ export default {
         },
         filteredAdmins() {
             return this.admins.filter(admin => {
-                const matchProvinsi = this.selectedProvinsi 
-                    ? admin.kode_provinsi === this.selectedProvinsi 
+                const matchProvinsi = this.selectedProvinsi
+                    ? admin.kode_provinsi === this.selectedProvinsi
                     : true;
-                const matchKabupaten = this.selectedKabupaten 
-                    ? admin.kode_kabupaten === this.selectedKabupaten 
+                const matchKabupaten = this.selectedKabupaten
+                    ? admin.kode_kabupaten === this.selectedKabupaten
                     : true;
-                const matchKecamatan = this.selectedKecamatan 
-                    ? admin.kode_kecamatan === this.selectedKecamatan 
+                const matchKecamatan = this.selectedKecamatan
+                    ? admin.kode_kecamatan === this.selectedKecamatan
                     : true;
-                
+
                 return matchProvinsi && matchKabupaten && matchKecamatan;
             });
         }
@@ -90,8 +90,8 @@ export default {
         downloadExcel() {
             const filteredData = this.filteredAdmins;
 
-            const exportData = filteredData.map((admin) => ({
-                'ID': admin.id,
+            const exportData = filteredData.map((admin, index) => ({
+                'No': index + 1,
                 'Nama Lengkap': admin.name,
                 'Email': admin.email,
                 'Alamat': admin.alamat,
@@ -106,8 +106,8 @@ export default {
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Admin');
 
             const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-            const file = new Blob([excelBuffer], { 
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            const file = new Blob([excelBuffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             });
 
             const fileName = 'data-admin.xlsx';
@@ -126,7 +126,7 @@ export default {
         <Head title="Data Admin" />
         <div class="flex bg-gray-100 overflow-auto">
             <main class="flex-1">
-                <div class="bg-white shadow-md rounded-lg p-4">
+                <div class="bg-white shadow-md rounded-lg p-4 max-h-[680px]">
                     <div class="flex justify-between mb-2">
                         <h2 class="text-xl font-bold">Data Admin</h2>
                         <div class="flex space-x-2">
@@ -138,7 +138,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap gap-4 mb-8">
+                    <div class="flex flex-wrap gap-4 mb-4">
                         <!-- Dropdown Provinsi -->
                         <div class="w-1 min-w-[200px]">
                             <!-- Provinsi -->
@@ -164,12 +164,12 @@ export default {
                         </div>
                     </div>
 
-                    <div class="overflow-auto rounded-lg">
+                    <div class="overflow-auto rounded-lg max-h-[510px]">
                         <table class="w-full min-w-[600px] border-collapse">
                             <thead>
                                 <tr class="bg-gray-200">
-                                    <th class="border p-2">Id</th>
-                                    <th class="border p-2">Nama Lengkap</th>
+                                    <th class="border p-2">No</th>
+                                    <th class="border p-2">Nama</th>
                                     <th class="border p-2">Email</th>
                                     <th class="border p-2">Alamat</th>
                                     <th class="border p-2">No. Telepon</th>
@@ -180,8 +180,8 @@ export default {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="admin in filteredAdmins" :key="admin.id" class="text-left">
-                                    <td class="border p-2 text-center">{{ admin.id }}</td>
+                                <tr v-for="(admin, index) in filteredAdmins" :key="admin.id" class="text-left">
+                                    <td class="border p-2 text-center">{{ index + 1 }}</td>
                                     <td class="border p-2">{{ admin.name }}</td>
                                     <td class="border p-2">{{ admin.email }}</td>
                                     <td class="border p-2">{{ admin.alamat }}</td>
@@ -215,6 +215,11 @@ export default {
                                                 </div>
                                             </div>
                                         </div>
+                                    </td>
+                                </tr>
+                                <tr v-if="filteredAdmins.length === 0">
+                                    <td colspan="9" class="border p-2 text-center">
+                                        Tidak ada data yang sesuai
                                     </td>
                                 </tr>
                             </tbody>

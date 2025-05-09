@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, computed } from "vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 
@@ -37,6 +37,17 @@ const removeBidang = (index) => {
   }
 };
 
+const isFormValid = computed(() => {
+  return (
+    form.name.trim() !== "" &&
+    form.email.trim() !== "" &&
+    (props.fasilitator || form.password.trim() !== "") &&
+    form.nomor_telepon.trim() !== "" &&
+    form.alamat.trim() !== "" &&
+    form.bidang_dampingan.every(bidang => bidang !== "")
+  );
+});
+
 const handleSubmit = () => {
   if (props.fasilitator) {
     form.put(`/admin/data-fasilitator/${props.fasilitator.id}`);
@@ -49,7 +60,7 @@ const handleSubmit = () => {
 <template>
   <AdminLayout>
 
-    <Head title="Form Fasilitator" />
+    <Head :title="props.fasilitator ? 'Edit Fasilitator' : 'Tambah Fasilitator'" />
 
     <div class="ml-5 w-full max-md:w-full mx-auto flex justify-center">
       <section
@@ -135,10 +146,14 @@ const handleSubmit = () => {
             </div>
 
             <div class="flex gap-4 mt-4 justify-end">
-              <a :href="route('fasilitator.index')" class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">
+              <a :href="route('fasilitator.index')"
+                class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">
                 Batal
               </a>
-              <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md">
+              <button type="submit" :disabled="!isFormValid" :class="[
+                'px-6 py-2 text-sm font-medium rounded-md',
+                isFormValid ? 'bg-sky-600 text-white' : 'bg-sky-600 text-white opacity-50 cursor-not-allowed'
+              ]">
                 {{ props.fasilitator ? "Simpan Perubahan" : "Tambah" }}
               </button>
             </div>

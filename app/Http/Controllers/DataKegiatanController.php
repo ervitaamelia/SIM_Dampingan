@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\Kegiatan;
 use App\Models\Kecamatan;
@@ -133,8 +134,8 @@ class DataKegiatanController extends Controller
 
         // Hapus file laporan lama dan simpan file laporan baru
         if ($request->hasFile('laporan')) {
-            if ($kegiatan->laporan && \Storage::disk('public')->exists($kegiatan->laporan)) {
-                \Storage::disk('public')->delete($kegiatan->laporan);
+            if ($kegiatan->laporan && Storage::disk('public')->exists($kegiatan->laporan)) {
+                Storage::disk('public')->delete($kegiatan->laporan);
             }
             $kegiatan->laporan = $request->file('laporan')->store('laporan_kegiatan', 'public');
         }
@@ -159,7 +160,7 @@ class DataKegiatanController extends Controller
         if ($request->hasFile('foto')) {
             foreach ($request->foto as $foto) {
                 $fotoPath = $foto->store('foto_kegiatan', 'public');
-                $kegiatan->galeri()->create(['foto' => $fotoPath]);
+                $kegiatan->galeris()->create(['foto' => $fotoPath]);
             }
         }
 
@@ -172,15 +173,15 @@ class DataKegiatanController extends Controller
 
         // Hapus semua file foto
         foreach ($kegiatan->galeris as $galeri) {
-            if ($galeri->foto && \Storage::disk('public')->exists($galeri->foto)) {
-                \Storage::disk('public')->delete($galeri->foto);
+            if ($galeri->foto && Storage::disk('public')->exists($galeri->foto)) {
+                Storage::disk('public')->delete($galeri->foto);
             }
             $galeri->delete();
         }
 
         // Hapus laporan
-        if ($kegiatan->laporan && \Storage::disk('public')->exists($kegiatan->laporan)) {
-            \Storage::disk('public')->delete($kegiatan->laporan);
+        if ($kegiatan->laporan && Storage::disk('public')->exists($kegiatan->laporan)) {
+            Storage::disk('public')->delete($kegiatan->laporan);
         }
 
         // Hapus relasi many-to-many
