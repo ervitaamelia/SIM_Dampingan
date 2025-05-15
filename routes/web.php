@@ -96,6 +96,7 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
 Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'index'])
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
     ->name('kegiatan-dampingan');
+Route::get('/artikel/{id}', [KegiatanDampinganController::class, 'show']);
 
 //Data kegiatan route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':fasilitator'])
@@ -109,13 +110,6 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':fasilitator'])
         Route::post('/data-kegiatan/{id}', [DataKegiatanController::class, 'update'])->name('kegiatan.update');
         Route::delete('/data-kegiatan/{id}', [DataKegiatanController::class, 'destroy'])->name('kegiatan.destroy');
     });
-
-// Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/data-kegiatan', function () {
-//     return Inertia::render('fasilitator/DataKegiatan');
-// });
-// Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator/FormKegiatan', function () {
-//     return Inertia::render('fasilitator/FormKegiatan');
-// });
 
 //Dampingan route
 Route::get('/api/dampingan-list', function () {

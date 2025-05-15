@@ -17,10 +17,7 @@ class DataKegiatanController extends Controller
     {
         $kegiatans = Kegiatan::with(
             'user',
-            'kecamatan',
-            'bidang',
             'galeris',
-            'grups'
         )
             ->where('id_user', Auth::id())
             ->latest()
@@ -34,7 +31,6 @@ class DataKegiatanController extends Controller
     public function create()
     {
         return Inertia::render('fasilitator/FormKegiatan', [
-            'kecamatans' => Kecamatan::all(['kode', 'nama']),
             'bidangs' => Bidang::all(['id_bidang', 'nama_bidang']),
             'grups' => GrupDampingan::with(['bidang:id_bidang,nama_bidang'])->get(['id_grup_dampingan', 'nama_grup_dampingan', 'id_bidang']),
         ]);
@@ -49,9 +45,11 @@ class DataKegiatanController extends Controller
             'solusi' => 'nullable|string',
             'tanggal' => 'required|date',
             'waktu' => 'required',
-            'tempat' => 'required|string|max:50',
+            'alamat' => 'required|string',
             'jumlah_peserta' => 'required|integer',
             'laporan' => 'nullable|mimes:pdf,doc,docx|file',
+            'kode_provinsi' => 'required|exists:provinsis,kode',
+            'kode_kabupaten' => 'required|exists:kabupatens,kode',
             'kode_kecamatan' => 'required|exists:kecamatans,kode',
             'id_bidang' => 'required|exists:bidang,id_bidang',
             'id_grup_dampingan' => 'required|array|min:1',
@@ -73,10 +71,12 @@ class DataKegiatanController extends Controller
             'solusi' => $request->solusi ?? null,
             'tanggal' => $request->tanggal,
             'waktu' => $request->waktu,
-            'tempat' => $request->tempat,
+            'alamat' => $request->alamat,
             'jumlah_peserta' => $request->jumlah_peserta,
             'laporan' => $laporanPath,
             'id_user' => Auth::id(),
+            'kode_provinsi' => $request->kode_provinsi,
+            'kode_kabupaten' => $request->kode_kabupaten,
             'kode_kecamatan' => $request->kode_kecamatan,
             'id_bidang' => $request->id_bidang
         ]);
@@ -98,13 +98,12 @@ class DataKegiatanController extends Controller
 
     public function edit($id)
     {
-        $kegiatan = Kegiatan::with('user', 'kecamatan', 'bidang', 'galeris', 'grups', )
+        $kegiatan = Kegiatan::with('user', 'provinsi', 'kabupaten', 'kecamatan', 'bidang', 'galeris', 'grups')
             ->where('id_user', Auth::id()) // pastikan hanya bisa edit kegiatan sendiri
             ->findOrFail($id);
 
         return Inertia::render('fasilitator/FormKegiatan', [
             'kegiatan' => $kegiatan,
-            'kecamatans' => Kecamatan::all(['kode', 'nama']),
             'bidangs' => Bidang::all(['id_bidang', 'nama_bidang']),
             'grups' => GrupDampingan::with(['bidang:id_bidang,nama_bidang'])->get(['id_grup_dampingan', 'nama_grup_dampingan', 'id_bidang']),
         ]);
@@ -121,9 +120,11 @@ class DataKegiatanController extends Controller
             'solusi' => 'nullable|string',
             'tanggal' => 'required|date',
             'waktu' => 'required',
-            'tempat' => 'required|string|max:50',
+            'alamat' => 'required|string',
             'jumlah_peserta' => 'required|integer',
             'laporan' => 'nullable|mimes:pdf,doc,docx|file',
+            'kode_provinsi' => 'required|exists:provinsis,kode',
+            'kode_kabupaten' => 'required|exists:kabupatens,kode',
             'kode_kecamatan' => 'required|exists:kecamatans,kode',
             'id_bidang' => 'required|exists:bidang,id_bidang',
             'id_grup_dampingan' => 'required|array|min:1',
@@ -147,8 +148,10 @@ class DataKegiatanController extends Controller
             'solusi' => $request->solusi ?? null,
             'tanggal' => $request->tanggal,
             'waktu' => $request->waktu,
-            'tempat' => $request->tempat,
+            'alamat' => $request->alamat,
             'jumlah_peserta' => $request->jumlah_peserta,
+            'kode_provinsi' => $request->kode_provinsi,
+            'kode_kabupaten' => $request->kode_kabupaten,
             'kode_kecamatan' => $request->kode_kecamatan,
             'id_bidang' => $request->id_bidang,
         ]);

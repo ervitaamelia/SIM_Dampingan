@@ -2,19 +2,18 @@
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { ref, watch, onMounted, computed } from 'vue'
 import { Head, useForm } from '@inertiajs/vue3'
+import Multiselect from '@vueform/multiselect'
+import '@vueform/multiselect/themes/default.css'
 
-const { admin, provinsis, kabupatens, kecamatans } = defineProps({
+const { admin } = defineProps({
   admin: Object,
-  provinsis: Array,
-  kabupatens: Array,
-  kecamatans: Array
 })
 
 const roleOptions = [
-  { value: 'superadmin', label: 'Admin Pusat', level: '' },
-  { value: 'admin-provinsi', label: 'Admin Provinsi', level: 'provinsi' },
-  { value: 'admin-kabupaten', label: 'Admin Kabupaten', level: 'kabupaten' },
-  { value: 'admin-kecamatan', label: 'Admin Kecamatan', level: 'kecamatan' }
+  { value: 'superadmin', label: 'Superadmin' },
+  { value: 'admin-provinsi', label: 'Admin Provinsi' },
+  { value: 'admin-kabupaten', label: 'Admin Kabupaten' },
+  { value: 'admin-kecamatan', label: 'Admin Kecamatan' }
 ]
 
 const form = useForm({
@@ -24,73 +23,38 @@ const form = useForm({
   nomor_telepon: '',
   alamat: '',
   role: '',
-  admin_level: '',
   kode_provinsi: '',
   kode_kabupaten: '',
   kode_kecamatan: ''
 })
 
 const selectedRole = ref(null)
-const filteredKabupatens = ref([])
-const filteredKecamatans = ref([])
-
-// Search inputs
-const searchProvinsi = ref('')
-const searchKabupaten = ref('')
-const searchKecamatan = ref('')
-
-const showProvDropdown = ref(false)
-const showKabDropdown = ref(false)
-const showKecDropdown = ref(false)
 
 onMounted(() => {
+  fetchProvinsi();
+  fetchKabupaten(admin.kode_provinsi);
+  fetchKecamatan(admin.kode_kabupaten);
+
   if (admin) {
     form.name = admin.name
     form.email = admin.email
     form.nomor_telepon = admin.nomor_telepon
     form.alamat = admin.alamat
+    form.kode_provinsi = admin.kode_provinsi
+    form.kode_kabupaten = admin.kode_kabupaten
+    form.kode_kecamatan = admin.kode_kecamatan
+    form.role = admin.role
+    selectedRole.value = roleOptions.find(option => option.value === admin.role)
   }
 })
 
 watch(selectedRole, (val) => {
   if (val) {
     form.role = val.value
-    form.admin_level = val.level
-    // Reset kode saat role berubah
     form.kode_provinsi = ''
     form.kode_kabupaten = ''
     form.kode_kecamatan = ''
-
-    filteredKabupatens.value = []
-    filteredKecamatans.value = []
   }
-})
-
-watch(() => form.kode_provinsi, () => {
-  filteredKabupatens.value = kabupatens.filter(k => k.kode_provinsi === form.kode_provinsi)
-  form.kode_kabupaten = ''
-  form.kode_kecamatan = ''
-  filteredKecamatans.value = []
-})
-
-watch(() => form.kode_kabupaten, () => {
-  filteredKecamatans.value = kecamatans.filter(k => k.kode_kabupaten === form.kode_kabupaten)
-  form.kode_kecamatan = ''
-})
-
-const filteredProvinsis = computed(() => {
-  if (!searchProvinsi.value) return provinsis
-  return provinsis.filter(p => p.nama.toLowerCase().includes(searchProvinsi.value.toLowerCase()))
-})
-
-const filteredKabupatenSearch = computed(() => {
-  if (!searchKabupaten.value) return filteredKabupatens.value
-  return filteredKabupatens.value.filter(k => k.nama.toLowerCase().includes(searchKabupaten.value.toLowerCase()))
-})
-
-const filteredKecamatanSearch = computed(() => {
-  if (!searchKecamatan.value) return filteredKecamatans.value
-  return filteredKecamatans.value.filter(kec => kec.nama.toLowerCase().includes(searchKecamatan.value.toLowerCase()))
 })
 
 const handleSubmit = () => {
@@ -101,54 +65,75 @@ const handleSubmit = () => {
   }
 }
 
-const resetSearch = (type) => {
-  if (type === 'provinsi') {
-    searchProvinsi.value = ''
-    form.kode_provinsi = ''
-    form.kode_kabupaten = ''
-    form.kode_kecamatan = ''
-  } else if (type === 'kabupaten') {
-    searchKabupaten.value = ''
-    form.kode_kabupaten = ''
-    form.kode_kecamatan = ''
-  } else if (type === 'kecamatan') {
-    searchKecamatan.value = ''
-    form.kode_kecamatan = ''
+const provinsiList = ref([])
+const kabupatenList = ref([])
+const kecamatanList = ref([])
+
+const selectedKabupaten = ref(null)
+const selectedKecamatan = ref(null)
+
+function fetchProvinsi() {
+  fetch('/api/provinsi')
+    .then(res => {
+      if (!res.ok) throw new Error('Network response was not ok');
+      return res.json();
+    })
+    .then(data => {
+      provinsiList.value = data.map(item => ({
+        label: item.nama,
+        value: item.kode
+      }))
+    })
+    .catch(error => {
+      console.error('Error fetching provinsi:', error)
+    })
+}
+
+function fetchKabupaten(kodeProvinsi) {
+  selectedKabupaten.value = null
+  selectedKecamatan.value = null
+  kabupatenList.value = []
+  kecamatanList.value = []
+
+  if (kodeProvinsi) {
+    fetch(`/api/kabupaten/${kodeProvinsi}`)
+      .then(res => res.json())
+      .then(data => {
+        kabupatenList.value = data.map(item => ({
+          label: item.nama,
+          value: item.kode
+        }))
+      })
   }
 }
 
-const clearSelection = (type) => {
-  if (type === 'provinsi') {
-    form.kode_provinsi = ''
-    form.kode_kabupaten = ''
-    form.kode_kecamatan = ''
-    filteredKabupatens.value = []
-    filteredKecamatans.value = []
-  } else if (type === 'kabupaten') {
-    form.kode_kabupaten = ''
-    form.kode_kecamatan = ''
-    filteredKecamatans.value = []
-  } else if (type === 'kecamatan') {
-    form.kode_kecamatan = ''
+function fetchKecamatan(kodeKabupaten) {
+  selectedKecamatan.value = null
+  kecamatanList.value = []
+
+  if (kodeKabupaten) {
+    fetch(`/api/kecamatan/${kodeKabupaten}`)
+      .then(res => res.json())
+      .then(data => {
+        kecamatanList.value = data.map(item => ({
+          label: item.nama,
+          value: item.kode
+        }))
+      })
   }
 }
 
 const isFormIncomplete = computed(() => {
   if (!form.name || !form.email || !form.nomor_telepon || !form.alamat) return true
-
   if (!admin && !form.password) return true
+  if (!form.role) return true
 
-  if (!admin && !selectedRole.value) return true
-
-  if (!admin) {
-    if (selectedRole.value?.level === 'provinsi' && !form.kode_provinsi) return true
-    if (selectedRole.value?.level === 'kabupaten' && (!form.kode_provinsi || !form.kode_kabupaten)) return true
-    if (selectedRole.value?.level === 'kecamatan' && (!form.kode_provinsi || !form.kode_kabupaten || !form.kode_kecamatan)) return true
-  }
+  if (['admin-provinsi'].includes(form.role) && !form.kode_provinsi) return true
+  if (['admin-kabupaten'].includes(form.role) && (!form.kode_provinsi || !form.kode_kabupaten)) return true
+  if (['admin-kecamatan'].includes(form.role) && (!form.kode_provinsi || !form.kode_kabupaten || !form.kode_kecamatan)) return true
 
   return false
 })
-
 </script>
 
 <template>
@@ -217,215 +202,27 @@ const isFormIncomplete = computed(() => {
                 placeholder="Masukkan Alamat"></textarea>
             </div>
 
-            <!-- Provinsi -->
-            <div v-if="selectedRole?.level === 'provinsi' || selectedRole?.level === 'kabupaten' || selectedRole?.level === 'kecamatan'">
-              <label class="text-sm font-medium text-gray-600">Provinsi</label>
-              <div class="relative">
-                <div class="flex items-center mt-1 border border-gray-400 rounded-md">
-                  <select 
-                    v-model="form.kode_provinsi" 
-                    @focus="showProvDropdown = true"
-                    @blur="setTimeout(() => showProvDropdown = false, 200)"
-                    class="w-full py-3 px-3 text-base appearance-none bg-transparent"
-                  >
-                    <option disabled value="">Pilih Provinsi</option>
-                    <option v-if="form.kode_provinsi" :value="form.kode_provinsi">
-                      {{ provinsis.find(p => p.kode === form.kode_provinsi)?.nama }}
-                    </option>
-                  </select>
-                  <button 
-                    v-if="form.kode_provinsi" 
-                    @click="clearSelection('provinsi')" 
-                    type="button"
-                    class="px-3 text-gray-500 hover:text-gray-700"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div 
-                  v-if="showProvDropdown" 
-                  class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg"
-                >
-                  <div class="relative p-2 border-b border-gray-300">
-                    <input 
-                      v-model="searchProvinsi" 
-                      placeholder="Cari Provinsi"
-                      class="w-full p-2 pl-8 pr-8 border rounded focus:outline-none"
-                      @click.stop
-                    />
-                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </span>
-                    <button 
-                      v-if="searchProvinsi" 
-                      @click="resetSearch('provinsi')" 
-                      type="button"
-                      class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <div class="max-h-60 overflow-y-auto">
-                    <div 
-                      v-for="p in filteredProvinsis" 
-                      :key="p.kode" 
-                      class="block w-full p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                      @mousedown="form.kode_provinsi = p.kode; showProvDropdown = false"
-                    >
-                      {{ p.nama }}
-                    </div>
-                    <div 
-                      v-if="filteredProvinsis.length === 0" 
-                      class="p-3 text-gray-500 text-center"
-                    >
-                      Tidak ditemukan
-                    </div>
-                  </div>
-                </div>
+            <div class="flex flex-col gap-2 pb-2">
+              <!-- Provinsi -->
+              <div v-if="['admin-provinsi', 'admin-kabupaten', 'admin-kecamatan'].includes(selectedRole?.value)">
+                <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
+                <Multiselect v-model="form.kode_provinsi" :options="provinsiList" placeholder="Pilih Provinsi"
+                  :searchable="true" class="w-full" @update:modelValue="fetchKabupaten" />
               </div>
-            </div>
 
-            <!-- Kabupaten -->
-            <div v-if="selectedRole?.level === 'kabupaten' || selectedRole?.level === 'kecamatan'">
-              <label class="text-sm font-medium text-gray-600">Kabupaten</label>
-              <div class="relative">
-                <div class="flex items-center mt-1 border border-gray-400 rounded-md">
-                  <select 
-                    v-model="form.kode_kabupaten" 
-                    @focus="showKabDropdown = true"
-                    @blur="setTimeout(() => showKabDropdown = false, 200)"
-                    class="w-full py-3 px-3 text-base appearance-none bg-transparent"
-                    :disabled="!form.kode_provinsi"
-                  >
-                    <option disabled value="">Pilih Kabupaten</option>
-                    <option v-if="form.kode_kabupaten" :value="form.kode_kabupaten">
-                      {{ kabupatens.find(k => k.kode === form.kode_kabupaten)?.nama }}
-                    </option>
-                  </select>
-                  <button 
-                    v-if="form.kode_kabupaten" 
-                    @click="clearSelection('kabupaten')" 
-                    type="button"
-                    class="px-3 text-gray-500 hover:text-gray-700"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div 
-                  v-if="showKabDropdown" 
-                  class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg"
-                >
-                  <div class="relative p-2 border-b border-gray-300">
-                    <input 
-                      v-model="searchKabupaten" 
-                      placeholder="Cari Kabupaten"
-                      class="w-full p-2 pl-8 pr-8 border rounded focus:outline-none"
-                      @click.stop
-                    />
-                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </span>
-                    <button 
-                      v-if="searchKabupaten" 
-                      @click="resetSearch('kabupaten')" 
-                      type="button"
-                      class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <div class="max-h-60 overflow-y-auto">
-                    <div 
-                      v-for="k in filteredKabupatenSearch" 
-                      :key="k.kode" 
-                      class="block w-full p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                      @mousedown="form.kode_kabupaten = k.kode; showKabDropdown = false"
-                    >
-                      {{ k.nama }}
-                    </div>
-                    <div 
-                      v-if="filteredKabupatenSearch.length === 0" 
-                      class="p-3 text-gray-500 text-center"
-                    >
-                      Tidak ditemukan
-                    </div>
-                  </div>
-                </div>
+              <!-- Kabupaten -->
+              <div v-if="['admin-kabupaten', 'admin-kecamatan'].includes(selectedRole?.value)">
+                <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
+                <Multiselect v-model="form.kode_kabupaten" :options="kabupatenList" placeholder="Pilih Kabupaten"
+                  :searchable="true" class="w-full" :disabled="!form.kode_provinsi"
+                  @update:modelValue="fetchKecamatan" />
               </div>
-            </div>
 
-            <!-- Kecamatan -->
-            <div v-if="selectedRole?.level === 'kecamatan'">
-              <label class="text-sm font-medium text-gray-600">Kecamatan</label>
-              <div class="relative">
-                <div class="flex items-center mt-1 border border-gray-400 rounded-md">
-                  <select 
-                    v-model="form.kode_kecamatan" 
-                    @focus="showKecDropdown = true"
-                    @blur="setTimeout(() => showKecDropdown = false, 200)"
-                    class="w-full py-3 px-3 text-base appearance-none bg-transparent"
-                    :disabled="!form.kode_kabupaten"
-                  >
-                    <option disabled value="">Pilih Kecamatan</option>
-                    <option v-if="form.kode_kecamatan" :value="form.kode_kecamatan">
-                      {{ kecamatans.find(k => k.kode === form.kode_kecamatan)?.nama }}
-                    </option>
-                  </select>
-                  <button 
-                    v-if="form.kode_kecamatan" 
-                    @click="clearSelection('kecamatan')" 
-                    type="button"
-                    class="px-3 text-gray-500 hover:text-gray-700"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div 
-                  v-if="showKecDropdown" 
-                  class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg"
-                >
-                  <div class="relative p-2 border-b border-gray-300">
-                    <input 
-                      v-model="searchKecamatan" 
-                      placeholder="Cari Kecamatan"
-                      class="w-full p-2 pl-8 pr-8 border rounded focus:outline-none"
-                      @click.stop
-                    />
-                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </span>
-                    <button 
-                      v-if="searchKecamatan" 
-                      @click="resetSearch('kecamatan')" 
-                      type="button"
-                      class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <div class="max-h-60 overflow-y-auto">
-                    <div 
-                      v-for="k in filteredKecamatanSearch" 
-                      :key="k.kode" 
-                      class="block w-full p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                      @mousedown="form.kode_kecamatan = k.kode; showKecDropdown = false"
-                    >
-                      {{ k.nama }}
-                    </div>
-                    <div 
-                      v-if="filteredKecamatanSearch.length === 0" 
-                      class="p-3 text-gray-500 text-center"
-                    >
-                      Tidak ditemukan
-                    </div>
-                  </div>
-                </div>
+              <!-- Kecamatan -->
+              <div v-if="selectedRole?.value === 'admin-kecamatan'">
+                <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
+                <Multiselect v-model="form.kode_kecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
+                  :searchable="true" class="w-full" :disabled="!form.kode_kabupaten" />
               </div>
             </div>
 
@@ -433,7 +230,8 @@ const isFormIncomplete = computed(() => {
             <div class="flex gap-4 mt-4 justify-end">
               <a :href="route('admin.index')"
                 class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">Batal</a>
-              <button type="submit" :disabled="isFormIncomplete" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+              <button type="submit" :disabled="isFormIncomplete"
+                class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ admin ? "Simpan Perubahan" : "Tambah" }}
               </button>
             </div>

@@ -68,5 +68,14 @@ export default {
         </table>
       </div>
     </div>
+    <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+      <h3 class="text-lg font-semibold mb-4 text-gray-700">Lokasi Kantor PP Muhammadiyah</h3>
+      <div class="w-full h-64 rounded-xl overflow-hidden">
+        <iframe class="w-full h-full"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3952.8908589824814!2d110.35557917358054!3d-7.801378177438836!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a578b840bb0f3%3A0xceca19d49f1ef380!2sKantor%20PP%20Muhammadiyah!5e0!3m2!1sid!2sid!4v1747030593743!5m2!1sid!2sid"
+          frameborder="0" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </div>
   </AdminLayout>
 </template>

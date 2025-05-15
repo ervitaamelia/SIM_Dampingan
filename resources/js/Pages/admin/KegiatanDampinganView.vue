@@ -1,86 +1,75 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { ref } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-const isMenuOpen = ref(false)
-const isDropdownOpen = ref(false)
-const showPopup = ref(false)
+const page = usePage();
+const kegiatans = computed(() => page.props.data || []);
 
-const toggleDropdown = () => {
-  isDropdownOpen.value = !isDropdownOpen.value
-}
-
-const getArtikelLink = id => {
-  return `/Artikel${id}`
-}
-
-const newsItems = ref([
-  {
-    id: 1,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/16271b27a3e1e288d76578e3e2a469550c5ba032',
-    date: '05/02/25',
-    title:
-      'Peluncuran BLASMU: Beras Sehat Inovasi Jamaah Tani Muhammadiyah (JATAM) Lebong Bengkulu',
-  },
-  {
-    id: 2,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/25b61d5f09e4ad466a1dd3cdd7e2a49e9bdb1f89',
-    date: '14/12/24',
-    title:
-      'JATAM Difabel Bejen Dampingan MPM Muhammadiyah Bagikan Kisah Sukses Peternakan Ayam Petelur Inklusif',
-  },
-  {
-    id: 3,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/9c3b9782b96384670eaa8bf3d45b86c1ca8b9b23',
-    date: '25/01/25',
-    title:
-      'MPM Muhammadiyah Kuatkan Kaderisasi untuk Pemberdayaan Masyarakat di Kalimantan Timur',
-  },
-])
-
-const tambahData = () => {
-  console.log('Tombol ditekan!')
-}
+const getArtikelLink = (id) => `/artikel/${id}`;
 </script>
 
 <template>
   <AdminLayout>
+
     <Head title="Kegiatan Dampingan" />
+
     <div class="flex bg-gray-100 overflow-auto">
       <main
-        class="grow px-10 py-6 bg-white rounded-lg shadow-md max-md:p-4 max-md:m-3 h-auto overflow-y-auto scrollbar-hidden"
-      >
+        class="grow px-10 py-6 bg-white rounded-lg shadow-md max-md:p-4 max-md:m-3 h-auto overflow-y-auto scrollbar-hidden">
         <h2 class="mb-6 text-2xl font-semibold text-black">
           Kegiatan Dampingan
         </h2>
 
-        <!-- Ubah dari flex menjadi grid -->
-        <section
-          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full pb-4"
-        >
-          <article
-            v-for="news in newsItems"
-            :key="news.id"
-            class="flex flex-col gap-2"
-          >
-            <router-link :to="getArtikelLink(news.id)">
-              <img
-                :src="news.image"
-                :alt="news.title"
-                class="object-cover w-full rounded-2xl h-[221px] cursor-pointer transition-transform hover:scale-105"
-              />
-            </router-link>
-            <time class="text-sm font-bold text-zinc-700">{{ news.date }}</time>
-            <h3 class="text-sm font-bold leading-snug text-zinc-800">
-              {{ news.title }}
-            </h3>
-          </article>
-        </section>
+        <!-- Tampilan artikel horizontal scroll -->
+        <div class="overflow-x-auto w-full pb-4 scrollbar-hidden relative">
+          <div class="flex items-center gap-4">
+            <!-- Tombol panah kiri -->
+            <button class="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
+              &#8249;
+            </button>
+
+            <!-- Card kegiatan -->
+            <div class="flex flex-col w-max gap-6">
+              <section class="flex gap-6">
+                <article v-for="kegiatan in kegiatans" :key="kegiatan.id_kegiatan"
+                  class="flex flex-col gap-3 w-[350px] flex-shrink-0 bg-white p-4 rounded-xl shadow-md hover:scale-105 transition-transform cursor-pointer ">
+                  <a :href="getArtikelLink(kegiatan.id_kegiatan)">
+                    <img :src="`/storage/${kegiatan.galeris[0]?.foto ?? 'placeholder.jpg'}`" :alt="kegiatan.judul"
+                      class="object-cover w-[350px] h-[230px] rounded-xl" />
+                  </a>
+                  <time class="text-xs font-bold text-gray-700">
+                    {{ new Date(kegiatan.tanggal).toLocaleDateString('id-ID') }}
+                  </time>
+                  <h3 class="text-base font-semibold text-gray-800 leading-snug">
+                    {{ kegiatan.judul }}
+                  </h3>
+                  <a v-if="kegiatan.laporan" :href="`/storage/${kegiatan.laporan}`" target="_blank"
+                    class="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition text-center">
+                    Lihat Laporan
+                  </a>
+                </article>
+              </section>
+            </div>
+
+            <!-- Tombol panah kanan -->
+            <button class="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
+              &#8250;
+            </button>
+          </div>
+        </div>
       </main>
     </div>
   </AdminLayout>
 </template>
+
+<style scoped>
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+</style>

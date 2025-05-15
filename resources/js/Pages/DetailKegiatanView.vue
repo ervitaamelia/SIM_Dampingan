@@ -1,71 +1,88 @@
-<script>
-import DetailKegiatanLayout from '@/Layouts/DetailKegiatanLayout.vue'
+<script setup>
+import DetailKegiatanLayout from '@/Layouts/DetailKegiatanLayout.vue';
+import { usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head } from '@inertiajs/vue3';
 
-export default {
-  components: {
-    DetailKegiatanLayout,
-  },
-  name: 'MainContent',
-  data() {
-    return {
-      isDropdownOpen: false,
-      showPopup: false,
-    }
-  },
-  methods: {
-    toggleDropdown() {
-      this.isDropdownOpen = !this.isDropdownOpen
-    },
-  },
+const page = usePage();
+const kegiatan = computed(() => page.props.kegiatan);
+
+const goBack = () => {
+  window.history.back();
+};
+
+function formatTanggal(tanggal) {
+  const date = new Date(tanggal);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
 }
+
+function formatWaktu(waktu) {
+  if (!waktu) return '';
+  const [hours, minutes] = waktu.split(':');
+  return `${hours}:${minutes}`;
+}
+
+const currentIndex = ref(0);
+const nextImage = () => {
+  if (currentIndex.value < kegiatan.value.galeris.length - 1) {
+    currentIndex.value++;
+  } else {
+    currentIndex.value = 0;
+  }
+};
+const prevImage = () => {
+  if (currentIndex.value > 0) {
+    currentIndex.value--;
+  } else {
+    currentIndex.value = kegiatan.value.galeris.length - 1;
+  }
+};
 </script>
 
 <template>
   <DetailKegiatanLayout>
-    <main
-      class="flex-1 p-6 max-md:p-4 max-sm:p-2.5 h-screen overflow-y-auto scrollbar-hide"
-    >
-      <button
-        @click="$router.go(-1)"
-        class="mb-4 px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition"
-      >
+    <Head title="Artikel Kegiatan" />
+    <main class="flex-1 p-6 max-md:p-4 max-sm:p-2.5 h-screen overflow-y-auto scrollbar-hide">
+      <button @click="goBack"
+        class="mb-4 px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700 transition">
         ← Kembali
       </button>
-      <article
-        class="p-8 bg-white rounded-[30px] shadow-[0_10px_60px_rgba(226,236,249,0.5)] max-sm:p-4"
-      >
+      <article class="p-8 bg-white w-full rounded-[30px] shadow-[0_10px_60px_rgba(226,236,249,0.5)] max-sm:p-4">
         <header class="mb-5 text-center">
           <h2 class="mb-2.5 text-base font-bold">
-            Muhammadiyah Panen Raya Padi Sehat: Ikhtiar Mewujudkan Kedaulatan
-            Pangan
+            {{ kegiatan.judul }}
           </h2>
-          <div
-            class="flex gap-2.5 justify-center items-center text-sm text-slate-400 max-sm:flex-wrap"
-          >
-            <time datetime="2025-02-07">Februari 7, 2025</time>
+          <div class="flex gap-2.5 justify-center items-center text-sm text-slate-400 max-sm:flex-wrap">
+            <time>{{ formatTanggal(kegiatan.tanggal) }}</time>
             <span>|</span>
-            <time>10.00</time>
+            <time>{{ formatWaktu(kegiatan.waktu) }}</time>
           </div>
         </header>
-        <img
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/4bd689ea69e6c38f65a3cd4dc52f56ee3c474aed"
-          alt="Panen Padi"
-          class="block mx-auto mt-0 mb-8 rounded-2xl h-[266px] w-[431px] max-md:w-full max-md:h-auto"
-        />
+        <!-- Gambar Slider -->
+        <div class="relative w-full max-w-[500px] mx-auto mb-6">
+          <img
+            :src="`/storage/${kegiatan.galeris[currentIndex]?.foto}`"
+            alt="Foto Kegiatan"
+            class="rounded-xl w-full h-[266px] object-cover"
+          />
+          <button
+            @click="prevImage"
+            class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full"
+          >
+            ‹
+          </button>
+          <button
+            @click="nextImage"
+            class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-200 hover:bg-gray-300 p-2 rounded-full"
+          >
+            ›
+          </button>
+        </div>
         <p class="text-base leading-normal text-black">
-          Lebong, Bengkulu – Majelis Pemberdayaan Masyarakat (MPM) Pimpinan
-          Pusat Muhammadiyah melakukan Panen Padi Sehat pada Rabu (5/2) di
-          Kampung Jawa, Lebong, Bengkulu. Acara ini sekaligus memperteguh
-          komitmen Muhammadiyah terus menggelorakan ikhtiar besar menghadirkan
-          kedaulatan pangan. Dengan pendampingan intensif dalam kesatuan
-          ekosistem pemberdayaan, Alhamdulillah panen raya ini memberikan hasil
-          yang menggembirakan. Demikian disampaikan Ketua MPM PP Muhammadiyah M.
-          Nurul Yamin saat memberikan sambutan acara tersebut. Pada sisi lain,
-          panen raya ini menunjukkan keberhasilan Jamaah Tani Muhammadiyah
-          (JATAM) Lebong Bengkulu dalam mengimplementasikan metode pertanian
-          sehat berbasis Jajar Legowo 2:1 dan penggunaan pupuk organik yang
-          dikembangkan oleh Jatam mampu meningkatkan hasil panen secara
-          signifikan.
+          {{ kegiatan.deskripsi }}
         </p>
       </article>
     </main>
@@ -77,6 +94,7 @@ export default {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 /* Untuk Firefox */
 .hide-scrollbar {
   scrollbar-width: none;

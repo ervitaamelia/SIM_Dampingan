@@ -16,6 +16,12 @@ export default {
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen
     },
+    formatRole(role) {
+      return role
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    },
   },
   setup() {
     const page = usePage();
@@ -51,7 +57,7 @@ export default {
         class="w-12 h-12 rounded-full object-cover border-2 border-gray-300" />
       <div>
         <h2 class="text-md font-semibold text-gray-800">{{ $page.props.auth.user.name }}</h2>
-        <p class="text-sm text-gray-500">{{ $page.props.auth.user.role }}</p>
+        <p class="text-sm text-gray-500">{{ formatRole($page.props.auth.user.role) }}</p>
       </div>
     </div>
 

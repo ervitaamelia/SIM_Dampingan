@@ -22,7 +22,6 @@ return new class extends Migration
             $table->text('alamat');
             $table->enum('status', ['Aktif', 'Non Aktif']);
             $table->string('foto', 255);
-            $table->string('qr', 255);
             $table->unsignedBigInteger('id_pekerjaan');
             $table->unsignedBigInteger('id_bidang');
             $table->unsignedBigInteger('id_grup_dampingan');

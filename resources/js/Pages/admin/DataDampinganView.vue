@@ -51,13 +51,31 @@ export default {
 
         return matchProvinsi && matchKabupaten && matchKecamatan && bidangMatch && matchJenis;
       });
+    },
+
+    paginatedGrups() {
+      const start = (this.currentPage - 1) * this.perPage;
+      const end = start + this.perPage;
+      return this.filteredGrups.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredGrups.length / this.perPage);
+    },
+    paginationInfo() {
+      const start = (this.currentPage - 1) * this.perPage + 1;
+      const end = Math.min(this.currentPage * this.perPage, this.filteredGrups.length);
+      return `Menampilkan ${start}-${end} dari ${this.filteredGrups.length} data`;
     }
   },
 
   data() {
     return {
+      currentPage: 1,
+      perPage: 7,
+
       showPopup: false,
       showPopupHapus: false,
+      showExportDropdown: false,
 
       searchQuery: '',
       showMore: {},
@@ -80,6 +98,12 @@ export default {
   },
 
   methods: {
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+      }
+    },
+    
     fetchProvinsi() {
       fetch('/api/provinsi')
         .then(res => {
@@ -153,6 +177,25 @@ export default {
 
       const fileName = 'data-dampingan.xlsx';
       saveAs(file, fileName);
+      this.showExportDropdown = false;
+    },
+    
+    printPDF() {
+      const printArea = document.getElementById('print-area');
+      printArea.classList.remove('hidden');
+      window.print();
+      setTimeout(() => {
+        printArea.classList.add('hidden');
+      }, 500);
+      this.showExportDropdown = false;
+    },
+    
+    toggleExportDropdown() {
+      this.showExportDropdown = !this.showExportDropdown;
+    },
+    
+    closeExportDropdown() {
+      this.showExportDropdown = false;
     }
   },
 }
@@ -165,53 +208,79 @@ export default {
     <div class="flex bg-gray-100 overflow-auto">
       <main class="flex-1">
         <div class="bg-white shadow-md rounded-lg p-4">
-          <div class="flex justify-between mb-4">
+
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
             <h2 class="text-xl font-bold mt-2">Data Grup Dampingan</h2>
-            <div class="flex space-x-2">
-              <a :href="route('dampingan.create')" class="bg-blue-500 text-white px-3 py-2 rounded">+ Tambah</a>
-              <button @click="downloadExcel" class="bg-green-500 text-white px-3 py-2 rounded">
-                🖨 Cetak
-              </button>
+            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+              <a :href="route('dampingan.create')" 
+                 class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded whitespace-nowrap">
+                + Tambah
+              </a>
+              
+              <!-- Export Dropdown -->
+              <div class="relative">
+                <button @click="toggleExportDropdown" 
+                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded flex items-center whitespace-nowrap">
+                  <span class="mr-1">🖨</span> Cetak Data
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                
+                <div v-if="showExportDropdown" 
+                     class="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                  <div class="py-1">
+                    <button @click="downloadExcel" 
+                            class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-green-50 w-full text-left">
+                      <span class="mr-2">📊</span> Export Excel
+                    </button>
+                    <button @click="printPDF" 
+                            class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-green-50 w-full text-left">
+                      <span class="mr-2">📄</span> Print PDF
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Click outside to close dropdown -->
+          <div v-if="showExportDropdown" @click="closeExportDropdown" class="fixed inset-0 z-0"></div>
 
           <!-- Filter Section -->
           <div class="flex flex-wrap gap-4 mb-4">
             <!-- Dropdown Bidang Dampingan -->
-            <div class="w-1 min-w-[200px]">
+            <div class="w-full sm:w-1 min-w-[200px]">
               <Multiselect v-model="selectedDampingan" :options="availableDampinganList" placeholder="Pilih Bidang"
-                :searchable="true" class="w-full" :clearable="true" />
+                :searchable="true" class="w-full" :clearable="true" @change="currentPage = 1" />
             </div>
 
             <!-- Dropdown Jenis Dampingan -->
-            <div class="w-1 min-w-[200px]">
+            <div class="w-full sm:w-1 min-w-[200px]">
               <Multiselect v-model="selectedJenis" :options="['Pusat','Provinsi','Kabupaten','Kecamatan']" placeholder="Pilih Jenis"
-                :searchable="true" class="w-full" :clearable="true" />
+                :searchable="true" class="w-full" :clearable="true" @change="currentPage = 1" />
             </div>
 
             <!-- Dropdown Provinsi -->
-            <div class="w-1 min-w-[200px]">
-              <!-- Provinsi -->
+            <div class="w-full sm:w-1 min-w-[200px]">
               <Multiselect v-model="selectedProvinsi" :options="provinsiList" placeholder="Pilih Provinsi"
-                :searchable="true" class="w-full" @update:modelValue="fetchKabupaten" />
+                :searchable="true" class="w-full" @update:modelValue="fetchKabupaten" @change="currentPage = 1" />
             </div>
 
             <!-- Dropdown Kabupaten -->
-            <div class="w-1 min-w-[200px]">
-              <!-- Kabupaten -->
+            <div class="w-full sm:w-1 min-w-[200px]">
               <Multiselect v-model="selectedKabupaten" :options="kabupatenList" placeholder="Pilih Kabupaten"
-                :searchable="true" class="w-full" :disabled="!selectedProvinsi" @update:modelValue="fetchKecamatan" />
+                :searchable="true" class="w-full" :disabled="!selectedProvinsi" @update:modelValue="fetchKecamatan" @change="currentPage = 1" />
             </div>
 
             <!-- Dropdown Kecamatan -->
-            <div class="w-1 min-w-[200px]">
-              <!-- Kecamatan -->
+            <div class="w-full sm:w-1 min-w-[200px]">
               <Multiselect v-model="selectedKecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
-                :searchable="true" class="w-full" :disabled="!selectedKabupaten" />
+                :searchable="true" class="w-full" :disabled="!selectedKabupaten" @change="currentPage = 1" />
             </div>
           </div>
 
-          <div class="overflow-auto rounded-lg">
+          <div class="overflow-auto rounded-lg border border-gray-200 mb-4">
             <table class="w-full min-w-[600px] border-collapse">
               <thead>
                 <tr class="bg-gray-200">
@@ -227,8 +296,8 @@ export default {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(grup, index) in filteredGrups" :key="grup.id_grup_dampingan" class="text-left">
-                  <td class="border p-2 text-center">{{ index + 1 }}</td>
+                <tr v-for="(grup, index) in paginatedGrups" :key="grup.id_grup_dampingan" class="text-left hover:bg-gray-50">
+                  <td class="border p-2 text-center">{{ (currentPage - 1) * perPage + index + 1 }}</td>
                   <td class="border p-2">{{ grup.nama_grup_dampingan }}</td>
                   <td class="border p-2">{{ grup.bidang?.nama_bidang }}</td>
                   <td class="border p-2">{{ grup.jenis_dampingan }}</td>
@@ -244,7 +313,7 @@ export default {
 
                     <!-- Tombol Read More / Less -->
                     <div v-if="grup.users.length > 2">
-                      <button class="text-blue-500 text-sm mt-1" @click="toggleShowMore(grup.id_grup_dampingan)">
+                      <button class="text-blue-500 text-sm mt-1 hover:underline" @click="toggleShowMore(grup.id_grup_dampingan)">
                         {{ showMore[grup.id_grup_dampingan] ? 'Read less' : 'Read more' }}
                       </button>
                     </div>
@@ -267,25 +336,147 @@ export default {
             </table>
           </div>
 
+          <!-- Pagination -->
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-4">
+            <div class="text-sm text-gray-600">
+              {{ paginationInfo }}
+            </div>
+            <div class="flex items-center gap-1">
+              <button
+                @click="goToPage(currentPage - 1)"
+                :disabled="currentPage === 1"
+                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                &lt;
+              </button>
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  'px-3 py-1 rounded',
+                  currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                ]"
+              >
+                {{ page }}
+              </button>
+              <button
+                @click="goToPage(currentPage + 1)"
+                :disabled="currentPage === totalPages"
+                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                &gt;
+              </button>
+            </div>
+          </div>
+
           <!-- Popup Konfirmasi Hapus -->
-          <div v-if="showPopupHapus" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-40">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
-              <p class="text-lg font-semibold">
-                Apakah Anda yakin ingin menghapus?
-              </p>
-              <div class="flex justify-center gap-4 mt-4">
-                <button @click="deleteItem(selectedDampinganId); showPopupHapus = false"
-                  class="px-4 py-2 bg-red-600 text-white rounded-md">
-                  Ya
-                </button>
-                <button @click="showPopupHapus = false" class="px-4 py-2 bg-gray-300 rounded-md">
+          <div v-if="showPopupHapus" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-white p-6 rounded-lg shadow-xl w-80">
+              <div class="flex items-center mb-4">
+                <div class="bg-red-100 p-2 rounded-full mr-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-medium">Konfirmasi Hapus</h3>
+              </div>
+              <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+              <div class="flex justify-end gap-3">
+                <button @click="showPopupHapus = false" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
                   Batal
+                </button>
+                <button @click="deleteItem(selectedDampinganId)" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                  Hapus
                 </button>
               </div>
             </div>
           </div>
+          
         </div>
+
+        <!-- Print / PDF area -->
+        <div id="print-area" class="hidden">
+          <div class="flex items-center mb-4">
+            <img src="/images/logo-mpm.png" class="object-contain w-12 h-12 mr-4" alt="Logo MPM" />
+            <div>
+              <h1 class="text-2xl font-bold">MPM Muhammadiyah</h1>
+              <p class="text-sm">Jl. KH. Ahmad Dahlan No. 103, Notoprajan, Ngampilan, Daerah Istimewa Yogyakarta • Telp: (0274) 375025 • @kabarmpm</p>
+            </div>
+          </div>
+          <h2 class="text-xl font-semibold text-center mb-4">Daftar Data Dampingan</h2>
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr class="bg-gray-200">
+                <th class="border p-2">No</th>
+                <th class="border p-2">Grup Dampingan</th>
+                <th class="border p-2">Bidang Dampingan</th>
+                <th class="border p-2">Jenis Dampingan</th>
+                <th class="border p-2">Provinsi</th>
+                <th class="border p-2">Kabupaten</th>
+                <th class="border p-2">Kecamatan</th>
+                <th class="border p-2">Fasilitator</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(grup, index) in filteredGrups" :key="grup.id_grup_dampingan">
+                <td class="border p-2 text-center">{{ index + 1 }}</td>
+                <td class="border p-2">{{ grup.nama_grup_dampingan }}</td>
+                <td class="border p-2">{{ grup.bidang?.nama_bidang }}</td>
+                <td class="border p-2">{{ grup.jenis_dampingan }}</td>
+                <td class="border p-2">{{ grup.nama_provinsi }}</td>
+                <td class="border p-2">{{ grup.nama_kabupaten }}</td>
+                <td class="border p-2">{{ grup.nama_kecamatan }}</td>
+                <td class="border p-2">
+                  <div v-for="(user, index) in grup.users" :key="index">
+                    <div>{{ index + 1 }}. {{ user.name }}</div>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="filteredGrups.length === 0">
+                <td colspan="8" class="border p-2 text-center text-gray-500">
+                  Tidak ada data yang sesuai
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
       </main>
     </div>
   </AdminLayout>
 </template>
+
+<style>
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area, #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+  }
+}
+
+/* Custom scrollbar for table */
+.overflow-auto::-webkit-scrollbar {
+  height: 8px;
+}
+.overflow-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+</style>

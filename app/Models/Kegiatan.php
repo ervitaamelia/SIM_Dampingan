@@ -20,10 +20,12 @@ class Kegiatan extends Model
         'solusi',
         'tanggal',
         'waktu',
-        'tempat',
+        'alamat',
         'jumlah_peserta',
         'laporan',
         'id_user',
+        'kode_provinsi',
+        'kode_kabupaten',
         'kode_kecamatan',
         'id_bidang'
     ];
@@ -31,6 +33,16 @@ class Kegiatan extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id');
+    }
+
+    public function provinsi()
+    {
+        return $this->belongsTo(Provinsi::class, 'kode_provinsi', 'kode');
+    }
+
+    public function kabupaten()
+    {
+        return $this->belongsTo(Kabupaten::class, 'kode_kabupaten', 'kode');
     }
 
     public function kecamatan()
