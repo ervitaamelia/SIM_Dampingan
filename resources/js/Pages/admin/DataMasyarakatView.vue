@@ -68,7 +68,7 @@ export default {
 
       qrCodeDataUrl: '',
       currentPage: 1,
-      perPage: 7,
+      perPage: 10,
     }
   },
 
@@ -345,7 +345,7 @@ export default {
             <div class="w-[720px] bg-gray-200 shadow-2xl rounded-xl overflow-hidden border border-gray-500 flex flex-col">
               <!-- Header -->
               <div class="bg-blue-700 flex items-center justify-start px-6 py-4">
-                <img src="/images/logo-mpm.png" class="object-contain w-12 h-13 mr-4" alt="Logo MPM" />
+                <img src="/images/logo-mpm-kartu.png" class="object-contain w-12 h-13 mr-4" alt="Logo MPM" />
                 <div class="text-center flex-1">
                   <div class="text-3xl font-bold text-white">Kartu Tanda Anggota Dampingan</div>
                   <div class="text-base font-medium text-white mt-1">MPM Muhammadiyah</div>

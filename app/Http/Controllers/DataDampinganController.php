@@ -12,7 +12,9 @@ class DataDampinganController extends Controller
 {
     public function index()
     {
-        $grups = GrupDampingan::with([
+        $user = auth()->user();
+
+        $query = GrupDampingan::with([
             'bidang',
             'users',
         ])
@@ -24,11 +26,26 @@ class DataDampinganController extends Controller
             )
             ->leftJoin('provinsis', 'grup_dampingan.kode_provinsi', '=', 'provinsis.kode')
             ->leftJoin('kabupatens', 'grup_dampingan.kode_kabupaten', '=', 'kabupatens.kode')
-            ->leftJoin('kecamatans', 'grup_dampingan.kode_kecamatan', '=', 'kecamatans.kode')
-            ->get();
+            ->leftJoin('kecamatans', 'grup_dampingan.kode_kecamatan', '=', 'kecamatans.kode');
+
+        if ($user->role === 'admin-provinsi') {
+            $query->where('grup_dampingan.kode_provinsi', $user->kode_provinsi);
+        } elseif ($user->role === 'admin-kabupaten') {
+            $query->where('grup_dampingan.kode_kabupaten', $user->kode_kabupaten);
+        } elseif ($user->role === 'admin-kecamatan') {
+            $query->where('grup_dampingan.kode_kecamatan', $user->kode_kecamatan);
+        }
+
+        $grups = $query->get();
 
         return Inertia::render('admin/DataDampinganView', [
-            'data' => $grups
+            'data' => $grups,
+            'userWilayah' => [
+                'role' => $user->role,
+                'kode_provinsi' => $user->kode_provinsi,
+                'kode_kabupaten' => $user->kode_kabupaten,
+                'kode_kecamatan' => $user->kode_kecamatan,
+            ]
         ]);
     }
 

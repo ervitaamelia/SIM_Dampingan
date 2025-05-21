@@ -53,7 +53,7 @@ export default {
     data() {
         return {
             currentPage: 1,
-            perPage: 7,
+            perPage: 10,
 
             showPopup: false,
             showPopupHapus: false,

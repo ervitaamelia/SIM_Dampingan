@@ -100,16 +100,23 @@ const bidangOptions = props.bidangs.map(b => ({
   label: b.nama_bidang,
 }));
 
-const grupOptions = computed(() => {
+const getGrupOptions = (index) => {
   if (!form.id_bidang) return []
 
+  const selectedIds = form.id_grup_dampingan
+    .filter((_, i) => i !== index)
+    .map(g => typeof g === 'object' ? g?.value : g)
+
   return props.grups
-    .filter(grup => grup.id_bidang === form.id_bidang)
+    .filter(grup =>
+      grup.id_bidang === form.id_bidang &&
+      !selectedIds.includes(grup.id_grup_dampingan)
+    )
     .map(grup => ({
       value: grup.id_grup_dampingan,
       label: grup.nama_grup_dampingan
     }))
-})
+}
 
 const addGrup = () => {
   form.id_grup_dampingan.push("");
@@ -132,6 +139,8 @@ const handleFileChange = (event, index) => {
 }
 
 const isFormValid = computed(() => {
+  const isFileValid = props.kegiatan || fileInputs.value.every(input => input.file instanceof File);
+
   return form.judul &&
     form.deskripsi &&
     form.tanggal &&
@@ -143,18 +152,13 @@ const isFormValid = computed(() => {
     form.kode_kecamatan &&
     form.id_bidang &&
     form.id_grup_dampingan &&
-    fileInputs.value.every(input => input.file instanceof File);
-})
+    isFileValid;
+});
 
 const handleSubmit = () => {
   form.foto = fileInputs.value
     .map(input => input.file)
     .filter(file => file !== null);
-
-  if (!isFormValid()) {
-    alert("Silakan lengkapi semua kolom wajib sebelum mengirim form.");
-    return;
-  }
 
   if (props.kegiatan) {
     form.post(`/fasilitator/data-kegiatan/${props.kegiatan.id_kegiatan}`, {
@@ -277,7 +281,7 @@ const handleSubmit = () => {
 
               <div v-for="(item, index) in form.id_grup_dampingan" :key="index"
                 class="flex gap-2 items-center gap-2 mb-2">
-                <Multiselect v-model="form.id_grup_dampingan[index]" :options="grupOptions" placeholder="Pilih Grup"
+                <Multiselect v-model="form.id_grup_dampingan[index]" :options="getGrupOptions(index)" placeholder="Pilih Grup"
                   :disabled="!form.id_bidang" class="w-full border border-gray-300 rounded-md shadow-sm text-sm"
                   :searchable="true" />
                 <button type="button" @click="addGrup"
@@ -329,8 +333,8 @@ const handleSubmit = () => {
             <div class="flex gap-4 mt-4 justify-end">
               <a :href="route('kegiatan.index')"
                 class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">Batal</a>
-              <button type="submit" :disabled="form.processing || !isFormValid" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
-                {{ form.processing ? 'Memproses...' : (props.kegiatan ? "Simpan Perubahan" : "Tambah") }}
+              <button type="submit" :disabled="!isFormValid" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+                {{ props.kegiatan ? "Simpan Perubahan" : "Tambah" }}
               </button>
             </div>
           </form>

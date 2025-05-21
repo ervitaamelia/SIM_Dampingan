@@ -14,7 +14,9 @@ class DataAdminController extends Controller
 {
     public function index()
     {
-        $admins = User::select(
+        $user = auth()->user();
+
+        $query = User::select(
             'users.*',
             'provinsis.nama as nama_provinsi',
             'kabupatens.nama as nama_kabupaten',
@@ -23,11 +25,26 @@ class DataAdminController extends Controller
             ->leftJoin('provinsis', 'users.kode_provinsi', '=', 'provinsis.kode')
             ->leftJoin('kabupatens', 'users.kode_kabupaten', '=', 'kabupatens.kode')
             ->leftJoin('kecamatans', 'users.kode_kecamatan', '=', 'kecamatans.kode')
-            ->whereIn('users.role', ['superadmin', 'admin-provinsi', 'admin-kabupaten', 'admin-kecamatan'])
-            ->get();
+            ->whereIn('users.role', ['superadmin', 'admin-provinsi', 'admin-kabupaten', 'admin-kecamatan']);
+
+        if ($user->role === 'admin-provinsi') {
+            $query->where('users.kode_provinsi', $user->kode_provinsi);
+        } elseif ($user->role === 'admin-kabupaten') {
+            $query->where('users.kode_kabupaten', $user->kode_kabupaten);
+        } elseif ($user->role === 'admin-kecamatan') {
+            $query->where('users.kode_kecamatan', $user->kode_kecamatan);
+        }
+
+        $admins = $query->get();
 
         return Inertia::render('admin/DataAdminView', [
-            'data' => $admins
+            'data' => $admins,
+            'userWilayah' => [
+                'role' => $user->role,
+                'kode_provinsi' => $user->kode_provinsi,
+                'kode_kabupaten' => $user->kode_kabupaten,
+                'kode_kecamatan' => $user->kode_kecamatan,
+            ]
         ]);
     }
 

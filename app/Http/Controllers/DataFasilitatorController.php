@@ -13,7 +13,7 @@ class DataFasilitatorController extends Controller
     public function index()
     {
         $fasilitators = User::where('users.role', 'fasilitator')
-            ->with('bidangs')
+            ->with('bidangs', 'grupDampingan')
             ->orderBy('name', 'asc')
             ->get();
 

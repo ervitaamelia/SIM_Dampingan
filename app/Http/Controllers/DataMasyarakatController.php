@@ -14,16 +14,32 @@ class DataMasyarakatController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+
+        $query = GrupDampingan::query();
+
+        if ($user->role === 'admin-provinsi') {
+            $query->where('grup_dampingan.kode_provinsi', $user->kode_provinsi);
+        } elseif ($user->role === 'admin-kabupaten') {
+            $query->where('grup_dampingan.kode_kabupaten', $user->kode_kabupaten);
+        } elseif ($user->role === 'admin-kecamatan') {
+            $query->where('grup_dampingan.kode_kecamatan', $user->kode_kecamatan);
+        }
+
+        $grups = $query->get();
+
+        $grupIds = $grups->pluck('id_grup_dampingan');
+
         $masyarakats = Masyarakat::with([
             'pekerjaan',
             'bidang',
             'grup',
         ])
+            ->whereIn('id_grup_dampingan', $grupIds)
             ->orderBy('nama_lengkap', 'asc')
             ->get();
 
         $bidangs = Bidang::all();
-        $grups = GrupDampingan::all();
 
         return Inertia::render('admin/DataMasyarakatView', [
             'data' => $masyarakats,

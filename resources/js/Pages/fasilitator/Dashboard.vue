@@ -1,61 +1,12 @@
 <script setup>
-import { Head } from '@inertiajs/vue3'
 import FasilitatorLayout from "@/Layouts/FasilitatorLayout.vue";
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-const getArtikelLink = id => {
-  return `/Artikel${id}`
-}
+const page = usePage();
+const kegiatans = computed(() => page.props.data || []);
 
-const newsItems = [
-  {
-    id: 1,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/16271b27a3e1e288d76578e3e2a469550c5ba032',
-    date: '05/02/25',
-    title:
-      'Peluncuran BLASMU: Beras Sehat Inovasi Jamaah Tani Muhammadiyah (JATAM) Lebong Bengkulu',
-  },
-  {
-    id: 2,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/25b61d5f09e4ad466a1dd3cdd7e2a49e9bdb1f89',
-    date: '14/12/24',
-    title:
-      'JATAM Difabel Bejen Dampingan MPM Muhammadiyah Bagikan Kisah Sukses Peternakan Ayam Petelur Inklusif',
-  },
-  {
-    id: 3,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/9c3b9782b96384670eaa8bf3d45b86c1ca8b9b23',
-    date: '25/01/25',
-    title:
-      'MPM Muhammadiyah Kuatkan Kaderisasi untuk Pemberdayaan Masyarakat di Kalimantan Timur',
-  },
-  {
-    id: 1,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/16271b27a3e1e288d76578e3e2a469550c5ba032',
-    date: '05/02/25',
-    title:
-      'Peluncuran BLASMU: Beras Sehat Inovasi Jamaah Tani Muhammadiyah (JATAM) Lebong Bengkulu',
-  },
-  {
-    id: 2,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/25b61d5f09e4ad466a1dd3cdd7e2a49e9bdb1f89',
-    date: '14/12/24',
-    title:
-      'JATAM Difabel Bejen Dampingan MPM Muhammadiyah Bagikan Kisah Sukses Peternakan Ayam Petelur Inklusif',
-  },
-  {
-    id: 3,
-    image:
-      'https://cdn.builder.io/api/v1/image/assets/TEMP/9c3b9782b96384670eaa8bf3d45b86c1ca8b9b23',
-    date: '25/01/25',
-    title:
-      'MPM Muhammadiyah Kuatkan Kaderisasi untuk Pemberdayaan Masyarakat di Kalimantan Timur',
-  },
-]
+const getArtikelLink = (id) => `/artikel/${id}`;
 
 const tableHeaders = [
   'No Anggota',
@@ -107,55 +58,49 @@ const tableData = [
 </script>
 
 <template>
-<FasilitatorLayout>
-  <Head title="Dashboard" />
+  <FasilitatorLayout>
+
+    <Head title="Dashboard" />
 
     <main
-      class="grow px-6 py-4 bg-white rounded-lg shadow-md max-md:p-4 max-md:m-3 h-[calc(100vh-70px)] w-full overflow-auto scrollbar-hidden"
-    >
+      class="grow px-6 py-4 bg-white rounded-lg shadow-md max-md:p-4 max-md:m-3 h-[calc(100vh-70px)] w-full overflow-auto scrollbar-hidden">
       <h2 class="mb-6 text-xl font-semibold text-gray-900">
         Kegiatan Dampingan
       </h2>
 
+      <!-- Tampilan artikel horizontal scroll -->
       <div class="overflow-x-auto w-full pb-4 scrollbar-hidden relative">
         <div class="flex items-center gap-4">
-          <button
-            class="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
-          >
+          <!-- Tombol panah kiri -->
+          <button class="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
             &#8249;
           </button>
+
+          <!-- Card kegiatan -->
           <div class="flex flex-col w-max gap-6">
             <section class="flex gap-6">
-              <article
-                v-for="news in newsItems"
-                :key="news.id"
-                class="flex flex-col gap-3 w-[350px] flex-shrink-0 bg-white p-4 rounded-xl shadow-md"
-              >
-                <router-link :to="getArtikelLink(news.id)">
-                  <img
-                    :src="news.image"
-                    :alt="news.title"
-                    class="object-cover w-[350px] h-[230px] rounded-xl cursor-pointer transition-transform hover:scale-105"
-                  />
-                </router-link>
-                <time class="text-xs font-bold text-gray-700">{{
-                  news.date
-                }}</time>
+              <article v-for="kegiatan in kegiatans" :key="kegiatan.id_kegiatan"
+                class="flex flex-col gap-3 w-[350px] flex-shrink-0 bg-white p-4 rounded-xl shadow-md hover:scale-105 transition-transform cursor-pointer ">
+                <a :href="getArtikelLink(kegiatan.id_kegiatan)">
+                  <img :src="`/storage/${kegiatan.galeris[0]?.foto ?? 'placeholder.jpg'}`" :alt="kegiatan.judul"
+                    class="object-cover w-[350px] h-[230px] rounded-xl" />
+                </a>
+                <time class="text-xs font-bold text-gray-700">
+                  {{ new Date(kegiatan.tanggal).toLocaleDateString('id-ID') }}
+                </time>
                 <h3 class="text-base font-semibold text-gray-800 leading-snug">
-                  {{ news.title }}
+                  {{ kegiatan.judul }}
                 </h3>
-                <button
-                  type="button"
-                  class="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition"
-                >
+                <a v-if="kegiatan.laporan" :href="`/storage/${kegiatan.laporan}`" target="_blank"
+                  class="px-4 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition text-center">
                   Lihat Laporan
-                </button>
+                </a>
               </article>
             </section>
           </div>
-          <button
-            class="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
-          >
+
+          <!-- Tombol panah kanan -->
+          <button class="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition">
             &#8250;
           </button>
         </div>
@@ -166,27 +111,18 @@ const tableData = [
           Data Dampingan
         </h2>
         <div class="w-full max-w-full pb-4 overflow-x-auto">
-          <table
-            class="w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden"
-          >
+          <table class="w-full border-collapse bg-white shadow-md rounded-lg overflow-hidden">
             <thead class="bg-gray-300 text-gray-700">
               <tr>
-                <th
-                  v-for="header in tableHeaders"
-                  :key="header"
-                  class="p-4 text-sm font-medium text-left border-b border-gray-200"
-                >
+                <th v-for="header in tableHeaders" :key="header"
+                  class="p-4 text-sm font-medium text-left border-b border-gray-200">
                   {{ header }}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="row in tableData" :key="row.id">
-                <td
-                  v-for="(value, key) in row"
-                  :key="key"
-                  class="p-4 text-sm border-b border-gray-200 text-gray-900"
-                >
+                <td v-for="(value, key) in row" :key="key" class="p-4 text-sm border-b border-gray-200 text-gray-900">
                   {{ value }}
                 </td>
               </tr>
@@ -195,18 +131,21 @@ const tableData = [
         </div>
       </section>
     </main>
-    </FasilitatorLayout>
+  </FasilitatorLayout>
 </template>
 
 <style>
 /* Sembunyikan scrollbar di semua browser */
 .scrollbar-hidden::-webkit-scrollbar {
-  display: none; /* Untuk Chrome, Safari */
+  display: none;
+  /* Untuk Chrome, Safari */
 }
 
 .scrollbar-hidden {
-  -ms-overflow-style: none; /* Untuk Internet Explorer */
-  scrollbar-width: none; /* Untuk Firefox */
+  -ms-overflow-style: none;
+  /* Untuk Internet Explorer */
+  scrollbar-width: none;
+  /* Untuk Firefox */
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
