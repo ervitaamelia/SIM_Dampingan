@@ -200,7 +200,7 @@ export default {
           <!-- Click outside to close dropdown -->
           <div v-if="showExportDropdown" @click="closeExportDropdown" class="fixed inset-0 z-0"></div>
 
-          <div class="flex flex-wrap gap-4 mb-4">
+          <div class="flex flex-wrap gap-4 mb-6">
             <div class="w-full sm:w-1 min-w-[250px]">
               <Multiselect v-model="selectedDampingan" :options="availableDampinganList"
                 placeholder="Pilih Bidang Dampingan" :searchable="true" :clearable="true" class="w-full"
@@ -228,10 +228,10 @@ export default {
               <tbody>
                 <tr v-for="(f, index) in paginatedFasilitators" :key="f.id" class="hover:bg-gray-50">
                   <td class="border p-2 text-center">{{ (currentPage - 1) * perPage + index + 1 }}</td>
-                  <td class="border p-2">{{ f.name }}</td>
-                  <td class="border p-2">{{ f.nomor_telepon }}</td>
-                  <td class="border p-2">{{ f.alamat }}</td>
-                  <td class="border p-2">{{ f.email }}</td>
+                  <td class="border px-2 py-3">{{ f.name }}</td>
+                  <td class="border px-2 py-3">{{ f.nomor_telepon }}</td>
+                  <td class="border px-2 py-3">{{ f.alamat }}</td>
+                  <td class="border px-2 py-3">{{ f.email }}</td>
                   <td class="border p-2">
                     <span v-for="(b, i) in f.bidangs" :key="i">
                       {{ b.nama_bidang }}<span v-if="i < f.bidangs.length - 1">, </span>

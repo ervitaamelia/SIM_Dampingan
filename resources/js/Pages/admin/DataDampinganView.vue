@@ -248,7 +248,7 @@ export default {
           <div v-if="showExportDropdown" @click="closeExportDropdown" class="fixed inset-0 z-0"></div>
 
           <!-- Filter Section -->
-          <div class="flex flex-wrap gap-4 mb-4">
+          <div class="flex flex-wrap gap-4 mb-6">
             <!-- Dropdown Bidang Dampingan -->
             <div class="w-full sm:w-1 min-w-[200px]">
               <Multiselect v-model="selectedDampingan" :options="availableDampinganList" placeholder="Pilih Bidang"
@@ -298,13 +298,13 @@ export default {
               <tbody>
                 <tr v-for="(grup, index) in paginatedGrups" :key="grup.id_grup_dampingan" class="text-left hover:bg-gray-50">
                   <td class="border p-2 text-center">{{ (currentPage - 1) * perPage + index + 1 }}</td>
-                  <td class="border p-2">{{ grup.nama_grup_dampingan }}</td>
-                  <td class="border p-2">{{ grup.bidang?.nama_bidang }}</td>
-                  <td class="border p-2">{{ grup.jenis_dampingan }}</td>
-                  <td class="border p-2">{{ grup.nama_provinsi }}</td>
-                  <td class="border p-2">{{ grup.nama_kabupaten }}</td>
-                  <td class="border p-2">{{ grup.nama_kecamatan }}</td>
-                  <td class="border p-2">
+                  <td class="border px-2 py-3">{{ grup.nama_grup_dampingan }}</td>
+                  <td class="border px-2 py-3">{{ grup.bidang?.nama_bidang }}</td>
+                  <td class="border px-2 py-3">{{ grup.jenis_dampingan }}</td>
+                  <td class="border px-2 py-3">{{ grup.nama_provinsi }}</td>
+                  <td class="border px-2 py-3">{{ grup.nama_kabupaten }}</td>
+                  <td class="border px-2 py-3">{{ grup.nama_kecamatan }}</td>
+                  <td class="border px-2 py-3">
                     <div v-for="(user, index) in grup.users" :key="index">
                       <template v-if="index < 2 || showMore[grup.id_grup_dampingan]">
                         <div>{{ index + 1 }}. {{ user.name }}</div>

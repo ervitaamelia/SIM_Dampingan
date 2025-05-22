@@ -24,8 +24,15 @@ class KegiatanDampinganController extends Controller
         $kegiatan = Kegiatan::with('user', 'provinsi', 'kabupaten', 'kecamatan', 'bidang', 'galeris', 'grups')
             ->findOrFail($id);
 
+        $artikelLain = Kegiatan::with('galeris')
+            ->where('id_kegiatan', '!=', $id)
+            ->latest()
+            ->take(3)
+            ->get();
+
         return Inertia::render('DetailKegiatanView', [
-            'kegiatan' => $kegiatan
+            'kegiatan' => $kegiatan,
+            'artikelLain' => $artikelLain
         ]);
     }
 }

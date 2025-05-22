@@ -249,7 +249,7 @@ export default {
           <div v-if="showExportDropdown" @click="closeExportDropdown" class="fixed inset-0 z-0"></div>
 
           <!-- Filter -->
-          <div class="flex flex-wrap gap-4 mb-4">
+          <div class="flex flex-wrap gap-4 mb-6">
             <div class="w-full sm:w-1 min-w-[250px]">
               <Multiselect v-model="selectedJenisKelamin" :options="['Laki-laki', 'Perempuan']"
                 placeholder="Pilih Jenis Kelamin" :searchable="false" class="w-full" @change="currentPage = 1" />

@@ -218,7 +218,7 @@ export default {
                     <div v-if="showExportDropdown" @click="closeExportDropdown" class="fixed inset-0 z-0"></div>
 
                     <!-- Filter -->
-                    <div class="flex flex-wrap gap-4 mb-4">
+                    <div class="flex flex-wrap gap-4 mb-6">
                         <!-- Dropdown Role -->
                         <div class="w-full sm:w-1 min-w-[200px]">
                             <Multiselect v-model="selectedRole"
@@ -275,14 +275,14 @@ export default {
                                     class="text-left hover:bg-gray-50">
                                     <td class="border p-2 text-center">{{ (currentPage - 1) * perPage + index + 1 }}
                                     </td>
-                                    <td class="border p-2">{{ admin.name }}</td>
-                                    <td class="border p-2">{{ admin.email }}</td>
-                                    <td class="border p-2">{{ admin.alamat }}</td>
-                                    <td class="border p-2">{{ admin.nomor_telepon }}</td>
-                                    <td class="border p-2">{{ formatRole(admin.role) }}</td>
-                                    <td class="border p-2">{{ admin.nama_provinsi }}</td>
-                                    <td class="border p-2">{{ admin.nama_kabupaten }}</td>
-                                    <td class="border p-2">{{ admin.nama_kecamatan }}</td>
+                                    <td class="border px-2 py-3">{{ admin.name }}</td>
+                                    <td class="border px-2 py-3">{{ admin.email }}</td>
+                                    <td class="border px-2 py-3">{{ admin.alamat }}</td>
+                                    <td class="border px-2 py-3">{{ admin.nomor_telepon }}</td>
+                                    <td class="border px-2 py-3">{{ formatRole(admin.role) }}</td>
+                                    <td class="border px-2 py-3">{{ admin.nama_provinsi }}</td>
+                                    <td class="border px-2 py-3">{{ admin.nama_kabupaten }}</td>
+                                    <td class="border px-2 py-3">{{ admin.nama_kecamatan }}</td>
                                     <td class="border p-2 text-center w-20">
                                         <a :href="route('admin.edit', admin.id)" class="text-blue-500 mr-2">✏️</a>
                                         <button @click="selectedAdminId = admin.id; showPopupHapus = true"
