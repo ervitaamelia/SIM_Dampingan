@@ -22,10 +22,12 @@
     "dependencies": {
         "@heroicons/vue": "^2.2.0",
         "@vueform/multiselect": "^2.6.11",
+        "chart.js": "^4.4.9",
         "file-saver": "^2.0.5",
         "html2canvas": "^1.4.1",
         "qrcode": "^1.5.4",
         "vue": "^3.5.13",
+        "vue-chartjs": "^5.3.2",
         "vue-loader": "^17.4.2",
         "xlsx": "^0.18.5"
     }

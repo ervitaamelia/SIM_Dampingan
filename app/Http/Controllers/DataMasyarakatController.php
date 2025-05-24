@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Masyarakat;
 use App\Models\Pekerjaan;
 use App\Models\Bidang;
@@ -14,7 +15,7 @@ class DataMasyarakatController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $query = GrupDampingan::query();
 

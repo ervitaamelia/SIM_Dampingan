@@ -21,6 +21,8 @@ return new class extends Migration
             $table->time('waktu');
             $table->text('alamat');
             $table->unsignedSmallInteger('jumlah_peserta');
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
             $table->string('laporan', 100)->nullable();
             $table->unsignedBigInteger('id_user');
             $table->string('kode_provinsi');

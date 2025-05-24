@@ -15,7 +15,6 @@ use App\Http\Controllers\BidangController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Middleware\EnsureUserRole;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 // Login route
 Route::get('/', [AuthenticatedSessionController::class, 'create'])

@@ -7,12 +7,13 @@ use App\Models\GrupDampingan;
 use App\Models\Bidang;
 use App\Models\User;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class DataDampinganController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $query = GrupDampingan::with([
             'bidang',
@@ -60,7 +61,7 @@ class DataDampinganController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_grup_dampingan' => 'required|unique|string|max:100',
+            'nama_grup_dampingan' => 'required|string|max:100',
             'jenis_dampingan' => 'required|in:Pusat,Provinsi,Kabupaten,Kecamatan',
             'kode_provinsi' => 'required|exists:provinsis,kode',
             'kode_kabupaten' => 'required|exists:kabupatens,kode',
@@ -110,7 +111,7 @@ class DataDampinganController extends Controller
         $grup = GrupDampingan::findOrFail($id);
 
         $request->validate([
-            'nama_grup_dampingan' => 'required|unique|string|max:100',
+            'nama_grup_dampingan' => 'required|string|max:100',
             'jenis_dampingan' => 'required|in:Pusat,Provinsi,Kabupaten,Kecamatan',
             'kode_provinsi' => 'required|exists:provinsis,kode',
             'kode_kabupaten' => 'required|exists:kabupatens,kode',
@@ -139,8 +140,10 @@ class DataDampinganController extends Controller
     {
         $grup = GrupDampingan::findOrFail($id);
 
-        // Hapus relasi ke users terlebih dahulu
+        // Hapus relasi terlebih dahulu
         $grup->users()->detach();
+        $grup->kegiatans()->detach();
+
         $grup->delete();
 
         return redirect()->route('dampingan.index')->with('success', 'Data grup dampingan berhasil dihapus!');

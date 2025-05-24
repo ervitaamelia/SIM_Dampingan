@@ -58,13 +58,15 @@ export default {
             showPopup: false,
             showPopupHapus: false,
 
-            selectedProvinsi: null,
+            selectedProvinsi: this.$page.props.userWilayah.role === 'admin-provinsi'
+                ? this.$page.props.userWilayah.kode_provinsi
+                : null,
             selectedKabupaten: null,
             selectedKecamatan: null,
             selectedRole: null,
             selectedAdminId: null,
 
-            provinsiList: [],
+            provinsiList: this.$page.props.provinsiList || [],
             kabupatenList: [],
             kecamatanList: [],
             showExportDropdown: false,
@@ -73,6 +75,10 @@ export default {
 
     mounted() {
         this.fetchProvinsi();
+        // Jika admin provinsi, langsung fetch kabupaten
+        if (this.$page.props.userWilayah.role === 'admin-provinsi') {
+            this.fetchKabupaten(this.selectedProvinsi);
+        }
     },
 
     methods: {
@@ -94,7 +100,7 @@ export default {
             this.kabupatenList = [];
             this.kecamatanList = [];
             if (kodeProvinsi) {
-                fetch(`/api/kabupaten/${kodeProvinsi}`)
+                fetch(`/api/kabupaten/${ kodeProvinsi }`)
                     .then(res => res.json())
                     .then(data => {
                         this.kabupatenList = data.map(item => ({ label: item.nama, value: item.kode }));
@@ -105,7 +111,7 @@ export default {
             this.selectedKecamatan = null;
             this.kecamatanList = [];
             if (kodeKabupaten) {
-                fetch(`/api/kecamatan/${kodeKabupaten}`)
+                fetch(`/api/kecamatan/${ kodeKabupaten }`)
                     .then(res => res.json())
                     .then(data => {
                         this.kecamatanList = data.map(item => ({ label: item.nama, value: item.kode }));
@@ -229,15 +235,18 @@ export default {
 
                         <!-- Dropdown Provinsi -->
                         <div class="w-full sm:w-1 min-w-[200px]">
-                            <!-- Provinsi -->
-                            <Multiselect v-model="selectedProvinsi" :options="provinsiList" placeholder="Pilih Provinsi"
-                                :searchable="true" class="w-full" @update:modelValue="fetchKabupaten"
+                            <Multiselect v-if="$page.props.userWilayah.role !== 'admin-provinsi'"
+                                v-model="selectedProvinsi" :options="provinsiList" placeholder="Pilih Provinsi"
+                                :searchable="true" class="w-full" :clearable="true" @update:modelValue="fetchKabupaten"
                                 @change="currentPage = 1" />
+                            <div v-else>
+                                <Multiselect v-model="selectedProvinsi" :options="provinsiList" :searchable="true"
+                                    class="w-full" :disabled="true" :clearable="false" placeholder="Jawa Tengah" />
+                            </div>
                         </div>
 
                         <!-- Dropdown Kabupaten -->
                         <div class="w-full sm:w-1 min-w-[200px]">
-                            <!-- Kabupaten -->
                             <Multiselect v-model="selectedKabupaten" :options="kabupatenList"
                                 placeholder="Pilih Kabupaten" :searchable="true" class="w-full"
                                 :disabled="!selectedProvinsi" @update:modelValue="fetchKecamatan"
@@ -246,7 +255,6 @@ export default {
 
                         <!-- Dropdown Kecamatan -->
                         <div class="w-full sm:w-1 min-w-[200px]">
-                            <!-- Kecamatan -->
                             <Multiselect v-model="selectedKecamatan" :options="kecamatanList"
                                 placeholder="Pilih Kecamatan" :searchable="true" class="w-full"
                                 :disabled="!selectedKabupaten" @change="currentPage = 1" />
@@ -284,43 +292,42 @@ export default {
                                     <td class="border px-2 py-3">{{ admin.nama_kabupaten }}</td>
                                     <td class="border px-2 py-3">{{ admin.nama_kecamatan }}</td>
                                     <td class="border p-2 text-center w-20">
-                                        <a :href="route('admin.edit', admin.id)" class="text-blue-500 mr-2">✏️</a>
+                                        <a :href="route('admin.edit', admin.id)" class="text-blue-500 mr-2">✏</a>
                                         <button @click="selectedAdminId = admin.id; showPopupHapus = true"
                                             class="text-red-500">
-                                            🗑️
+                                            🗑
                                         </button>
-
-                                        <!-- Popup Konfirmasi Hapus -->
-                                        <div v-if="showPopupHapus"
-                                            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-                                            <div class="bg-white p-6 rounded-lg shadow-xl w-80">
-                                                <div class="flex items-center mb-4">
-                                                    <div class="bg-red-100 p-2 rounded-full mr-3">
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
-                                                            stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                        </svg>
-                                                    </div>
-                                                    <h3 class="text-lg font-medium">Konfirmasi Hapus</h3>
+                                    </td>
+                                    <!-- Popup Konfirmasi Hapus -->
+                                    <div v-if="showPopupHapus && selectedAdminId !== null"
+                                        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+                                        <div class="bg-white p-6 rounded-lg shadow-xl w-80">
+                                            <div class="flex items-center mb-4">
+                                                <div class="bg-red-100 p-2 rounded-full mr-3">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
                                                 </div>
-                                                <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus data
-                                                    ini? Tindakan ini tidak dapat dibatalkan.</p>
-                                                <div class="flex justify-end gap-3">
-                                                    <button @click="showPopupHapus = false"
-                                                        class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-                                                        Batal
-                                                    </button>
-                                                    <button @click="deleteItem(selectedAdminId)"
-                                                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                                                        Hapus
-                                                    </button>
-                                                </div>
+                                                <h3 class="text-lg font-medium">Konfirmasi Hapus</h3>
+                                            </div>
+                                            <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus data ini?
+                                                Tindakan ini tidak dapat dibatalkan.</p>
+                                            <div class="flex justify-end gap-3">
+                                                <button @click="showPopupHapus = false; selectedAdminId = null"
+                                                    class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                                                    Batal
+                                                </button>
+                                                <button
+                                                    @click="deleteItem(selectedAdminId); showPopupHapus = false; selectedAdminId = null"
+                                                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                                                    Hapus
+                                                </button>
                                             </div>
                                         </div>
-                                    </td>
+                                    </div>
                                 </tr>
                                 <tr v-if="filteredAdmins.length === 0">
                                     <td colspan="9" class="border p-2 text-center">

@@ -9,12 +9,13 @@ use App\Models\Kabupaten;
 use App\Models\Kecamatan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class DataAdminController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $query = User::select(
             'users.*',
@@ -37,17 +38,27 @@ class DataAdminController extends Controller
 
         $admins = $query->get();
 
+        // Dapatkan data provinsi yang sesuai dengan user
+        $provinsiList = [];
+        if ($user->role === 'admin-provinsi') {
+            $provinsiList = Provinsi::where('kode', $user->kode_provinsi)
+                ->get(['kode', 'nama']);
+        } else {
+            $provinsiList = Provinsi::all(['kode', 'nama']);
+        }
+
         return Inertia::render('admin/DataAdminView', [
             'data' => $admins,
+            'provinsiList' => $provinsiList,
             'userWilayah' => [
                 'role' => $user->role,
                 'kode_provinsi' => $user->kode_provinsi,
                 'kode_kabupaten' => $user->kode_kabupaten,
                 'kode_kecamatan' => $user->kode_kecamatan,
+                'nama_provinsi' => $user->provinsi->nama ?? null, // Pastikan relasi provinsi ada di model User
             ]
         ]);
     }
-
     public function create()
     {
         return inertia('admin/FormAdminView', [

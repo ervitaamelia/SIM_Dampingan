@@ -252,7 +252,7 @@ const isFormIncomplete = computed(() => {
             <div class="flex gap-4 mt-4 justify-end">
               <a :href="route('admin.index')"
                 class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">Batal</a>
-              <button type="submit" :disabled="isFormIncomplete"
+              <button type="submit" :disabled="isFormIncomplete && !admin"
                 class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ admin ? "Simpan Perubahan" : "Tambah" }}
               </button>

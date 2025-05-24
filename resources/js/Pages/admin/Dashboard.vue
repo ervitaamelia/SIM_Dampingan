@@ -1,11 +1,13 @@
 <script>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import { Head } from '@inertiajs/vue3'
+import ChartAnggota from '@/Components/ChartAnggota.vue'
 
 export default {
   components: {
     AdminLayout,
     Head,
+    ChartAnggota,
   },
 
   props: {
@@ -46,28 +48,40 @@ export default {
       </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h2 class="text-lg font-bold mb-4">Grup Dampingan MPM Muhammadiyah</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full border-collapse rounded-lg overflow-hidden shadow-sm">
-          <thead>
-            <tr class="bg-gray-400 text-white">
-              <th class="p-3 text-left">Grup Dampingan</th>
-              <th class="p-3 text-left">Bidang Dampingan</th>
-              <th class="p-3 text-left">Jumlah Masyarakat</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(data, index) in anggotaTerbanyak" :key="index" class="border-b">
-              <td class="p-3">{{ data.nama_grup_dampingan }}</td>
-              <td class="p-3">{{ data.nama_bidang }}</td>
-              <td class="p-3">{{ data.jumlah_anggota }}</td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Chart dan Tabel sejajar, tapi ukuran chart disesuaikan -->
+    <div class="flex flex-col lg:flex-row gap-6 mt-6">
+      <!-- Tabel -->
+      <div class="w-full lg:w-2/3 bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-lg font-bold mb-4">Grup Dampingan MPM Muhammadiyah</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full border-collapse rounded-lg overflow-hidden shadow-sm">
+            <thead>
+              <tr class="bg-sky-600 text-white">
+                <th class="p-3 text-left">Grup Dampingan</th>
+                <th class="p-3 text-left">Bidang Dampingan</th>
+                <th class="p-3 text-left">Jumlah Masyarakat</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(data, index) in anggotaTerbanyak" :key="index" class="border-b">
+                <td class="p-3">{{ data.nama_grup_dampingan }}</td>
+                <td class="p-3">{{ data.nama_bidang }}</td>
+                <td class="p-3">{{ data.jumlah_anggota }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Diagram -->
+      <div class="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+        <h3 class="text-lg font-semibold mb-4 text-gray-700 text-center">Statistik Masyarakat Pergrup</h3>
+        <div class="w-64 h-64">
+          <ChartAnggota :anggotaData="anggotaTerbanyak" />
+        </div>
       </div>
     </div>
+
     <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
       <h3 class="text-lg font-semibold mb-4 text-gray-700">Lokasi Kantor PP Muhammadiyah</h3>
       <div class="w-full h-64 rounded-xl overflow-hidden">

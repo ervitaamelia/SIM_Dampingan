@@ -37,18 +37,21 @@ onMounted(() => {
   }
 })
 
-const fasilitatorOptions = computed(() => {
+const getFasilitatorOptions = (index) => {
   if (!form.id_bidang) return []
+
+  const selectedIds = form.id_user.filter((_, i) => i !== index)
 
   return props.users
     .filter(user =>
-      user.bidangs.some(b => b.id_bidang === form.id_bidang)
+      user.bidangs.some(b => b.id_bidang === form.id_bidang) &&
+      !selectedIds.includes(String(user.id)) // filter out already selected
     )
     .map(user => ({
       value: String(user.id),
       label: user.name
     }))
-})
+}
 
 const bidangOptions = props.bidangs.map(b => ({
   value: b.id_bidang,
@@ -240,9 +243,9 @@ const handleSubmit = () => {
               <label class="text-sm font-medium text-gray-600">Fasilitator</label>
 
               <div v-for="(item, index) in form.id_user" :key="index" class="flex gap-2 items-center gap-2 mb-2">
-                <Multiselect v-model="form.id_user[index]" :options="fasilitatorOptions" placeholder="Pilih Fasilitator"
-                  class="w-full border border-gray-300 rounded-md shadow-sm text-sm" :searchable="true"
-                  :disabled="!form.id_bidang" />
+                <Multiselect v-model="form.id_user[index]" :options="getFasilitatorOptions(index)"
+                  placeholder="Pilih Fasilitator" class="w-full border border-gray-300 rounded-md shadow-sm text-sm"
+                  :searchable="true" :disabled="!form.id_bidang" />
                 <button type="button" @click="addFasilitator"
                   class="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600"
                   v-if="index === form.id_user.length - 1">
@@ -259,7 +262,8 @@ const handleSubmit = () => {
             <div class="flex gap-4 mt-4 justify-end">
               <a :href="route('dampingan.index')"
                 class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">Batal</a>
-              <button type="submit" :disabled="!isFormValid" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+              <button type="submit" :disabled="!isFormValid"
+                class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ props.grup ? "Simpan Perubahan" : "Tambah" }}
               </button>
             </div>

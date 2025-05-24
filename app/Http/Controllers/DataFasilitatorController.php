@@ -5,14 +5,35 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Bidang;
+use App\Models\GrupDampingan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class DataFasilitatorController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+
+        $query = GrupDampingan::query();
+
+        if ($user->role === 'admin-provinsi') {
+            $query->where('grup_dampingan.kode_provinsi', $user->kode_provinsi);
+        } elseif ($user->role === 'admin-kabupaten') {
+            $query->where('grup_dampingan.kode_kabupaten', $user->kode_kabupaten);
+        } elseif ($user->role === 'admin-kecamatan') {
+            $query->where('grup_dampingan.kode_kecamatan', $user->kode_kecamatan);
+        }
+
+        $grups = $query->get();
+
+        $grupIds = $grups->pluck('id_grup_dampingan');
+
         $fasilitators = User::where('users.role', 'fasilitator')
+            ->whereHas('grupDampingan', function ($query) use ($grupIds) {
+                $query->whereIn('grup_dampingan.id_grup_dampingan', $grupIds);
+            })
             ->with('bidangs', 'grupDampingan')
             ->orderBy('name', 'asc')
             ->get();
@@ -104,8 +125,10 @@ class DataFasilitatorController extends Controller
     {
         $fasilitator = User::findOrFail($id);
 
-        // Hapus relasi bidang terlebih dahulu
+        // Hapus relasi terlebih dahulu
         $fasilitator->bidangs()->detach();
+        $fasilitator->grupDampingan()->detach();
+
         $fasilitator->delete();
 
         return redirect()->route('fasilitator.index')->with('success', 'Fasilitator berhasil dihapus!');

@@ -221,7 +221,8 @@ export default {
                   <th class="border p-2">Telepon</th>
                   <th class="border p-2">Alamat</th>
                   <th class="border p-2">Email</th>
-                  <th class="border p-2">Bidang</th>
+                  <th class="border p-2">Bidang Dampingan</th>
+                  <th class="border p-2">Grup Dampingan</th>
                   <th class="border p-2">Aksi</th>
                 </tr>
               </thead>
@@ -235,6 +236,11 @@ export default {
                   <td class="border p-2">
                     <span v-for="(b, i) in f.bidangs" :key="i">
                       {{ b.nama_bidang }}<span v-if="i < f.bidangs.length - 1">, </span>
+                    </span>
+                  </td>
+                  <td class="border p-2">
+                    <span v-for="(g, i) in f.grup_dampingan" :key="i">
+                      {{ g.nama_grup_dampingan }}<span v-if="i < f.grup_dampingan.length - 1">, </span>
                     </span>
                   </td>
                   <td class="border p-2 text-center space-x-1">
