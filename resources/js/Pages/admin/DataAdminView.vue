@@ -19,6 +19,7 @@ export default {
         },
         filteredAdmins() {
             return this.admins.filter(admin => {
+                // Filter berdasarkan wilayah
                 const matchProvinsi = this.selectedProvinsi
                     ? admin.kode_provinsi === this.selectedProvinsi
                     : true;
@@ -28,6 +29,8 @@ export default {
                 const matchKecamatan = this.selectedKecamatan
                     ? admin.kode_kecamatan === this.selectedKecamatan
                     : true;
+
+                // Filter berdasarkan role
                 const matchRole = this.selectedRole
                     ? this.formatRole(admin.role) === this.selectedRole
                     : true;
@@ -46,11 +49,13 @@ export default {
         paginationInfo() {
             const start = (this.currentPage - 1) * this.perPage + 1;
             const end = Math.min(this.currentPage * this.perPage, this.filteredAdmins.length);
-            return `Menampilkan ${start} -${end} dari ${this.filteredAdmins.length} data`;
+            return `Menampilkan ${start}-${end} dari ${this.filteredAdmins.length} data`;
         }
     },
 
     data() {
+        const user = this.$page.props.auth.user; // Ganti dari userWilayah ke auth.user jika perlu
+
         return {
             currentPage: 1,
             perPage: 10,
@@ -58,11 +63,18 @@ export default {
             showPopup: false,
             showPopupHapus: false,
 
-            selectedProvinsi: this.$page.props.userWilayah.role === 'admin-provinsi'
-                ? this.$page.props.userWilayah.kode_provinsi
+            selectedProvinsi: user.role === 'admin-provinsi' ||
+                user.role === 'admin-kabupaten' ||
+                user.role === 'admin-kecamatan'
+                ? user.kode_provinsi
                 : null,
-            selectedKabupaten: null,
-            selectedKecamatan: null,
+            selectedKabupaten: user.role === 'admin-kabupaten' ||
+                user.role === 'admin-kecamatan'
+                ? user.kode_kabupaten
+                : null,
+            selectedKecamatan: user.role === 'admin-kecamatan'
+                ? user.kode_kecamatan
+                : null,
             selectedRole: null,
             selectedAdminId: null,
 
@@ -75,9 +87,29 @@ export default {
 
     mounted() {
         this.fetchProvinsi();
-        // Jika admin provinsi, langsung fetch kabupaten
-        if (this.$page.props.userWilayah.role === 'admin-provinsi') {
-            this.fetchKabupaten(this.selectedProvinsi);
+        const user = this.$page.props.auth.user; // Ganti dari userWilayah ke auth.user jika perlu
+
+        if (user.role === 'admin-provinsi') {
+            this.selectedProvinsi = user.kode_provinsi;
+            this.fetchKabupaten(user.kode_provinsi);
+        }
+
+        if (user.role === 'admin-kabupaten') {
+            this.selectedProvinsi = user.kode_provinsi;
+            this.fetchKabupaten(user.kode_provinsi).then(() => {
+                this.selectedKabupaten = user.kode_kabupaten;
+                this.fetchKecamatan(user.kode_kabupaten);
+            });
+        }
+
+        if (user.role === 'admin-kecamatan') {
+            this.selectedProvinsi = user.kode_provinsi;
+            this.fetchKabupaten(user.kode_provinsi).then(() => {
+                this.selectedKabupaten = user.kode_kabupaten;
+                return this.fetchKecamatan(user.kode_kabupaten);
+            }).then(() => {
+                this.selectedKecamatan = user.kode_kecamatan;
+            });
         }
     },
 
@@ -100,23 +132,28 @@ export default {
             this.kabupatenList = [];
             this.kecamatanList = [];
             if (kodeProvinsi) {
-                fetch(`/api/kabupaten/${ kodeProvinsi }`)
+                return fetch(`/api/kabupaten/${kodeProvinsi}`)
                     .then(res => res.json())
                     .then(data => {
                         this.kabupatenList = data.map(item => ({ label: item.nama, value: item.kode }));
+                        return data;
                     });
             }
+            return Promise.resolve();
         },
+
         fetchKecamatan(kodeKabupaten) {
             this.selectedKecamatan = null;
             this.kecamatanList = [];
             if (kodeKabupaten) {
-                fetch(`/api/kecamatan/${ kodeKabupaten }`)
+                return fetch(`/api/kecamatan/${kodeKabupaten}`)
                     .then(res => res.json())
                     .then(data => {
                         this.kecamatanList = data.map(item => ({ label: item.nama, value: item.kode }));
+                        return data;
                     });
             }
+            return Promise.resolve();
         },
         downloadExcel() {
             const filteredData = this.filteredAdmins;
@@ -185,7 +222,7 @@ export default {
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                         <h2 class="text-xl font-bold">Data Admin</h2>
                         <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                            <a :href="route('admin.create')"
+                            <a v-if="$page.props.auth.user.role !== 'admin-kecamatan'" :href="route('admin.create')"
                                 class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded whitespace-nowrap">
                                 + Tambah
                             </a>
@@ -235,29 +272,27 @@ export default {
 
                         <!-- Dropdown Provinsi -->
                         <div class="w-full sm:w-1 min-w-[200px]">
-                            <Multiselect v-if="$page.props.userWilayah.role !== 'admin-provinsi'"
-                                v-model="selectedProvinsi" :options="provinsiList" placeholder="Pilih Provinsi"
-                                :searchable="true" class="w-full" :clearable="true" @update:modelValue="fetchKabupaten"
+                            <Multiselect v-model="selectedProvinsi" :options="provinsiList" placeholder="Pilih Provinsi"
+                                :searchable="true" class="w-full" :disabled="$page.props.auth.user.role === 'admin-provinsi' ||
+                                    $page.props.auth.user.role === 'admin-kabupaten' ||
+                                    $page.props.auth.user.role === 'admin-kecamatan'" @update:modelValue="fetchKabupaten"
                                 @change="currentPage = 1" />
-                            <div v-else>
-                                <Multiselect v-model="selectedProvinsi" :options="provinsiList" :searchable="true"
-                                    class="w-full" :disabled="true" :clearable="false" placeholder="Jawa Tengah" />
-                            </div>
                         </div>
 
                         <!-- Dropdown Kabupaten -->
                         <div class="w-full sm:w-1 min-w-[200px]">
                             <Multiselect v-model="selectedKabupaten" :options="kabupatenList"
-                                placeholder="Pilih Kabupaten" :searchable="true" class="w-full"
-                                :disabled="!selectedProvinsi" @update:modelValue="fetchKecamatan"
+                                placeholder="Pilih Kabupaten" :searchable="true" class="w-full" :disabled="!selectedProvinsi ||
+                                    $page.props.auth.user.role === 'admin-kabupaten' ||
+                                    $page.props.auth.user.role === 'admin-kecamatan'" @update:modelValue="fetchKecamatan"
                                 @change="currentPage = 1" />
                         </div>
 
                         <!-- Dropdown Kecamatan -->
                         <div class="w-full sm:w-1 min-w-[200px]">
                             <Multiselect v-model="selectedKecamatan" :options="kecamatanList"
-                                placeholder="Pilih Kecamatan" :searchable="true" class="w-full"
-                                :disabled="!selectedKabupaten" @change="currentPage = 1" />
+                                placeholder="Pilih Kecamatan" :searchable="true" class="w-full" :disabled="!selectedKabupaten ||
+                                    $page.props.auth.user.role === 'admin-kecamatan'" @change="currentPage = 1" />
                         </div>
                     </div>
 

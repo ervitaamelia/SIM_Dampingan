@@ -5,8 +5,9 @@ import { Head, useForm } from '@inertiajs/vue3'
 import Multiselect from '@vueform/multiselect'
 import '@vueform/multiselect/themes/default.css'
 
-const { admin } = defineProps({
+const { admin, auth } = defineProps({
   admin: Object,
+  auth: Object
 })
 
 // state untuk toggle visibility password
@@ -15,12 +16,27 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
 
-const roleOptions = [
-  { value: 'superadmin', label: 'Superadmin' },
-  { value: 'admin-provinsi', label: 'Admin Provinsi' },
-  { value: 'admin-kabupaten', label: 'Admin Kabupaten' },
-  { value: 'admin-kecamatan', label: 'Admin Kecamatan' }
-]
+// Role options berdasarkan user yang login
+const roleOptions = computed(() => {
+  if (auth.user.role === 'superadmin') {
+    return [
+      { value: 'superadmin', label: 'Superadmin' },
+      { value: 'admin-provinsi', label: 'Admin Provinsi' },
+      { value: 'admin-kabupaten', label: 'Admin Kabupaten' },
+      { value: 'admin-kecamatan', label: 'Admin Kecamatan' }
+    ]
+  } else if (auth.user.role === 'admin-provinsi') {
+    return [
+      { value: 'admin-kabupaten', label: 'Admin Kabupaten' },
+      { value: 'admin-kecamatan', label: 'Admin Kecamatan' }
+    ]
+  } else if (auth.user.role === 'admin-kabupaten') {
+    return [
+      { value: 'admin-kecamatan', label: 'Admin Kecamatan' }
+    ]
+  }
+  return []
+})
 
 const form = useForm({
   name: '',
@@ -36,68 +52,26 @@ const form = useForm({
 
 const selectedRole = ref(null)
 
-onMounted(() => {
-  fetchProvinsi();
-  fetchKabupaten(admin.kode_provinsi);
-  fetchKecamatan(admin.kode_kabupaten);
-
-  if (admin) {
-    form.name = admin.name
-    form.email = admin.email
-    form.nomor_telepon = admin.nomor_telepon
-    form.alamat = admin.alamat
-    form.kode_provinsi = admin.kode_provinsi
-    form.kode_kabupaten = admin.kode_kabupaten
-    form.kode_kecamatan = admin.kode_kecamatan
-    form.role = admin.role
-    selectedRole.value = roleOptions.find(option => option.value === admin.role)
-  }
-})
-
-watch(selectedRole, (val) => {
-  if (val) {
-    form.role = val.value
-    form.kode_provinsi = ''
-    form.kode_kabupaten = ''
-    form.kode_kecamatan = ''
-  }
-})
-
-const handleSubmit = () => {
-  if (admin) {
-    form.put(`/admin/data-admin/${admin.id}`)
-  } else {
-    form.post('/admin/data-admin')
-  }
-}
-
+// Data wilayah
 const provinsiList = ref([])
 const kabupatenList = ref([])
 const kecamatanList = ref([])
 
-const selectedKabupaten = ref(null)
-const selectedKecamatan = ref(null)
-
+// Fungsi untuk fetch data wilayah
 function fetchProvinsi() {
   fetch('/api/provinsi')
-    .then(res => {
-      if (!res.ok) throw new Error('Network response was not ok');
-      return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
       provinsiList.value = data.map(item => ({
         label: item.nama,
         value: item.kode
       }))
     })
-    .catch(error => {
-      console.error('Error fetching provinsi:', error)
-    })
 }
 
 function fetchKabupaten(kodeProvinsi) {
-  selectedKabupaten.value = null
-  selectedKecamatan.value = null
+  form.kode_kabupaten = ''
+  form.kode_kecamatan = ''
   kabupatenList.value = []
   kecamatanList.value = []
 
@@ -113,19 +87,82 @@ function fetchKabupaten(kodeProvinsi) {
   }
 }
 
-function fetchKecamatan(kodeKabupaten) {
-  selectedKecamatan.value = null
+async function fetchKecamatan(kodeKabupaten) {
+  form.kode_kecamatan = ''
   kecamatanList.value = []
 
   if (kodeKabupaten) {
-    fetch(`/api/kecamatan/${kodeKabupaten}`)
-      .then(res => res.json())
-      .then(data => {
-        kecamatanList.value = data.map(item => ({
-          label: item.nama,
-          value: item.kode
-        }))
+    const res = await fetch(`/api/kecamatan/${kodeKabupaten}`)
+    const data = await res.json()
+    kecamatanList.value = data.map(item => ({
+      label: item.nama,
+      value: item.kode
+    }))
+  }
+}
+
+onMounted(() => {
+  fetchProvinsi()
+  fetchKecamatan()
+  
+  // Jika edit admin, set nilai form dan fetch wilayah
+  if (admin) {
+    form.name = admin.name
+    form.email = admin.email
+    form.nomor_telepon = admin.nomor_telepon
+    form.alamat = admin.alamat
+    form.kode_provinsi = admin.kode_provinsi
+    form.kode_kabupaten = admin.kode_kabupaten
+    form.kode_kecamatan = admin.kode_kecamatan
+    form.role = admin.role
+    selectedRole.value = roleOptions.value.find(option => option.value === admin.role)
+    
+    // Fetch kabupaten dan kecamatan jika ada
+    if (admin.kode_provinsi) {
+      fetchKabupaten(admin.kode_provinsi).then(() => {
+        if (admin.kode_kabupaten) {
+          fetchKecamatan(admin.kode_kabupaten)
+        }
       })
+    }
+  } 
+  // Jika tambah admin, set role dan wilayah berdasarkan user yang login
+  else {
+    // Auto set wilayah untuk admin wilayah
+    if (auth.user.role === 'admin-provinsi') {
+      form.kode_provinsi = auth.user.kode_provinsi
+      fetchKabupaten(auth.user.kode_provinsi)
+    } 
+    else if (auth.user.role === 'admin-kabupaten') {
+      form.kode_provinsi = auth.user.kode_provinsi
+      form.kode_kabupaten = auth.user.kode_kabupaten
+      fetchKabupaten(auth.user.kode_provinsi).then(() => {
+        fetchKecamatan(auth.user.kode_kabupaten)
+      })
+    }
+  }
+})
+
+watch(selectedRole, (val) => {
+  if (val) {
+    form.role = val.value
+  }
+})
+
+// Watch perubahan provinsi dan kabupaten
+watch(() => form.kode_provinsi, (val) => {
+  fetchKabupaten(val)
+})
+
+watch(() => form.kode_kabupaten, (val) => {
+  fetchKecamatan(val)
+})
+
+const handleSubmit = () => {
+  if (admin) {
+    form.put(`/admin/data-admin/${admin.id}`)
+  } else {
+    form.post('/admin/data-admin')
   }
 }
 
@@ -134,9 +171,8 @@ const isFormIncomplete = computed(() => {
   if (!admin && !form.password) return true
   if (!form.role) return true
 
-  if (['admin-provinsi'].includes(form.role) && !form.kode_provinsi) return true
-  if (['admin-kabupaten'].includes(form.role) && (!form.kode_provinsi || !form.kode_kabupaten)) return true
-  if (['admin-kecamatan'].includes(form.role) && (!form.kode_provinsi || !form.kode_kabupaten || !form.kode_kecamatan)) return true
+  if (form.role === 'admin-kabupaten' && !form.kode_kabupaten) return true
+  if (form.role === 'admin-kecamatan' && !form.kode_kecamatan) return true
 
   return false
 })
@@ -144,12 +180,10 @@ const isFormIncomplete = computed(() => {
 
 <template>
   <AdminLayout>
-
     <Head :title="admin ? 'Edit Admin' : 'Tambah Admin'" />
 
     <div class="ml-5 w-full max-md:w-full mx-auto flex justify-center">
-      <section
-        class="flex flex-col items-center px-8 pt-6 pb-8 mt-12 w-full max-w-5xl bg-white rounded-[20px] shadow-lg overflow-y-auto max-h-[80vh]">
+      <section class="flex flex-col items-center px-8 pt-6 pb-8 mt-12 w-full max-w-5xl bg-white rounded-[20px] shadow-lg overflow-y-auto max-h-[80vh]">
         <div class="flex flex-col w-full">
           <h2 class="self-center text-2xl font-bold text-black">
             {{ admin ? 'Form Edit Admin' : 'Form Tambah Admin' }}
@@ -157,7 +191,7 @@ const isFormIncomplete = computed(() => {
           <form @submit.prevent="handleSubmit" class="mt-6 w-full">
 
             <!-- Role -->
-            <div class="flex flex-col gap-2 pb-2" v-if="!admin">
+            <div class="flex flex-col gap-2 pb-2" v-if="!admin && roleOptions.length > 0">
               <label for="role" class="text-sm font-medium text-gray-600">Role</label>
               <select id="role" v-model="selectedRole"
                 class="w-full py-3 px-3 mt-1 border border-gray-300 rounded-md shadow-sm text-base">
@@ -224,27 +258,87 @@ const isFormIncomplete = computed(() => {
                 placeholder="Masukkan Alamat"></textarea>
             </div>
 
+            <!-- Wilayah sesuai role -->
             <div class="flex flex-col gap-2 pb-2">
-              <!-- Provinsi -->
-              <div v-if="['admin-provinsi', 'admin-kabupaten', 'admin-kecamatan'].includes(selectedRole?.value)">
-                <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
-                <Multiselect v-model="form.kode_provinsi" :options="provinsiList" placeholder="Pilih Provinsi"
-                  :searchable="true" class="w-full" @update:modelValue="fetchKabupaten" />
+              <!-- Untuk admin-provinsi (hanya bisa buat admin kabupaten/kecamatan) -->
+              <div v-if="auth.user.role === 'admin-provinsi' && !admin">
+                <!-- Kabupaten -->
+                <div v-if="form.role === 'admin-kabupaten' || form.role === 'admin-kecamatan'">
+                  <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
+                  <Multiselect 
+                    v-model="form.kode_kabupaten" 
+                    :options="kabupatenList" 
+                    placeholder="Pilih Kabupaten"
+                    :searchable="true" 
+                    class="w-full"
+                  />
+                </div>
+
+                <!-- Kecamatan (hanya untuk role admin-kecamatan) -->
+                <div v-if="form.role === 'admin-kecamatan'">
+                  <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
+                  <Multiselect 
+                    v-model="form.kode_kecamatan" 
+                    :options="kecamatanList" 
+                    placeholder="Pilih Kecamatan"
+                    :searchable="true" 
+                    class="w-full" 
+                    :disabled="!form.kode_kabupaten"
+                  />
+                </div>
               </div>
 
-              <!-- Kabupaten -->
-              <div v-if="['admin-kabupaten', 'admin-kecamatan'].includes(selectedRole?.value)">
-                <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
-                <Multiselect v-model="form.kode_kabupaten" :options="kabupatenList" placeholder="Pilih Kabupaten"
-                  :searchable="true" class="w-full" :disabled="!form.kode_provinsi"
-                  @update:modelValue="fetchKecamatan" />
-              </div>
-
-              <!-- Kecamatan -->
-              <div v-if="selectedRole?.value === 'admin-kecamatan'">
+              <!-- Untuk admin-kabupaten (hanya bisa buat admin kecamatan) -->
+              <div v-else-if="auth.user.role === 'admin-kabupaten' && !admin && form.role === 'admin-kecamatan'">
                 <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
-                <Multiselect v-model="form.kode_kecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
-                  :searchable="true" class="w-full" :disabled="!form.kode_kabupaten" />
+                <Multiselect 
+                  v-model="form.kode_kecamatan" 
+                  :options="kecamatanList" 
+                  placeholder="Pilih Kecamatan"
+                  :searchable="true" 
+                  class="w-full"
+                />
+              </div>
+
+              <!-- Untuk superadmin (bisa buat semua role) -->
+              <div v-else-if="auth.user.role === 'superadmin'">
+                <!-- Provinsi -->
+                <div v-if="['admin-provinsi', 'admin-kabupaten', 'admin-kecamatan'].includes(form.role)">
+                  <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
+                  <Multiselect 
+                    v-model="form.kode_provinsi" 
+                    :options="provinsiList" 
+                    placeholder="Pilih Provinsi"
+                    :searchable="true" 
+                    class="w-full" 
+                  />
+                </div>
+
+                <!-- Kabupaten -->
+                <div v-if="['admin-kabupaten', 'admin-kecamatan'].includes(form.role)">
+                  <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
+                  <Multiselect 
+                    v-model="form.kode_kabupaten" 
+                    :options="kabupatenList" 
+                    placeholder="Pilih Kabupaten"
+                    :searchable="true" 
+                    class="w-full" 
+                    :disabled="!form.kode_provinsi"
+                  />
+                </div>
+
+                <!-- Kecamatan -->
+                <div v-if="form.role === 'admin-kecamatan'">
+                  <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
+                  <Multiselect 
+                    v-model="form.kode_kecamatan" 
+                    :options="kecamatanList" 
+                    placeholder="Pilih Kecamatan"
+                    :searchable="true" 
+                    class="w-full" 
+                    :disabled="!form.kode_kabupaten"
+                  />
+                </div>
               </div>
             </div>
 

@@ -45,7 +45,7 @@ const getFasilitatorOptions = (index) => {
   return props.users
     .filter(user =>
       user.bidangs.some(b => b.id_bidang === form.id_bidang) &&
-      !selectedIds.includes(String(user.id)) // filter out already selected
+      !selectedIds.includes(String(user.id))
     )
     .map(user => ({
       value: String(user.id),

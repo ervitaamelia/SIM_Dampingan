@@ -1,14 +1,15 @@
 <script setup>
+import AdminLayout from "@/Layouts/AdminLayout.vue";
 import { onMounted, computed, ref } from "vue";
 import { Head, useForm } from "@inertiajs/vue3";
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import Multiselect from '@vueform/multiselect';
+import '@vueform/multiselect/themes/default.css';
 
 const props = defineProps({
   fasilitator: Object,
   bidangs: Array,
 });
 
-// state untuk toggle visibility password
 const showPassword = ref(false);
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
@@ -32,6 +33,18 @@ onMounted(() => {
     form.bidang_dampingan = props.fasilitator.bidang_dampingan || [""];
   }
 });
+
+const getBidangOptions = (index) => {
+  const selectedIds = form.bidang_dampingan
+    .filter((_, i) => i !== index);
+
+  return props.bidangs
+    .filter(bidang => !selectedIds.includes(String(bidang.id_bidang)))
+    .map(bidang => ({
+      value: String(bidang.id_bidang),
+      label: bidang.nama_bidang,
+    }));
+};
 
 const addBidang = () => {
   form.bidang_dampingan.push("");
@@ -73,11 +86,7 @@ const handleSubmit = () => {
         class="flex flex-col items-center px-8 pt-6 pb-8 mt-12 w-full max-w-4xl bg-white rounded-[20px] shadow-lg overflow-y-auto scrollbar-hide max-h-[80vh]">
         <div class="flex flex-col w-full">
           <h2 class="self-center text-2xl font-bold text-black">
-            {{
-              props.fasilitator
-                ? "Form Edit Fasilitator"
-                : "Form Tambah Fasilitator"
-            }}
+            {{ props.fasilitator ? "Form Edit Fasilitator" : "Form Tambah Fasilitator" }}
           </h2>
 
           <form @submit.prevent="handleSubmit" class="mt-6 w-full">
@@ -110,21 +119,12 @@ const handleSubmit = () => {
               <label class="text-sm font-medium text-gray-600">Bidang Dampingan</label>
 
               <div v-for="(bidang, index) in form.bidang_dampingan" :key="index" class="flex items-center gap-2 mb-2">
-                <select v-model="form.bidang_dampingan[index]"
-                  class="w-full py-2 px-3 border border-gray-400 rounded-md text-sm">
-                  <option value="" disabled>
-                    Pilih Bidang
-                  </option>
-                  <option v-for="b in props.bidangs" :key="b.id" :value="b.id">
-                    {{ b.nama }}
-                  </option>
-                </select>
-
+                <Multiselect v-model="form.bidang_dampingan[index]" :options="getBidangOptions(index)"
+                  placeholder="Pilih Bidang" class="w-full border border-gray-300 rounded-md shadow-sm text-sm"
+                  :searchable="true" />
                 <button type="button" @click="addBidang"
-                  class="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600" v-if="
-                    index ===
-                    form.bidang_dampingan.length - 1
-                  ">
+                  class="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600"
+                  v-if="index === form.bidang_dampingan.length - 1">
                   +
                 </button>
                 <button type="button" @click="removeBidang(index)"

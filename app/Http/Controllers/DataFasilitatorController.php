@@ -31,8 +31,11 @@ class DataFasilitatorController extends Controller
         $grupIds = $grups->pluck('id_grup_dampingan');
 
         $fasilitators = User::where('users.role', 'fasilitator')
-            ->whereHas('grupDampingan', function ($query) use ($grupIds) {
-                $query->whereIn('grup_dampingan.id_grup_dampingan', $grupIds);
+            ->where(function ($query) use ($grupIds) {
+                $query->whereHas('grupDampingan', function ($subQuery) use ($grupIds) {
+                    $subQuery->whereIn('grup_dampingan.id_grup_dampingan', $grupIds);
+                })
+                    ->orWhereDoesntHave('grupDampingan');
             })
             ->with('bidangs', 'grupDampingan')
             ->orderBy('name', 'asc')
@@ -45,7 +48,7 @@ class DataFasilitatorController extends Controller
 
     public function create()
     {
-        $bidangs = Bidang::all(['id_bidang as id', 'nama_bidang as nama']);
+        $bidangs = Bidang::all(['id_bidang', 'nama_bidang']);
         return inertia('admin/FormFasilitatorView', [
             'bidangs' => $bidangs,
         ]);
@@ -80,7 +83,7 @@ class DataFasilitatorController extends Controller
     public function edit($id)
     {
         $fasilitator = User::with('bidangs')->findOrFail($id);
-        $bidangs = Bidang::all(['id_bidang as id', 'nama_bidang as nama']);
+        $bidangs = Bidang::all(['id_bidang', 'nama_bidang']);
 
         return inertia('admin/FormFasilitatorView', [
             'fasilitator' => [

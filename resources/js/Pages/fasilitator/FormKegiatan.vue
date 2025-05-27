@@ -11,6 +11,10 @@ const props = defineProps({
   grups: Array,
 })
 
+const isDeskripsiValid = computed(() => {
+  return form.deskripsi.trim().length >= 500;
+});
+
 const form = useForm({
   judul: props.kegiatan?.judul || '',
   deskripsi: props.kegiatan?.deskripsi || '',
@@ -142,7 +146,7 @@ const isFormValid = computed(() => {
   const isFileValid = props.kegiatan || fileInputs.value.every(input => input.file instanceof File);
 
   return form.judul &&
-    form.deskripsi &&
+    isDeskripsiValid.value &&
     form.tanggal &&
     form.waktu &&
     form.alamat &&
@@ -194,8 +198,11 @@ const handleSubmit = () => {
             <!-- Deskripsi -->
             <div class="mb-2">
               <label class="text-sm font-medium text-gray-600">Deskripsi</label>
-              <textarea v-model="form.deskripsi" placeholder="Masukkan Deskripsi di sini"
-                class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm"></textarea>
+              <textarea v-model="form.deskripsi" placeholder="Masukkan Deskripsi (minimal 500 karakter)"
+                class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm"
+                :class="{ 'border-red-500': !isDeskripsiValid && form.deskripsi }"></textarea>
+              <p class="text-xs text-blue-500 mt-1">Minimal 500 karakter. Saat ini: {{ form.deskripsi.trim().length }} karakter</p>
+              <p v-if="form.deskripsi && !isDeskripsiValid" class="text-xs text-red-500 mt-1">Deskripsi terlalu pendek.</p>
             </div>
 
             <!-- Masalah -->
@@ -215,7 +222,11 @@ const handleSubmit = () => {
             <!-- Alamat -->
             <div class="mb-2">
               <label class="text-sm font-medium text-gray-600">Alamat</label>
-              <textarea v-model="form.alamat" placeholder="Masukkan Alamat"
+              <p class="text-xs text-blue-500 mb-1">
+                Masukkan No / Nama jalan, RT, RW, Dusun / Kelurahan setempat secara rinci. <br />
+                Contoh: No. 6 Jl. Pracanda 6, RT.05/RW.02, Purwodiningratan, Jebres
+              </p>
+              <textarea v-model="form.alamat" placeholder="Masukkan Alamat lengkap"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm"></textarea>
             </div>
 
