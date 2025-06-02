@@ -21,6 +21,7 @@ const form = useForm({
   password: "",
   nomor_telepon: "",
   alamat: "",
+  foto: null,
   bidang_dampingan: [""],
 });
 
@@ -30,6 +31,7 @@ onMounted(() => {
     form.email = props.fasilitator.email;
     form.nomor_telepon = props.fasilitator.nomor_telepon;
     form.alamat = props.fasilitator.alamat;
+    form.foto = props.fasilitator.foto ?? null,
     form.bidang_dampingan = props.fasilitator.bidang_dampingan || [""];
   }
 });
@@ -69,7 +71,10 @@ const isFormValid = computed(() => {
 
 const handleSubmit = () => {
   if (props.fasilitator) {
-    form.put(`/admin/data-fasilitator/${props.fasilitator.id}`);
+    form.post(`/admin/data-fasilitator/${props.fasilitator.id}`,{
+      _method: 'put',
+      forceFormData: true
+    });
   } else {
     form.post("/admin/data-fasilitator");
   }
@@ -90,9 +95,13 @@ const handleSubmit = () => {
           </h2>
 
           <form @submit.prevent="handleSubmit" class="mt-6 w-full">
+
+            <!-- Keterangan bintang merah -->
+            <p class="text-sm text-gray-500 mb-7"><span class="text-red-500">*</span> = wajib diisi</p> 
+
             <!-- Nama Lengkap -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="name" class="text-sm font-medium text-gray-600">Nama Lengkap</label>
+              <label for="name" class="text-sm font-medium text-gray-600">Nama Lengkap <span class="text-red-500">*</span></label>
               <input id="name" type="text" v-model="form.name"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan Nama Lengkap" />
@@ -100,7 +109,7 @@ const handleSubmit = () => {
 
             <!-- Alamat -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="alamat" class="text-sm font-medium text-gray-600">Alamat</label>
+              <label for="alamat" class="text-sm font-medium text-gray-600">Alamat <span class="text-red-500">*</span></label>
               <textarea id="alamat" v-model="form.alamat" rows="4"
                 class="w-full py-3 px-3 mt-1 border border-gray-400 rounded-md outline-none text-base resize-none"
                 placeholder="Masukkan Alamat"></textarea>
@@ -108,7 +117,7 @@ const handleSubmit = () => {
 
             <!-- No. Telepon -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="nomor_telepon" class="text-sm font-medium text-gray-600">No. Telepon</label>
+              <label for="nomor_telepon" class="text-sm font-medium text-gray-600">No. Telepon <span class="text-red-500">*</span></label>
               <input id="nomor_telepon" type="tel" v-model="form.nomor_telepon"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan No. Telepon" />
@@ -116,7 +125,7 @@ const handleSubmit = () => {
 
             <!-- Bidang Dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Bidang Dampingan</label>
+              <label class="text-sm font-medium text-gray-600">Bidang Dampingan <span class="text-red-500">*</span></label>
 
               <div v-for="(bidang, index) in form.bidang_dampingan" :key="index" class="flex items-center gap-2 mb-2">
                 <Multiselect v-model="form.bidang_dampingan[index]" :options="getBidangOptions(index)"
@@ -137,15 +146,15 @@ const handleSubmit = () => {
 
             <!-- Email -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="email" class="text-sm font-medium text-gray-600">Email</label>
+              <label for="email" class="text-sm font-medium text-gray-600">Email <span class="text-red-500">*</span></label>
               <input id="email" type="email" v-model="form.email"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan Email" />
             </div>
 
             <!-- Password dengan toggle icon -->
-            <div v-if="!props.fasilitator" class="flex flex-col gap-2">
-              <label for="password" class="text-sm font-medium text-gray-600">Password</label>
+            <div v-if="!props.fasilitator" class="flex flex-col gap-2 mb-2">
+              <label for="password" class="text-sm font-medium text-gray-600">Password <span class="text-red-500">*</span></label>
               <div class="relative">
                 <input id="password" :type="showPassword ? 'text' : 'password'" v-model="form.password"
                   placeholder="Masukkan Password"
@@ -166,6 +175,17 @@ const handleSubmit = () => {
                   </svg>
                 </button>
               </div>
+            </div>
+
+            <!-- Foto -->
+            <div class="flex flex-col gap-2 pb-2">
+              <label class="text-sm font-medium text-gray-600">Foto</label>
+              <input type="file" @change="form.foto = $event.target.files[0]"
+                class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" />
+            </div>
+            <div v-if="props.fasilitator?.foto" class="mb-4">
+              <img :src="`/storage/${props.fasilitator.foto}`" alt="Foto Fasilitator" class="w-32 rounded" />
+              <p class="text-xs text-gray-500 mt-1">Foto saat ini</p>
             </div>
 
             <div class="flex gap-4 mt-4 justify-end">

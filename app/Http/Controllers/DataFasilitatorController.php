@@ -9,6 +9,7 @@ use App\Models\GrupDampingan;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class DataFasilitatorController extends Controller
 {
@@ -62,9 +63,14 @@ class DataFasilitatorController extends Controller
             'password' => 'required|min:6',
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
+            'foto' => 'nullable|image',
             'bidang_dampingan' => 'required|array|min:1',
             'bidang_dampingan.*' => 'exists:bidang,id_bidang',
         ]);
+
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('foto', 'public');
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -72,6 +78,7 @@ class DataFasilitatorController extends Controller
             'password' => Hash::make($request->password),
             'nomor_telepon' => $request->nomor_telepon,
             'alamat' => $request->alamat,
+            'foto' => $fotoPath ?? null,
         ]);
 
         // Simpan bidang dampingannya (relasi many-to-many)
@@ -92,6 +99,7 @@ class DataFasilitatorController extends Controller
                 'email' => $fasilitator->email,
                 'nomor_telepon' => $fasilitator->nomor_telepon,
                 'alamat' => $fasilitator->alamat,
+                'foto' => $fasilitator->foto,
                 'bidang_dampingan' => $fasilitator->bidangs->pluck('id_bidang')->map(fn($id) => (string) $id),
             ],
             'bidangs' => $bidangs,
@@ -107,15 +115,23 @@ class DataFasilitatorController extends Controller
             'email' => 'required|email|unique:users,email,' . $id,
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
+            'foto' => 'nullable|image',
             'bidang_dampingan' => 'required|array|min:1',
             'bidang_dampingan.*' => 'exists:bidang,id_bidang',
         ]);
+
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('foto', 'public');
+
+            Storage::delete('public/' . $fasilitator->foto);
+        }
 
         $fasilitator->update([
             'name' => $request->name,
             'email' => $request->email,
             'nomor_telepon' => $request->nomor_telepon,
             'alamat' => $request->alamat,
+            'foto' => $fotoPath ?? null,
         ]);
 
         // Sinkronisasi bidang dampingan
@@ -127,6 +143,11 @@ class DataFasilitatorController extends Controller
     public function destroy($id)
     {
         $fasilitator = User::findOrFail($id);
+
+        // Hapus file foto jika ada
+        if ($fasilitator->foto && Storage::disk('public')->exists($fasilitator->foto)) {
+            Storage::disk('public')->delete($fasilitator->foto);
+        }
 
         // Hapus relasi terlebih dahulu
         $fasilitator->bidangs()->detach();

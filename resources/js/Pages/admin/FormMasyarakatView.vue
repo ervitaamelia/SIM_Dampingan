@@ -76,8 +76,7 @@ const isFormValid = computed(() => {
     form.id_bidang &&
     form.id_grup_dampingan
 
-  // Jika sedang create, pastikan foto juga diisi
-  return props.masyarakat ? allFieldsFilled : allFieldsFilled && form.foto
+  return allFieldsFilled
 })
 
 function handleSubmit() {
@@ -98,6 +97,7 @@ function handleSubmit() {
 
 <template>
   <AdminLayout>
+
     <Head :title="masyarakat ? 'Edit Masyarakat' : 'Tambah Masyarakat'" />
     <div class="ml-5 w-full max-md:w-full mx-auto flex justify-center">
       <section
@@ -107,9 +107,13 @@ function handleSubmit() {
             {{ masyarakat ? "Form Edit Masyarakat" : "Form Tambah Masyarakat" }}
           </h2>
           <form @submit.prevent="handleSubmit" enctype="multipart/form-data" class="mt-6 w-full">
+
+            <!-- Keterangan bintang merah -->
+            <p class="text-sm text-gray-500 mb-7"><span class="text-red-500">*</span> = wajib diisi</p>
+
             <!-- Nama Lengkap -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Nama Lengkap</label>
+              <label class="text-sm font-medium text-gray-600">Nama Lengkap <span class="text-red-500">*</span> </label>
               <input type="text" v-model="form.nama_lengkap"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan Nama Lengkap" />
@@ -120,7 +124,7 @@ function handleSubmit() {
 
             <!-- Tempat Lahir -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Tempat Lahir</label>
+              <label class="text-sm font-medium text-gray-600">Tempat Lahir <span class="text-red-500">*</span> </label>
               <input type="text" v-model="form.tempat_lahir"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan Tempat Lahir" />
@@ -131,7 +135,8 @@ function handleSubmit() {
 
             <!-- Tanggal Lahir -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Tanggal Lahir</label>
+              <label class="text-sm font-medium text-gray-600">Tanggal Lahir <span class="text-red-500">*</span>
+              </label>
               <input type="date" v-model="form.tanggal_lahir"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan Tanggal Lahir" />
@@ -142,7 +147,8 @@ function handleSubmit() {
 
             <!-- Jenis Kelamin -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Jenis Kelamin</label>
+              <label class="text-sm font-medium text-gray-600">Jenis Kelamin <span class="text-red-500">*</span>
+              </label>
               <div class="flex items-center gap-4 mt-1">
                 <label class="flex items-center gap-1 text-sm">
                   <input type="radio" value="Perempuan" v-model="form.jenis_kelamin" />
@@ -161,7 +167,7 @@ function handleSubmit() {
             <!-- Agama -->
             <div class="flex flex-col gap-2 pb-2">
               <label class="text-sm font-medium text-gray-600">
-                Agama
+                Agama <span class="text-red-500">*</span>
               </label>
               <Multiselect v-model="form.agama"
                 :options="['Islam', 'Kristen Protestan', 'Kristen Katolik', 'Hindu', 'Buddha', 'Konghucu']"
@@ -173,7 +179,7 @@ function handleSubmit() {
 
             <!-- No. Telepon -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">No. Telepon</label>
+              <label class="text-sm font-medium text-gray-600">No. Telepon <span class="text-red-500">*</span> </label>
               <input type="tel" v-model="form.nomor_telepon"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan No. Telepon" />
@@ -184,7 +190,7 @@ function handleSubmit() {
 
             <!-- Alamat -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Alamat</label>
+              <label class="text-sm font-medium text-gray-600">Alamat <span class="text-red-500">*</span> </label>
               <textarea v-model="form.alamat"
                 class="w-full h-20 py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm resize-none"
                 placeholder="Masukkan Alamat"></textarea>
@@ -195,7 +201,7 @@ function handleSubmit() {
 
             <!-- Status -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Status</label>
+              <label class="text-sm font-medium text-gray-600">Status <span class="text-red-500">*</span> </label>
               <div class="flex items-center gap-4 mt-1">
                 <label class="flex items-center gap-1 text-sm">
                   <input type="radio" value="Aktif" v-model="form.status" />
@@ -214,7 +220,7 @@ function handleSubmit() {
             <!-- Pekerjaan Utama -->
             <div class="flex flex-col gap-2 pb-2">
               <label class="text-sm font-medium text-gray-600">
-                Pekerjaan Utama
+                Pekerjaan Utama <span class="text-red-500">*</span>
               </label>
               <Multiselect v-model="form.id_pekerjaan" :options="pekerjaanOptions" placeholder="Pilih Pekerjaan"
                 class="w-full border border-gray-300 rounded-md shadow-sm text-sm" :searchable="true" />
@@ -226,7 +232,7 @@ function handleSubmit() {
             <!-- Bidang Dampingan -->
             <div class="flex flex-col gap-2 pb-2">
               <label class="text-sm font-medium text-gray-600">
-                Bidang Dampingan
+                Bidang Dampingan <span class="text-red-500">*</span>
               </label>
               <Multiselect v-model="form.id_bidang" :options="bidangOptions" placeholder="Pilih Bidang"
                 class="w-full border border-gray-300 rounded-md shadow-sm text-sm" />
@@ -238,17 +244,18 @@ function handleSubmit() {
             <!-- Grup Dampingan -->
             <div class="flex flex-col gap-2 pb-2">
               <label class="text-sm font-medium text-gray-600">
-                Grup Dampingan
+                Grup Dampingan <span class="text-red-500">*</span>
               </label>
-              <Multiselect v-model="form.id_grup_dampingan" :options="grupOptions" :disabled="!form.id_bidang" placeholder="Pilih Grup Dampingan"
-                class="w-full border border-gray-300 rounded-md shadow-sm text-sm" :searchable="true" />
+              <Multiselect v-model="form.id_grup_dampingan" :options="grupOptions" :disabled="!form.id_bidang"
+                placeholder="Pilih Grup Dampingan" class="w-full border border-gray-300 rounded-md shadow-sm text-sm"
+                :searchable="true" />
               <div v-if="form.errors.id_grup_dampingan" class="text-red-500 text-sm">
                 {{ form.errors.id_grup_dampingan }}
               </div>
             </div>
 
             <!-- Foto -->
-            <div class="mb-4">
+            <div class="flex flex-col gap-2 pb-2">
               <label class="text-sm font-medium text-gray-600">Foto</label>
               <input type="file" @change="form.foto = $event.target.files[0]"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" />

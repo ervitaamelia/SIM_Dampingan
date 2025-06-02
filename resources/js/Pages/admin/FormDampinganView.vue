@@ -190,9 +190,14 @@ const handleSubmit = () => {
           </h2>
 
           <form @submit.prevent="handleSubmit" class="mt-6 w-full">
+
+            <!-- Keterangan bintang merah -->
+            <p class="text-sm text-gray-500 mb-7"><span class="text-red-500">*</span> = wajib diisi</p>
+            
             <!-- Nama Grup Dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Nama Grup Dampingan</label>
+              <label class="text-sm font-medium text-gray-600">Nama Grup Dampingan <span class="text-red-500">*</span>
+              </label>
               <input v-model="form.nama_grup_dampingan" type="text"
                 class="w-full py-2 px-3 mt-1 border rounded-md outline-none text-sm" :class="{
                   'border-gray-400': !namaGrupError,
@@ -208,7 +213,8 @@ const handleSubmit = () => {
 
             <!-- Jenis Dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Jenis Dampingan</label>
+              <label class="text-sm font-medium text-gray-600">Jenis Dampingan <span class="text-red-500">*</span>
+              </label>
               <Multiselect v-model="form.jenis_dampingan" :options="['Pusat', 'Provinsi', 'Kabupaten', 'Kecamatan']"
                 placeholder="Pilih Jenis Dampingan"
                 class="w-full border border-gray-300 rounded-md shadow-sm text-sm" />
@@ -216,31 +222,35 @@ const handleSubmit = () => {
 
             <!-- Bidang Dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Bidang Dampingan</label>
+              <label class="text-sm font-medium text-gray-600">Bidang Dampingan <span class="text-red-500">*</span>
+              </label>
               <Multiselect v-model="form.id_bidang" :options="bidangOptions" placeholder="Pilih Bidang"
                 class="w-full border border-gray-300 rounded-md shadow-sm text-sm" />
             </div>
 
             <div class="flex flex-col gap-2 pb-2">
               <!-- Provinsi -->
-              <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
+              <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi <span
+                  class="text-red-500">*</span> </label>
               <Multiselect v-model="form.kode_provinsi" :options="provinsiList" placeholder="Pilih Provinsi"
                 :searchable="true" class="w-full" @update:modelValue="fetchKabupaten" />
 
               <!-- Kabupaten -->
-              <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
+              <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten <span
+                  class="text-red-500">*</span> </label>
               <Multiselect v-model="form.kode_kabupaten" :options="kabupatenList" placeholder="Pilih Kabupaten"
                 :searchable="true" class="w-full" :disabled="!form.kode_provinsi" @update:modelValue="fetchKecamatan" />
 
               <!-- Kecamatan -->
-              <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
+              <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan <span
+                  class="text-red-500">*</span> </label>
               <Multiselect v-model="form.kode_kecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
                 :searchable="true" class="w-full" :disabled="!form.kode_kabupaten" />
             </div>
 
             <!-- Fasilitator -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Fasilitator</label>
+              <label class="text-sm font-medium text-gray-600">Fasilitator <span class="text-red-500">*</span> </label>
 
               <div v-for="(item, index) in form.id_user" :key="index" class="flex gap-2 items-center gap-2 mb-2">
                 <Multiselect v-model="form.id_user[index]" :options="getFasilitatorOptions(index)"

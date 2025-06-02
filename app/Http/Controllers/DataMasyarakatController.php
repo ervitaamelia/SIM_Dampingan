@@ -69,7 +69,7 @@ class DataMasyarakatController extends Controller
             'nomor_telepon' => 'required|string|max:15',
             'alamat' => 'required',
             'status' => 'required|in:Aktif,Non Aktif',
-            'foto' => 'required|image',
+            'foto' => 'nullable|image',
             'id_pekerjaan' => 'required|exists:pekerjaan,id_pekerjaan',
             'id_bidang' => 'required|exists:bidang,id_bidang',
             'id_grup_dampingan' => 'required|exists:grup_dampingan,id_grup_dampingan',
@@ -123,7 +123,7 @@ class DataMasyarakatController extends Controller
             'nomor_telepon' => $request->nomor_telepon,
             'alamat' => $request->alamat,
             'status' => $request->status,
-            'foto' => $fotoPath,
+            'foto' => $fotoPath ?? null,
             'id_pekerjaan' => $request->id_pekerjaan,
             'id_bidang' => $request->id_bidang,
             'id_grup_dampingan' => $request->id_grup_dampingan,
@@ -158,10 +158,11 @@ class DataMasyarakatController extends Controller
             'alamat' => 'required',
             'status' => 'required|in:Aktif,Non Aktif',
             'id_pekerjaan' => 'required|exists:pekerjaan,id_pekerjaan',
+            'id_bidang' => 'required|exists:bidang,id_bidang',
+            'id_grup_dampingan' => 'required|exists:grup_dampingan,id_grup_dampingan',
         ]);
 
         if ($request->hasFile('foto')) {
-
             //upload new image
             $fotoPath = $request->file('foto')->store('foto', 'public');
 
@@ -180,10 +181,10 @@ class DataMasyarakatController extends Controller
                 'status' => $request->status,
                 'foto' => $fotoPath,
                 'id_pekerjaan' => $request->id_pekerjaan,
+                'id_bidang' => $request->id_bidang,
+                'id_grup_dampingan' => $request->id_grup_dampingan,
             ]);
-
         } else {
-
             //update product without image
             $masyarakat->update([
                 'nama_lengkap' => $request->nama_lengkap,
@@ -195,6 +196,8 @@ class DataMasyarakatController extends Controller
                 'alamat' => $request->alamat,
                 'status' => $request->status,
                 'id_pekerjaan' => $request->id_pekerjaan,
+                'id_bidang' => $request->id_bidang,
+                'id_grup_dampingan' => $request->id_grup_dampingan,
             ]);
         }
 
@@ -204,6 +207,12 @@ class DataMasyarakatController extends Controller
     public function destroy($id)
     {
         $masyarakat = Masyarakat::findOrFail($id);
+
+        // Hapus file foto jika ada
+        if ($masyarakat->foto && Storage::disk('public')->exists($masyarakat->foto)) {
+            Storage::disk('public')->delete($masyarakat->foto);
+        }
+
         $masyarakat->delete();
 
         return redirect()->route('masyarakat.index')->with('success', 'Data masyarakat berhasil dihapus.');

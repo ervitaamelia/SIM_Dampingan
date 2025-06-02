@@ -22,21 +22,19 @@ Route::get('/', [AuthenticatedSessionController::class, 'create'])
 
 Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
-//Dashboard Fasilitator
-Route::middleware(['auth', 'role:fasilitator'])->get('/fasilitator', [DashboardFasilitatorController::class, 'index']);
-
-//Logout route
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-    ->name('logout');
+//Dashboard fasilitator route
+Route::middleware(['auth', 'role:fasilitator'])
+    ->get('/fasilitator', [DashboardFasilitatorController::class, 'index'])
+    ->name('fasilitator.dashboard');
 
 //Dashboard admin route
 Route::get('/admin', [DashboardAdminController::class, 'index'])
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
-    ->name('dashboard');
+    ->name('admin.dashboard');
 
-// Route::get('/fasilitator', [DashboardFasilitatorController::class, 'index'])
-//     ->middleware(['auth', 'verified', 'role:fasilitator', EnsureUserRole::class . ':fasilitator'])
-//     ->name('dashboard');
+//Logout route
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->name('logout');
 
 //Bidang route
 Route::get('/bidang', [BidangController::class, 'index'])->name('bidang.index');
@@ -51,7 +49,7 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
         Route::get('/data-fasilitator/create', [DataFasilitatorController::class, 'create'])->name('fasilitator.create');
         Route::post('/data-fasilitator', [DataFasilitatorController::class, 'store'])->name('fasilitator.store');
         Route::get('/data-fasilitator/{id}/edit', [DataFasilitatorController::class, 'edit'])->name('fasilitator.edit');
-        Route::put('/data-fasilitator/{id}', [DataFasilitatorController::class, 'update'])->name('fasilitator.update');
+        Route::post('/data-fasilitator/{id}', [DataFasilitatorController::class, 'update'])->name('fasilitator.update');
         Route::delete('/data-fasilitator/{id}', [DataFasilitatorController::class, 'destroy'])->name('fasilitator.destroy');
     });
 
@@ -105,7 +103,6 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':fasilitator'])
         Route::get('/data-kegiatan/create', [DataKegiatanController::class, 'create'])->name('kegiatan.create');
         Route::post('/data-kegiatan', [DataKegiatanController::class, 'store'])->name('kegiatan.store');
         Route::get('/data-kegiatan/{id}/edit', [DataKegiatanController::class, 'edit'])->name('kegiatan.edit');
-        Route::put('/data-kegiatan/{id}', [DataKegiatanController::class, 'update'])->name('kegiatan.update');
         Route::post('/data-kegiatan/{id}', [DataKegiatanController::class, 'update'])->name('kegiatan.update');
         Route::delete('/data-kegiatan/{id}', [DataKegiatanController::class, 'destroy'])->name('kegiatan.destroy');
     });

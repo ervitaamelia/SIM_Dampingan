@@ -213,30 +213,32 @@ export default {
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
             <h2 class="text-xl font-bold">Data Masyarakat</h2>
             <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-              <a :href="route('masyarakat.create')" 
-                 class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded whitespace-nowrap">
+              <a :href="route('masyarakat.create')"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded whitespace-nowrap">
                 + Tambah
               </a>
-              
+
               <!-- Export Dropdown -->
               <div class="relative">
-                <button @click="toggleExportDropdown" 
-                        class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded flex items-center whitespace-nowrap">
+                <button @click="toggleExportDropdown"
+                  class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded flex items-center whitespace-nowrap">
                   <span class="mr-1">🖨</span> Cetak Data
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clip-rule="evenodd" />
                   </svg>
                 </button>
-                
-                <div v-if="showExportDropdown" 
-                     class="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+
+                <div v-if="showExportDropdown"
+                  class="absolute right-0 mt-1 w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200">
                   <div class="py-1">
-                    <button @click="downloadExcel" 
-                            class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-green-50 w-full text-left">
+                    <button @click="downloadExcel"
+                      class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-green-50 w-full text-left">
                       <span class="mr-2">📊</span> Export Excel
                     </button>
-                    <button @click="printPDF" 
-                            class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-green-50 w-full text-left">
+                    <button @click="printPDF"
+                      class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-green-50 w-full text-left">
                       <span class="mr-2">📄</span> Print PDF
                     </button>
                   </div>
@@ -287,9 +289,9 @@ export default {
                   <td>{{ masyarakat.bidang?.nama_bidang }}</td>
                   <td>{{ masyarakat.grup?.nama_grup_dampingan }}</td>
                   <td class="text-center">
-                    <a :href="route('masyarakat.edit', masyarakat.nomor_anggota)" class="text-blue-500">✏️</a>
-                    <button @click="confirmDelete(masyarakat.nomor_anggota)" class="text-red-500">🗑️</button>
-                    <button @click="downloadKartu(masyarakat)" class="text-green-500">🖨️</button>
+                    <a :href="route('masyarakat.edit', masyarakat.nomor_anggota)" class="text-blue-500">✏</a>
+                    <button @click="confirmDelete(masyarakat.nomor_anggota)" class="text-red-500">🗑</button>
+                    <button @click="downloadKartu(masyarakat)" class="text-green-500">🖨</button>
                   </td>
                   <td class="text-center">
                     <button @click="showDetails(masyarakat)"
@@ -311,29 +313,18 @@ export default {
               {{ paginationInfo }}
             </div>
             <div class="flex items-center gap-1">
-              <button
-                @click="goToPage(currentPage - 1)"
-                :disabled="currentPage === 1"
-                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
+                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
                 &lt;
               </button>
-              <button
-                v-for="page in totalPages"
-                :key="page"
-                @click="goToPage(page)"
-                :class="[
-                  'px-3 py-1 rounded',
-                  currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                ]"
-              >
+              <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
+                'px-3 py-1 rounded',
+                currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+              ]">
                 {{ page }}
               </button>
-              <button
-                @click="goToPage(currentPage + 1)"
-                :disabled="currentPage === totalPages"
-                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
+                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
                 &gt;
               </button>
             </div>
@@ -342,7 +333,8 @@ export default {
           <!-- Template Kartu Digital (Hidden) -->
           <div v-if="selectedMasyarakatForKartu" id="kartu-digital" class="invisible fixed top-0 left-0 p-10">
             <!-- HALAMAN DEPAN (Original Design) -->
-            <div class="w-[720px] bg-gray-200 shadow-2xl rounded-xl overflow-hidden border border-gray-500 flex flex-col">
+            <div
+              class="w-[720px] bg-gray-200 shadow-2xl rounded-xl overflow-hidden border border-gray-500 flex flex-col">
               <!-- Header -->
               <div class="bg-blue-700 flex items-center justify-start px-6 py-4">
                 <img src="/images/logo-mpm-kartu.png" class="object-contain w-12 h-13 mr-4" alt="Logo MPM" />
@@ -356,12 +348,8 @@ export default {
               <div class="flex px-6 py-4 gap-6">
                 <!-- Foto -->
                 <div class="w-[160px] flex items-center justify-center">
-                  <img
-                    v-if="selectedMasyarakatForKartu?.foto"
-                    :src="`/storage/${selectedMasyarakatForKartu.foto}`"
-                    alt="Foto"
-                    class="w-30 h-40 object-cover border rounded-md"
-                  />
+                  <img v-if="selectedMasyarakatForKartu?.foto" :src="`/storage/${selectedMasyarakatForKartu.foto}`"
+                    alt="Foto" class="w-30 h-40 object-cover border rounded-md" />
                 </div>
 
                 <!-- Data Anggota -->
@@ -373,7 +361,8 @@ export default {
                   <div>: {{ selectedMasyarakatForKartu.nama_lengkap }}</div>
 
                   <div class="font-medium">Tempat, Tgl Lahir</div>
-                  <div>: {{ selectedMasyarakatForKartu.tempat_lahir }}, {{ formatTanggal(selectedMasyarakatForKartu.tanggal_lahir) }}</div>
+                  <div>: {{ selectedMasyarakatForKartu.tempat_lahir }}, {{
+                    formatTanggal(selectedMasyarakatForKartu.tanggal_lahir) }}</div>
 
                   <div class="font-medium">Jenis Kelamin</div>
                   <div>: {{ selectedMasyarakatForKartu.jenis_kelamin }}</div>
@@ -399,7 +388,8 @@ export default {
             </div>
 
             <!-- HALAMAN BELAKANG (Match Front Size) -->
-            <div class="w-[720px] bg-gray-200 shadow-2xl rounded-xl overflow-hidden border border-gray-500 flex flex-col items-center justify-center mt-6">
+            <div
+              class="w-[720px] bg-gray-200 shadow-2xl rounded-xl overflow-hidden border border-gray-500 flex flex-col items-center justify-center mt-6">
               <!-- Header Back -->
               <div class="bg-blue-700 text-center pt-7 pb-4 w-full">
                 <div class="text-3xl font-bold text-white">Verifikasi Keanggotaan</div>
@@ -408,13 +398,9 @@ export default {
               <!-- Back Content -->
               <div class="flex flex-col items-center justify-center p-8">
                 <div class="text-xl font-semibold mb-4">Scan untuk verifikasi</div>
-                <img
-                  v-if="qrCodeDataUrl"
-                  :src="qrCodeDataUrl"
-                  alt="QR Code"
-                  class="w-32 h-32"
-                />
-                <div class="mt-4 text-gray-700 text-sm font-medium">No. Anggota: {{ selectedMasyarakatForKartu.nomor_anggota }}</div>
+                <img v-if="qrCodeDataUrl" :src="qrCodeDataUrl" alt="QR Code" class="w-32 h-32" />
+                <div class="mt-4 text-gray-700 text-sm font-medium">No. Anggota: {{
+                  selectedMasyarakatForKartu.nomor_anggota }}</div>
               </div>
             </div>
           </div>
@@ -424,18 +410,23 @@ export default {
             <div class="bg-white p-6 rounded-lg shadow-xl w-80">
               <div class="flex items-center mb-4">
                 <div class="bg-red-100 p-2 rounded-full mr-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
                 <h3 class="text-lg font-medium">Konfirmasi Hapus</h3>
               </div>
-              <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+              <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat
+                dibatalkan.</p>
               <div class="flex justify-end gap-3">
-                <button @click="showPopupHapus = false" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                <button @click="showPopupHapus = false"
+                  class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
                   Batal
                 </button>
-                <button @click="deleteItem(selectedMasyarakatId); showPopupHapus = false" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                <button @click="deleteItem(selectedMasyarakatId); showPopupHapus = false"
+                  class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
                   Hapus
                 </button>
               </div>
@@ -448,7 +439,8 @@ export default {
               <img src="/images/logo-mpm.png" class="object-contain w-12 h-12 mr-4" alt="Logo MPM" />
               <div>
                 <h1 class="text-2xl font-bold">MPM Muhammadiyah</h1>
-                <p class="text-sm">Jl. KH. Ahmad Dahlan No. 103, Notoprajan, Ngampilan, Daerah Istimewa Yogyakarta • Telp: (0274) 375025 • @kabarmpm</p>
+                <p class="text-sm">Jl. KH. Ahmad Dahlan No. 103, Notoprajan, Ngampilan, Daerah Istimewa Yogyakarta •
+                  Telp: (0274) 375025 • @kabarmpm</p>
               </div>
             </div>
             <h2 class="text-xl font-semibold text-center mb-4">Daftar Data Masyarakat</h2>
@@ -489,8 +481,9 @@ export default {
                 class="absolute top-4 right-4 text-gray-600 hover:text-red-500 text-xl">✖</button>
 
               <div class="flex items-center gap-4 mb-6">
-                <img :src="`/storage/${selectedMasyarakat.foto}`" alt="Foto"
-                  class="w-16 h-16 rounded-full object-cover border" />
+                <img
+                  :src="selectedMasyarakat.foto ? `/storage/${selectedMasyarakat.foto}` : '/images/default-profile.png'"
+                  alt="Foto" class="w-16 h-16 rounded-full object-cover border" />
                 <div>
                   <h3 class="text-2xl font-bold">{{ selectedMasyarakat.nama_lengkap }}</h3>
                   <p class="text-base">{{ selectedMasyarakat.nomor_anggota }}</p>
@@ -518,7 +511,12 @@ export default {
                   </tr>
                   <tr class="border-b">
                     <td class="font-semibold py-2 pr-4">No. Telepon</td>
-                    <td class="py-2">{{ selectedMasyarakat.nomor_telepon }}</td>
+                    <td class="py-2">
+                      <a :href="`https://wa.me/${selectedMasyarakat.nomor_telepon.replace(/^0/, '62')}`"
+                        class="text-green-600 hover:underline">
+                        {{ selectedMasyarakat.nomor_telepon }}
+                      </a>
+                    </td>
                   </tr>
                   <tr class="border-b">
                     <td class="font-semibold py-2 pr-4">Alamat</td>
@@ -552,7 +550,8 @@ export default {
   body * {
     visibility: hidden;
   }
-  #print-area, #print-area * {
+  #print-area,
+  #print-area * {
     visibility: visible;
   }
   #print-area {

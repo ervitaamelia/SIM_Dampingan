@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('nomor_telepon', 15);
             $table->text('alamat');
             $table->enum('status', ['Aktif', 'Non Aktif']);
-            $table->string('foto', 255);
+            $table->string('foto', 255)->nullable();
             $table->unsignedBigInteger('id_pekerjaan');
             $table->unsignedBigInteger('id_bidang');
             $table->unsignedBigInteger('id_grup_dampingan');

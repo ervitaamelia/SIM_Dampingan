@@ -24,6 +24,7 @@ class User extends Authenticatable
         'nomor_telepon',
         'alamat',
         'role',
+        'foto',
         'kode_provinsi',
         'kode_kabupaten',
         'kode_kecamatan'
@@ -55,7 +56,7 @@ class User extends Authenticatable
     public function bidangs()
     {
         return $this->belongsToMany(Bidang::class, 'bidang_dampingan', 'id_user', 'id_bidang')
-            ->withTimestamps(); // karena tabel ada `created_at` & `updated_at`
+            ->withTimestamps();
     }
 
     public function grupDampingan()

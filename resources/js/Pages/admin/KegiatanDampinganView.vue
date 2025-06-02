@@ -39,7 +39,7 @@ const paginationInfo = computed(() => {
   const total = sortedKegiatans.value.length;
   const from = (currentPage.value - 1) * perPage + 1;
   const to = Math.min(currentPage.value * perPage, total);
-  return `Menampilkan ${from} - ${to} dari ${total} kegiatan`;
+  return `Menampilkan ${from}-${to} dari ${total} kegiatan`;
 });
 
 const goToPage = (page) => {

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('nomor_telepon', 15)->nullable();
             $table->string('alamat')->nullable();
             $table->enum('role', ['superadmin', 'admin-provinsi', 'admin-kabupaten', 'admin-kecamatan', 'fasilitator'])->default('fasilitator');
+            $table->string('foto',255)->nullable();
             
             // Menggunakan kode sebagai foreign key
             $table->string('kode_provinsi')->nullable();

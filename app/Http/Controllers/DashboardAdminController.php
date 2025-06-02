@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\GrupDampingan;
 use App\Models\Masyarakat;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
 
