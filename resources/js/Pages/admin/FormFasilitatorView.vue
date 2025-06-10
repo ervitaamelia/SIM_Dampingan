@@ -1,6 +1,6 @@
 <script setup>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
-import { onMounted, computed, ref } from "vue";
+import { onMounted, computed, ref, watch } from "vue";
 import { Head, useForm } from "@inertiajs/vue3";
 import Multiselect from '@vueform/multiselect';
 import '@vueform/multiselect/themes/default.css';
@@ -15,25 +15,22 @@ const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
 
-const form = useForm({
+const form = useForm(props.fasilitator ? {
+  name: props.fasilitator.name,
+  username: props.fasilitator.username,
+  nomor_telepon: props.fasilitator.nomor_telepon,
+  alamat: props.fasilitator.alamat,
+  foto: null,
+  bidang_dampingan: props.fasilitator.bidang_dampingan || [""],
+  _method: props.fasilitator ? 'PUT' : 'POST'
+} : {
   name: "",
-  email: "",
+  username: "",
   password: "",
   nomor_telepon: "",
   alamat: "",
   foto: null,
   bidang_dampingan: [""],
-});
-
-onMounted(() => {
-  if (props.fasilitator) {
-    form.name = props.fasilitator.name;
-    form.email = props.fasilitator.email;
-    form.nomor_telepon = props.fasilitator.nomor_telepon;
-    form.alamat = props.fasilitator.alamat;
-    form.foto = props.fasilitator.foto ?? null,
-    form.bidang_dampingan = props.fasilitator.bidang_dampingan || [""];
-  }
 });
 
 const getBidangOptions = (index) => {
@@ -58,10 +55,38 @@ const removeBidang = (index) => {
   }
 };
 
+const usernameError = ref("");
+const usernameValid = ref(false);
+
+watch(() => form.username, async (newValue) => {
+  usernameError.value = "";
+  usernameValid.value = false;
+
+  if (!newValue) return;
+
+  try {
+    const query = new URLSearchParams({
+      username: newValue,
+      id: props.fasilitator?.id ?? ""
+    });
+
+    const res = await fetch(`/api/check-username?${query}`);
+    const data = await res.json();
+
+    if (data.exists) {
+      usernameError.value = "Username sudah digunakan.";
+    } else {
+      usernameValid.value = true;
+    }
+  } catch (e) {
+    console.error("Gagal memeriksa username:", e);
+  }
+});
+
 const isFormValid = computed(() => {
   return (
     form.name.trim() !== "" &&
-    form.email.trim() !== "" &&
+    form.username.trim() !== "" &&
     (props.fasilitator || form.password.trim() !== "") &&
     form.nomor_telepon.trim() !== "" &&
     form.alamat.trim() !== "" &&
@@ -70,13 +95,22 @@ const isFormValid = computed(() => {
 });
 
 const handleSubmit = () => {
+  if (!form.foto) {
+    delete form.foto; // hanya kirim jika ada file baru
+  }
+
   if (props.fasilitator) {
-    form.post(`/admin/data-fasilitator/${props.fasilitator.id}`,{
-      _method: 'put',
-      forceFormData: true
-    });
+    // Untuk update, gunakan post dengan _method PUT
+    form.post(route('fasilitator.update', props.fasilitator.id), {
+      forceFormData: true,
+      preserveScroll: true,
+      onSuccess: () => form.reset(),
+    })
   } else {
-    form.post("/admin/data-fasilitator");
+    form.post(route('fasilitator.store'), {
+      preserveScroll: true,
+      onSuccess: () => form.reset(),
+    })
   }
 };
 </script>
@@ -94,14 +128,16 @@ const handleSubmit = () => {
             {{ props.fasilitator ? "Form Edit Fasilitator" : "Form Tambah Fasilitator" }}
           </h2>
 
-          <form @submit.prevent="handleSubmit" class="mt-6 w-full">
+          <form @submit.prevent="handleSubmit" enctype="multipart/form-data" class="mt-6 w-full">
 
-            <!-- Keterangan bintang merah -->
-            <p class="text-sm text-gray-500 mb-7"><span class="text-red-500">*</span> = wajib diisi</p> 
+            <p class="text-sm text-gray-600 mb-4">
+              Kolom yang ditandai dengan <span class="text-red-500 font-semibold">*</span> wajib diisi.
+            </p>
 
             <!-- Nama Lengkap -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="name" class="text-sm font-medium text-gray-600">Nama Lengkap <span class="text-red-500">*</span></label>
+              <label for="name" class="text-sm font-medium text-gray-600">Nama Lengkap <span
+                  class="text-red-500">*</span></label>
               <input id="name" type="text" v-model="form.name"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan Nama Lengkap" />
@@ -109,7 +145,8 @@ const handleSubmit = () => {
 
             <!-- Alamat -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="alamat" class="text-sm font-medium text-gray-600">Alamat <span class="text-red-500">*</span></label>
+              <label for="alamat" class="text-sm font-medium text-gray-600">Alamat <span
+                  class="text-red-500">*</span></label>
               <textarea id="alamat" v-model="form.alamat" rows="4"
                 class="w-full py-3 px-3 mt-1 border border-gray-400 rounded-md outline-none text-base resize-none"
                 placeholder="Masukkan Alamat"></textarea>
@@ -117,7 +154,8 @@ const handleSubmit = () => {
 
             <!-- No. Telepon -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="nomor_telepon" class="text-sm font-medium text-gray-600">No. Telepon <span class="text-red-500">*</span></label>
+              <label for="nomor_telepon" class="text-sm font-medium text-gray-600">No. Telepon <span
+                  class="text-red-500">*</span></label>
               <input id="nomor_telepon" type="tel" v-model="form.nomor_telepon"
                 class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
                 placeholder="Masukkan No. Telepon" />
@@ -125,7 +163,8 @@ const handleSubmit = () => {
 
             <!-- Bidang Dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Bidang Dampingan <span class="text-red-500">*</span></label>
+              <label class="text-sm font-medium text-gray-600">Bidang Dampingan <span
+                  class="text-red-500">*</span></label>
 
               <div v-for="(bidang, index) in form.bidang_dampingan" :key="index" class="flex items-center gap-2 mb-2">
                 <Multiselect v-model="form.bidang_dampingan[index]" :options="getBidangOptions(index)"
@@ -144,17 +183,28 @@ const handleSubmit = () => {
               </div>
             </div>
 
-            <!-- Email -->
+            <!-- Username -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="email" class="text-sm font-medium text-gray-600">Email <span class="text-red-500">*</span></label>
-              <input id="email" type="email" v-model="form.email"
-                class="w-full py-2 px-3 mt-1 border border-gray-400 rounded-md outline-none text-sm"
-                placeholder="Masukkan Email" />
+              <label for="username" class="text-sm font-medium text-gray-600">Username <span
+                  class="text-red-500">*</span></label>
+              <input id="username" type="text" v-model="form.username"
+                class="w-full py-2 px-3 mt-1 border rounded-md outline-none text-sm" :class="{
+                  'border-gray-400': !usernameError,
+                  'border-red-500': usernameError
+                }"
+                placeholder="Masukkan Username" />
+              <div v-if="usernameError" class="text-red-500 text-sm">
+                {{ usernameError }}
+              </div>
+              <div v-else-if="usernameValid && form.username" class="text-green-500 text-sm">
+                Username tersedia.
+              </div>
             </div>
 
             <!-- Password dengan toggle icon -->
             <div v-if="!props.fasilitator" class="flex flex-col gap-2 mb-2">
-              <label for="password" class="text-sm font-medium text-gray-600">Password <span class="text-red-500">*</span></label>
+              <label for="password" class="text-sm font-medium text-gray-600">Password <span
+                  class="text-red-500">*</span></label>
               <div class="relative">
                 <input id="password" :type="showPassword ? 'text' : 'password'" v-model="form.password"
                   placeholder="Masukkan Password"

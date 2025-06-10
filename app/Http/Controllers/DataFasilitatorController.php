@@ -59,7 +59,7 @@ class DataFasilitatorController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
+            'username' => 'required|string|unique:users,username',
             'password' => 'required|min:6',
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
@@ -74,7 +74,7 @@ class DataFasilitatorController extends Controller
 
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'username' => $request->username,
             'password' => Hash::make($request->password),
             'nomor_telepon' => $request->nomor_telepon,
             'alamat' => $request->alamat,
@@ -96,7 +96,7 @@ class DataFasilitatorController extends Controller
             'fasilitator' => [
                 'id' => $fasilitator->id,
                 'name' => $fasilitator->name,
-                'email' => $fasilitator->email,
+                'username' => $fasilitator->username,
                 'nomor_telepon' => $fasilitator->nomor_telepon,
                 'alamat' => $fasilitator->alamat,
                 'foto' => $fasilitator->foto,
@@ -112,29 +112,29 @@ class DataFasilitatorController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email,' . $id,
+            'username' => 'required|string|unique:users,username,' . $id,
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
-            'foto' => 'nullable|image',
             'bidang_dampingan' => 'required|array|min:1',
             'bidang_dampingan.*' => 'exists:bidang,id_bidang',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
+
+        $data = $request->only(['name', 'username', 'nomor_telepon', 'alamat']);
 
         if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('foto', 'public');
+            // Hapus foto lama
+            if ($fasilitator->foto && Storage::disk('public')->exists($fasilitator->foto)) {
+                Storage::disk('public')->delete($fasilitator->foto);
+            }
 
-            Storage::delete('public/' . $fasilitator->foto);
+            // Simpan foto baru
+            $fotoPath = $request->file('foto')->store('foto', 'public');
+            $data['foto'] = $fotoPath;
         }
 
-        $fasilitator->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'nomor_telepon' => $request->nomor_telepon,
-            'alamat' => $request->alamat,
-            'foto' => $fotoPath ?? null,
-        ]);
+        $fasilitator->update($data);
 
-        // Sinkronisasi bidang dampingan
         $fasilitator->bidangs()->sync($request->bidang_dampingan);
 
         return redirect()->route('fasilitator.index')->with('success', 'Fasilitator berhasil diperbarui!');
@@ -156,5 +156,35 @@ class DataFasilitatorController extends Controller
         $fasilitator->delete();
 
         return redirect()->route('fasilitator.index')->with('success', 'Fasilitator berhasil dihapus!');
+    }
+
+    public function resetPassword($id)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Akses tidak diizinkan');
+        }
+
+        $fasilitator = User::findOrFail($id);
+
+        $fasilitator->password = Hash::make('12345678');
+        $fasilitator->save();
+
+        return redirect()->route('fasilitator.index')->with('success', 'Password berhasil direset ke default');
+    }
+
+    public function checkUsername(Request $request)
+    {
+        $username = $request->query('username');
+        $id = $request->query('id'); // untuk pengecualian saat edit
+
+        $query = User::where('username', $username);
+
+        if ($id) {
+            $query->where('id', '!=', $id);
+        }
+
+        $exists = $query->exists();
+
+        return response()->json(['exists' => $exists]);
     }
 }

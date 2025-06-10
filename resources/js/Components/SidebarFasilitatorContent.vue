@@ -41,10 +41,18 @@ export default {
 </script>
 
 <template>
-  <button class="lg:hidden block text-gray-600" @click="isMenuOpen = !isMenuOpen">☰</button>
+  <button class="lg:hidden fixed top-4 left-4 z-50 text-gray-600 bg-white shadow p-2 rounded" @click="isMenuOpen = !isMenuOpen">☰</button>
 
-  <aside :class="isMenuOpen ? 'block' : 'hidden'" class="w-72 bg-white shadow-md p-4 lg:block">
-    <nav class="flex flex-col items-start py-5 pr-7 pl-2 w-full">
+  <aside
+    :class="[
+      'fixed top-0 left-0 z-40 h-full min-h-screen bg-white shadow-md transition-transform duration-300 ease-in-out',
+      isMenuOpen ? 'translate-x-0' : '-translate-x-full',
+      'lg:translate-x-0 lg:static lg:block w-72'
+    ]"
+    class="overflow-y-auto p-4"
+  >
+    <!-- Header -->
+    <nav class="flex flex-col items-start pb-5 pr-7 pl-2 w-full">
       <header class="flex gap-4 items-center text-2xl font-semibold text-black">
         <img src="/images/logo-mpm.png" class="object-contain w-10" alt="Logo MPM" />
         <h1>Dashboard</h1>
@@ -89,9 +97,13 @@ export default {
     </ul>
 
     <!-- Logout -->
-    <Link as="button" method="post" href="/logout"
-      class="w-full py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 mt-80">
-    Keluar
+    <Link
+      as="button"
+      method="post"
+      href="/logout"
+      class="w-full py-2 bg-red-600 text-white font-medium rounded-md hover:bg-red-700 mt-10 lg:mt-80"
+    >
+      Keluar
     </Link>
   </aside>
 </template>

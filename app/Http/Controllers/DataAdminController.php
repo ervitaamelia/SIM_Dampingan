@@ -49,16 +49,10 @@ class DataAdminController extends Controller
 
         return Inertia::render('admin/DataAdminView', [
             'data' => $admins,
-            'provinsiList' => $provinsiList,
-            'userWilayah' => [
-                'role' => $user->role,
-                'kode_provinsi' => $user->kode_provinsi,
-                'kode_kabupaten' => $user->kode_kabupaten,
-                'kode_kecamatan' => $user->kode_kecamatan,
-                'nama_provinsi' => $user->provinsi->nama ?? null, // Pastikan relasi provinsi ada di model User
-            ]
+            'provinsiList' => $provinsiList
         ]);
     }
+
     public function create()
     {
         return inertia('admin/FormAdminView', [
@@ -72,7 +66,7 @@ class DataAdminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
+            'username' => 'required|string|unique:users,username',
             'password' => 'required|min:6',
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
@@ -84,7 +78,7 @@ class DataAdminController extends Controller
 
         User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'username' => $request->username,
             'password' => Hash::make($request->password),
             'nomor_telepon' => $request->nomor_telepon,
             'alamat' => $request->alamat,
@@ -105,7 +99,7 @@ class DataAdminController extends Controller
             'admin' => [
                 'id' => $admin->id,
                 'name' => $admin->name,
-                'email' => $admin->email,
+                'username' => $admin->username,
                 'nomor_telepon' => $admin->nomor_telepon,
                 'alamat' => $admin->alamat,
             ],
@@ -118,14 +112,14 @@ class DataAdminController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email,' . $id,
+            'username' => 'required|string|unique:users,username,' . $id,
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
         ]);
 
         $admin->update([
             'name' => $request->name,
-            'email' => $request->email,
+            'username' => $request->username,
             'nomor_telepon' => $request->nomor_telepon,
             'alamat' => $request->alamat,
         ]);
@@ -133,12 +127,25 @@ class DataAdminController extends Controller
         return redirect()->route('admin.index')->with('success', 'Admin berhasil diperbarui!');
     }
 
-
     public function destroy($id)
     {
         $admin = User::findOrFail($id);
         $admin->delete();
 
         return redirect()->route('admin.index')->with('success', 'Admin berhasil dihapus!');
+    }
+
+    public function resetPassword($id)
+    {
+        if (auth()->user()->role !== 'superadmin') {
+            abort(403, 'Akses tidak diizinkan');
+        }
+
+        $admin = User::findOrFail($id);
+
+        $admin->password = Hash::make('12345678');
+        $admin->save();
+
+        return redirect()->route('admin.index')->with('success', 'Password berhasil direset ke default');
     }
 }

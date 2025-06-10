@@ -21,11 +21,11 @@ return new class extends Migration
             $table->string('nomor_telepon', 15);
             $table->text('alamat');
             $table->enum('status', ['Aktif', 'Non Aktif']);
+            $table->enum('peran', ['koordinator', 'anggota'])->default('anggota');
             $table->string('foto', 255)->nullable();
             $table->unsignedBigInteger('id_pekerjaan');
             $table->unsignedBigInteger('id_bidang');
             $table->unsignedBigInteger('id_grup_dampingan');
-            
             $table->foreign('id_pekerjaan')->references('id_pekerjaan')->on('pekerjaan');
             $table->foreign('id_bidang')->references('id_bidang')->on('bidang');
             $table->foreign('id_grup_dampingan')->references('id_grup_dampingan')->on('grup_dampingan');

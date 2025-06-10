@@ -51,10 +51,16 @@ class DataMasyarakatController extends Controller
 
     public function create()
     {
+        $grupKoordinatorMap = Masyarakat::where('peran', 'koordinator')
+            ->get()
+            ->groupBy('id_grup_dampingan')
+            ->map(fn($group) => $group->first()->nama_lengkap);
+
         return Inertia::render('admin/FormMasyarakatView', [
             'pekerjaans' => Pekerjaan::all(['id_pekerjaan', 'nama_pekerjaan']),
             'bidangs' => Bidang::all(['id_bidang', 'nama_bidang']),
             'grups' => GrupDampingan::with(['bidang:id_bidang,nama_bidang'])->get(['id_grup_dampingan', 'nama_grup_dampingan', 'id_bidang']),
+            'grupKoordinators' => $grupKoordinatorMap,
         ]);
     }
 
@@ -69,6 +75,7 @@ class DataMasyarakatController extends Controller
             'nomor_telepon' => 'required|string|max:15',
             'alamat' => 'required',
             'status' => 'required|in:Aktif,Non Aktif',
+            'peran' => 'required|in:koordinator,anggota',
             'foto' => 'nullable|image',
             'id_pekerjaan' => 'required|exists:pekerjaan,id_pekerjaan',
             'id_bidang' => 'required|exists:bidang,id_bidang',
@@ -104,14 +111,16 @@ class DataMasyarakatController extends Controller
             ->orderBy('nomor_anggota', 'desc')
             ->first();
 
-        $nextNumber = 1;
-        if ($last) {
-            $lastNumber = intval(substr($last->nomor_anggota, strlen($prefix)));
-            $nextNumber = $lastNumber + 1;
-        }
+        $nextNumber = $last ? intval(substr($last->nomor_anggota, strlen($prefix))) + 1 : 1;
 
         // Buat nomor anggota baru dengan 4 digit increment
         $nomor_anggota = $prefix . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+        $affected = 0;
+        if ($request->peran === 'koordinator') {
+            $affected = Masyarakat::where('id_grup_dampingan', $request->id_grup_dampingan)
+                ->update(['peran' => 'anggota']);
+        }
 
         Masyarakat::create([
             'nomor_anggota' => $nomor_anggota,
@@ -123,24 +132,32 @@ class DataMasyarakatController extends Controller
             'nomor_telepon' => $request->nomor_telepon,
             'alamat' => $request->alamat,
             'status' => $request->status,
+            'peran' => $request->peran,
             'foto' => $fotoPath ?? null,
             'id_pekerjaan' => $request->id_pekerjaan,
             'id_bidang' => $request->id_bidang,
             'id_grup_dampingan' => $request->id_grup_dampingan,
         ]);
 
-        return redirect()->route('masyarakat.index')->with('success', 'Data masyarakat berhasil ditambahkan.');
+        return redirect()->route('masyarakat.index')
+            ->with('success', 'Data masyarakat berhasil ditambahkan.' . ($affected ? ' Koordinator sebelumnya telah diubah menjadi anggota.' : ''));
     }
 
     public function edit($id)
     {
         $masyarakat = Masyarakat::findOrFail($id);
 
+        $grupKoordinatorMap = Masyarakat::where('peran', 'koordinator')
+            ->get()
+            ->groupBy('id_grup_dampingan')
+            ->map(fn($group) => $group->first()->nama_lengkap);
+
         return Inertia::render('admin/FormMasyarakatView', [
             'masyarakat' => $masyarakat,
             'pekerjaans' => Pekerjaan::all(['id_pekerjaan', 'nama_pekerjaan']),
             'bidangs' => Bidang::all(['id_bidang', 'nama_bidang']),
             'grups' => GrupDampingan::with(['bidang:id_bidang,nama_bidang'])->get(['id_grup_dampingan', 'nama_grup_dampingan', 'id_bidang']),
+            'grupKoordinators' => $grupKoordinatorMap,
         ]);
     }
 
@@ -157,10 +174,19 @@ class DataMasyarakatController extends Controller
             'nomor_telepon' => 'required|string|max:15',
             'alamat' => 'required',
             'status' => 'required|in:Aktif,Non Aktif',
+            'peran' => 'required|in:koordinator,anggota',
             'id_pekerjaan' => 'required|exists:pekerjaan,id_pekerjaan',
             'id_bidang' => 'required|exists:bidang,id_bidang',
             'id_grup_dampingan' => 'required|exists:grup_dampingan,id_grup_dampingan',
         ]);
+
+        if ($request->peran === 'koordinator') {
+            $affected = Masyarakat::where('id_grup_dampingan', $request->id_grup_dampingan)
+                ->where('nomor_anggota', '!=', $masyarakat->nomor_anggota)
+                ->update(['peran' => 'anggota']);
+        } else {
+            $affected = 0;
+        }
 
         if ($request->hasFile('foto')) {
             //upload new image
@@ -179,6 +205,7 @@ class DataMasyarakatController extends Controller
                 'nomor_telepon' => $request->nomor_telepon,
                 'alamat' => $request->alamat,
                 'status' => $request->status,
+                'peran' => $request->peran,
                 'foto' => $fotoPath,
                 'id_pekerjaan' => $request->id_pekerjaan,
                 'id_bidang' => $request->id_bidang,
@@ -195,13 +222,15 @@ class DataMasyarakatController extends Controller
                 'nomor_telepon' => $request->nomor_telepon,
                 'alamat' => $request->alamat,
                 'status' => $request->status,
+                'peran' => $request->peran,
                 'id_pekerjaan' => $request->id_pekerjaan,
                 'id_bidang' => $request->id_bidang,
                 'id_grup_dampingan' => $request->id_grup_dampingan,
             ]);
         }
 
-        return redirect()->route('masyarakat.index')->with('success', 'Data masyarakat berhasil diperbarui.');
+        return redirect()->route('masyarakat.index')
+            ->with('success', 'Data masyarakat berhasil diperbarui.' . ($affected ? ' Koordinator sebelumnya telah diubah menjadi anggota.' : ''));
     }
 
     public function destroy($id)

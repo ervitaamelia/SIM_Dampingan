@@ -534,6 +534,10 @@ export default {
                     <td class="font-semibold py-2 pr-4">Grup Dampingan</td>
                     <td class="py-2">{{ selectedMasyarakat.grup?.nama_grup_dampingan }}</td>
                   </tr>
+                  <tr>
+                    <td class="font-semibold py-2 pr-4">Peran</td>
+                    <td class="py-2">{{ selectedMasyarakat.peran }}</td>
+                  </tr>
                 </tbody>
               </table>
             </div>

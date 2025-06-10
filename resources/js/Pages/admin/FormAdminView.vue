@@ -12,25 +12,6 @@ const { admin, auth } = defineProps({
 
 const errors = ref({})
 
-const validateForm = () => {
-  errors.value = {}
-
-  if (!form.name) errors.value.name = 'Nama wajib diisi'
-  if (!form.email) errors.value.email = 'Email wajib diisi'
-  if (!form.nomor_telepon) errors.value.nomor_telepon = 'No. Telepon wajib diisi'
-  if (!form.alamat) errors.value.alamat = 'Alamat wajib diisi'
-  if (!admin && !form.password) errors.value.password = 'Password wajib diisi'
-  if (!form.role) errors.value.role = 'Role wajib dipilih'
-
-  if (form.role === 'admin-kabupaten' && !form.kode_kabupaten)
-    errors.value.kode_kabupaten = 'Kabupaten wajib dipilih'
-
-  if (form.role === 'admin-kecamatan' && !form.kode_kecamatan)
-    errors.value.kode_kecamatan = 'Kecamatan wajib dipilih'
-
-  return Object.keys(errors.value).length === 0
-}
-
 const showPassword = ref(false);
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
@@ -60,7 +41,7 @@ const roleOptions = computed(() => {
 
 const form = useForm({
   name: '',
-  email: '',
+  username: '',
   password: '',
   nomor_telepon: '',
   alamat: '',
@@ -134,7 +115,7 @@ onMounted(() => {
   // Jika edit admin, set nilai form dan fetch wilayah
   if (admin) {
     form.name = admin.name
-    form.email = admin.email
+    form.username = admin.username
     form.nomor_telepon = admin.nomor_telepon
     form.alamat = admin.alamat
     form.kode_provinsi = admin.kode_provinsi
@@ -189,21 +170,36 @@ watch(() => form.kode_kabupaten, (val) => {
   fetchKecamatan(val)
 })
 
-const handleSubmit = () => {
-  if (!validateForm()) {
-    alert('Harap lengkapi semua field yang wajib diisi.')
-    return
-  }
+const usernameError = ref("");
+const usernameValid = ref(false);
 
-  if (admin) {
-    form.put(`/admin/data-admin/${admin.id}`)
-  } else {
-    form.post('/admin/data-admin')
+watch(() => form.username, async (newValue) => {
+  usernameError.value = "";
+  usernameValid.value = false;
+
+  if (!newValue) return;
+
+  try {
+    const query = new URLSearchParams({
+      username: newValue,
+      id: admin?.id ?? ""
+    });
+
+    const res = await fetch(`/api/check-username?${query}`);
+    const data = await res.json();
+
+    if (data.exists) {
+      usernameError.value = "Username sudah digunakan.";
+    } else {
+      usernameValid.value = true;
+    }
+  } catch (e) {
+    console.error("Gagal memeriksa username:", e);
   }
-}
+});
 
 const isFormIncomplete = computed(() => {
-  if (!form.name || !form.email || !form.nomor_telepon || !form.alamat) return true
+  if (!form.name || !form.username || !form.nomor_telepon || !form.alamat) return true
   if (!admin && !form.password) return true
   if (!form.role) return true
 
@@ -212,6 +208,14 @@ const isFormIncomplete = computed(() => {
 
   return false
 })
+
+const handleSubmit = () => {
+  if (admin) {
+    form.put(`/admin/data-admin/${admin.id}`)
+  } else {
+    form.post('/admin/data-admin')
+  }
+}
 </script>
 
 <template>
@@ -228,8 +232,9 @@ const isFormIncomplete = computed(() => {
           </h2>
           <form @submit.prevent="handleSubmit" class="mt-6 w-full">
 
-            <!-- Keterangan bintang merah -->
-            <p class="text-sm text-gray-500 mb-7"><span class="text-red-500">*</span> = wajib diisi</p>
+            <p class="text-sm text-gray-600 mb-4">
+              Kolom yang ditandai dengan <span class="text-red-500 font-semibold">*</span> wajib diisi.
+            </p>
 
             <!-- Role -->
             <div class="flex flex-col gap-2 pb-2" v-if="!admin && roleOptions.length > 0">
@@ -244,14 +249,13 @@ const isFormIncomplete = computed(() => {
               </select>
             </div>
 
-            <!-- Nama Lengkap -->
+            <!-- Nama -->
             <div class="flex flex-col gap-2 pb-2">
               <label for="name" class="text-sm font-medium text-gray-600">Nama <span
                   class="text-red-500">*</span></label>
               <input id="name" type="text" v-model="form.name"
                 class="w-full py-3 px-3 mt-1 border border-gray-400 rounded-md outline-none text-base"
                 placeholder="Masukkan Nama Lengkap" />
-              <p v-if="errors.name" class="text-red-500 text-sm mt-1">{{ errors.name }}</p>
             </div>
 
 
@@ -262,17 +266,24 @@ const isFormIncomplete = computed(() => {
               <input id="nomor_telepon" type="text" v-model="form.nomor_telepon"
                 class="w-full py-3 px-3 mt-1 border border-gray-400 rounded-md outline-none text-base"
                 placeholder="Masukkan Nomor Telepon" />
-              <p v-if="errors.nomor_telepon" class="text-red-500 text-sm mt-1">{{ errors.nomor_telepon }}</p>
             </div>
 
-            <!-- Email -->
+            <!-- Username -->
             <div class="flex flex-col gap-2 pb-2">
-              <label for="email" class="text-sm font-medium text-gray-600">Email <span
+              <label for="username" class="text-sm font-medium text-gray-600">Username <span
                   class="text-red-500">*</span></label>
-              <input id="email" type="email" v-model="form.email"
-                class="w-full py-3 px-3 mt-1 border border-gray-400 rounded-md outline-none text-base"
-                placeholder="Masukkan Email" />
-              <p v-if="errors.email" class="text-red-500 text-sm mt-1">{{ errors.email }}</p>
+              <input id="username" type="text" v-model="form.username"
+                class="w-full py-3 px-3 mt-1 border rounded-md outline-none text-base" :class="{
+                  'border-gray-400': !usernameError,
+                  'border-red-500': usernameError
+                }"
+                placeholder="Masukkan Username" />
+              <div v-if="usernameError" class="text-red-500 text-sm">
+                {{ usernameError }}
+              </div>
+              <div v-else-if="usernameValid && form.username" class="text-green-500 text-sm">
+                Username tersedia.
+              </div>
             </div>
 
             <!-- Password dengan toggle icon -->
@@ -297,7 +308,6 @@ const isFormIncomplete = computed(() => {
                       d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.944 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </button>
-                <p v-if="errors.password" class="text-red-500 text-sm mt-1">{{ errors.password }}</p>
               </div>
             </div>
 
@@ -308,7 +318,6 @@ const isFormIncomplete = computed(() => {
               <textarea id="alamat" v-model="form.alamat" rows="4"
                 class="w-full py-3 px-3 mt-1 border border-gray-400 rounded-md outline-none text-base resize-none"
                 placeholder="Masukkan Alamat"></textarea>
-              <p v-if="errors.alamat" class="text-red-500 text-sm mt-1">{{ errors.alamat }}</p>
             </div>
 
             <!-- Wilayah sesuai role -->
@@ -317,14 +326,16 @@ const isFormIncomplete = computed(() => {
               <div v-if="auth.user.role === 'admin-provinsi' && !admin">
                 <!-- Kabupaten -->
                 <div v-if="form.role === 'admin-kabupaten' || form.role === 'admin-kecamatan'">
-                  <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
+                  <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten <span
+                      class="text-red-500">*</span></label>
                   <Multiselect v-model="form.kode_kabupaten" :options="kabupatenList" placeholder="Pilih Kabupaten"
                     :searchable="true" class="w-full" />
                 </div>
 
                 <!-- Kecamatan (hanya untuk role admin-kecamatan) -->
                 <div v-if="form.role === 'admin-kecamatan'">
-                  <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
+                  <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan <span
+                      class="text-red-500">*</span></label>
                   <Multiselect v-model="form.kode_kecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
                     :searchable="true" class="w-full" :disabled="!form.kode_kabupaten" />
                 </div>
@@ -334,14 +345,16 @@ const isFormIncomplete = computed(() => {
               <div v-else-if="auth.user.role === 'admin-kabupaten' && !admin && form.role === 'admin-kecamatan'">
                 <!-- Kabupaten (disabled dan otomatis terisi) -->
                 <div class="mb-4">
-                  <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
+                  <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten <span
+                      class="text-red-500">*</span></label>
                   <Multiselect v-model="form.kode_kabupaten" :options="kabupatenList" placeholder="Kabupaten"
                     class="w-full" :disabled="true" />
                 </div>
 
                 <!-- Kecamatan -->
                 <div>
-                  <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
+                  <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan <span
+                      class="text-red-500">*</span></label>
                   <Multiselect v-model="form.kode_kecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
                     :searchable="true" class="w-full" />
                 </div>
@@ -351,21 +364,24 @@ const isFormIncomplete = computed(() => {
               <div v-else-if="auth.user.role === 'superadmin'">
                 <!-- Provinsi -->
                 <div v-if="['admin-provinsi', 'admin-kabupaten', 'admin-kecamatan'].includes(form.role)">
-                  <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi</label>
+                  <label for="kode_provinsi" class="text-sm font-medium text-gray-600">Provinsi <span
+                      class="text-red-500">*</span></label>
                   <Multiselect v-model="form.kode_provinsi" :options="provinsiList" placeholder="Pilih Provinsi"
                     :searchable="true" class="w-full" />
                 </div>
 
                 <!-- Kabupaten -->
                 <div v-if="['admin-kabupaten', 'admin-kecamatan'].includes(form.role)">
-                  <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten</label>
+                  <label for="kode_kabupaten" class="text-sm font-medium text-gray-600">Kabupaten <span
+                      class="text-red-500">*</span></label>
                   <Multiselect v-model="form.kode_kabupaten" :options="kabupatenList" placeholder="Pilih Kabupaten"
                     :searchable="true" class="w-full" :disabled="!form.kode_provinsi" />
                 </div>
 
                 <!-- Kecamatan -->
                 <div v-if="form.role === 'admin-kecamatan'">
-                  <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan</label>
+                  <label for="kode_kecamatan" class="text-sm font-medium text-gray-600">Kecamatan <span
+                      class="text-red-500">*</span></label>
                   <Multiselect v-model="form.kode_kecamatan" :options="kecamatanList" placeholder="Pilih Kecamatan"
                     :searchable="true" class="w-full" :disabled="!form.kode_kabupaten" />
                 </div>
@@ -387,14 +403,3 @@ const isFormIncomplete = computed(() => {
     </div>
   </AdminLayout>
 </template>
-
-<style>
-.multiselect.is-disabled {
-  background-color: #f3f4f6;
-  cursor: not-allowed;
-}
-
-.multiselect.is-disabled .multiselect-tag {
-  background-color: #e5e7eb;
-}
-</style>

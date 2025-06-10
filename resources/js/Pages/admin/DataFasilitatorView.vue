@@ -1,6 +1,6 @@
 <script>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import Multiselect from "@vueform/multiselect";
 import '@vueform/multiselect/themes/default.css';
 import * as XLSX from 'xlsx';
@@ -60,6 +60,9 @@ export default {
       selectedFasilitatorId: null,
 
       showExportDropdown: false,
+
+      showDetailPopup: false,
+      selectedFasilDetail: null,
     };
   },
 
@@ -77,6 +80,16 @@ export default {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
       }
+    },
+
+    showDetail(fasil) {
+      this.selectedFasilDetail = fasil;
+      this.showDetailPopup = true;
+    },
+
+    closeDetail() {
+      this.showDetailPopup = false;
+      this.selectedFasilDetail = null;
     },
 
     tambahBidang() {
@@ -116,7 +129,7 @@ export default {
         'Nama Lengkap': f.name,
         'Nomor Telepon': f.nomor_telepon,
         'Alamat': f.alamat,
-        'Email': f.email,
+        'Username': f.username,
         'Bidang Dampingan': f.bidangs.map(b => b.nama_bidang).join(', ')
       }));
       const ws = XLSX.utils.json_to_sheet(exportData);
@@ -143,6 +156,17 @@ export default {
 
     closeExportDropdown() {
       this.showExportDropdown = false;
+    },
+
+    resetPassword(id) {
+      if (confirm('Apakah yakin ingin mereset password user ini ke "12345678"?')) {
+        router.post(`/fasilitator/${id}/reset-password`, {}, {
+          onSuccess: () => {
+            alert('Password berhasil direset!')
+          },
+          preserveScroll: true,
+        });
+      }
     },
 
     deleteItem(id) {
@@ -218,9 +242,7 @@ export default {
                 <tr class="bg-gray-200 text-center">
                   <th class="border p-2">No</th>
                   <th class="border p-2">Nama</th>
-                  <th class="border p-2">Telepon</th>
-                  <th class="border p-2">Alamat</th>
-                  <th class="border p-2">Email</th>
+                  <th class="border p-2">Username</th>
                   <th class="border p-2">Bidang Dampingan</th>
                   <th class="border p-2">Grup Dampingan</th>
                   <th class="border p-2">Aksi</th>
@@ -230,23 +252,26 @@ export default {
                 <tr v-for="(f, index) in paginatedFasilitators" :key="f.id" class="hover:bg-gray-50">
                   <td class="border p-2 text-center">{{ (currentPage - 1) * perPage + index + 1 }}</td>
                   <td class="border px-2 py-3">{{ f.name }}</td>
-                  <td class="border px-2 py-3">{{ f.nomor_telepon }}</td>
-                  <td class="border px-2 py-3">{{ f.alamat }}</td>
-                  <td class="border px-2 py-3">{{ f.email }}</td>
-                  <td class="border p-2">
+                  <td class="border px-2 py-3">{{ f.username }}</td>
+                  <td class="border px-2 py-3">
                     <span v-for="(b, i) in f.bidangs" :key="i">
                       {{ b.nama_bidang }}<span v-if="i < f.bidangs.length - 1">, </span>
                     </span>
                   </td>
-                  <td class="border p-2">
+                  <td class="border px-2 py-3">
                     <span v-for="(g, i) in f.grup_dampingan" :key="i">
                       {{ g.nama_grup_dampingan }}<span v-if="i < f.grup_dampingan.length - 1">, </span>
                     </span>
                   </td>
                   <td class="border p-2 text-center space-x-1">
-                    <a :href="route('fasilitator.edit', f.id)" class="text-blue-500">✏️</a>
-                    <button @click="selectedFasilitatorId = f.id; showPopupHapus = true"
-                      class="text-red-500">🗑️</button>
+                    <button @click="showDetail(f)">
+                      👁
+                    </button>
+                    <a :href="route('fasilitator.edit', f.id)" class="text-blue-500" title="Edit">✏️</a>
+                    <button @click="selectedFasilitatorId = f.id; showPopupHapus = true" class="text-red-500"
+                      title="Hapus">🗑️</button>
+                    <button v-if="$page.props.auth.user.role === 'superadmin'" @click="resetPassword(f.id)"
+                      class="text-red-500 hover:text-red-700" title="Reset Password">🔐</button>
                   </td>
                 </tr>
                 <tr v-if="filteredFasilitators.length === 0">
@@ -256,6 +281,61 @@ export default {
                 </tr>
               </tbody>
             </table>
+
+            <!-- Modal Detail Fasilitator -->
+            <div v-if="showDetailPopup"
+              class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative">
+                <button @click="closeDetail"
+                  class="absolute top-4 right-4 text-gray-600 hover:text-red-500 text-xl">✖</button>
+
+                <div class="flex items-center gap-4 mb-6">
+                  <img
+                    :src="selectedFasilDetail.foto ? `/storage/${ selectedFasilDetail.foto }` : '/images/default-profile.png'"
+                    alt="Foto" class="w-16 h-16 rounded-full object-cover border" />
+
+                  <div>
+                    <h3 class="text-2xl font-bold">{{ selectedFasilDetail.name }}</h3>
+                    <p class="text-base">{{ selectedFasilDetail.email }}</p>
+                  </div>
+                </div>
+
+                <table class="w-full text-sm">
+                  <tbody>
+                    <tr class="border-b">
+                      <td class="font-semibold py-2 pr-4 w-1/3">Nomor Telepon</td>
+                      <td class="py-2">
+                        <a :href="`https://wa.me/${selectedFasilDetail.nomor_telepon.replace(/^0/, '62')}`"
+                          class="text-green-600 hover:underline">
+                          {{ selectedFasilDetail.nomor_telepon }}
+                        </a>
+                      </td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="font-semibold py-2 pr-4">Alamat</td>
+                      <td class="py-2">{{ selectedFasilDetail.alamat }}</td>
+                    </tr>
+                    <tr class="border-b">
+                      <td class="font-semibold py-2 pr-4">Bidang Dampingan</td>
+                      <td class="py-2">
+                        <span v-for="(b, i) in selectedFasilDetail.bidangs" :key="i">
+                          {{ b.nama_bidang }}<span v-if="i < selectedFasilDetail.bidangs.length - 1">, </span>
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="font-semibold py-2 pr-4">Grup Dampingan</td>
+                      <td class="py-2">
+                        <span v-for="(g, i) in selectedFasilDetail.grup_dampingan" :key="i">
+                          {{ g.nama_grup_dampingan }}<span v-if="i < selectedFasilDetail.grup_dampingan.length - 1">,
+                          </span>
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <!-- Pagination -->
@@ -329,7 +409,7 @@ export default {
             <th class="border p-2">Nama</th>
             <th class="border p-2">Telepon</th>
             <th class="border p-2">Alamat</th>
-            <th class="border p-2">Email</th>
+            <th class="border p-2">Username</th>
             <th class="border p-2">Bidang</th>
           </tr>
         </thead>
@@ -339,7 +419,7 @@ export default {
             <td class="border p-2">{{ f.name }}</td>
             <td class="border p-2">{{ f.nomor_telepon }}</td>
             <td class="border p-2">{{ f.alamat }}</td>
-            <td class="border p-2">{{ f.email }}</td>
+            <td class="border p-2">{{ f.username }}</td>
             <td class="border p-2">
               <span v-for="(b, i) in f.bidangs" :key="i">
                 {{ b.nama_bidang }}<span v-if="i < f.bidangs.length - 1">, </span>

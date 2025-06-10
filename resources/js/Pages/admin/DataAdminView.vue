@@ -1,7 +1,7 @@
 <script>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 import Multiselect from "@vueform/multiselect";
-import { Head } from "@inertiajs/vue3";
+import { Head, router } from "@inertiajs/vue3";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import '@vueform/multiselect/themes/default.css';
@@ -161,7 +161,7 @@ export default {
             const exportData = filteredData.map((admin, index) => ({
                 'No': index + 1,
                 'Nama Lengkap': admin.name,
-                'Email': admin.email,
+                'Username': admin.username,
                 'Alamat': admin.alamat,
                 'Nomor Telepon': admin.nomor_telepon,
                 'Role': this.formatRole(admin.role),
@@ -204,6 +204,16 @@ export default {
         closeExportDropdown() {
             this.showExportDropdown = false;
         },
+        resetPassword(id) {
+            if (confirm('Apakah yakin ingin mereset password user ini ke "12345678"?')) {
+                router.post(`/admin/${id}/reset-password`, {}, {
+                    onSuccess: () => {
+                        alert('Password berhasil direset!')
+                    },
+                    preserveScroll: true,
+                });
+            }
+        },
         deleteItem(id) {
             this.$inertia.delete(route('admin.destroy', id));
         }
@@ -215,22 +225,22 @@ export default {
     <AdminLayout>
 
         <Head title="Data Admin" />
-        <div class="flex bg-gray-100 overflow-auto">
-            <main class="flex-1">
-                <div class="bg-white shadow-md rounded-lg p-4">
+        <div class="bg-gray-100 min-h-screen">
+            <main class="container mx-auto px-4 py-6">
+                <div class="bg-white shadow-md rounded-lg p-4 md:p-6">
                     <!-- Header actions -->
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                         <h2 class="text-xl font-bold">Data Admin</h2>
                         <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                             <a v-if="$page.props.auth.user.role !== 'admin-kecamatan'" :href="route('admin.create')"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded whitespace-nowrap">
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded whitespace-nowrap text-sm sm:text-base">
                                 + Tambah
                             </a>
 
                             <!-- Export Dropdown -->
                             <div class="relative">
                                 <button @click="toggleExportDropdown"
-                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded flex items-center whitespace-nowrap">
+                                    class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded flex items-center whitespace-nowrap text-sm sm:text-base">
                                     <span class="mr-1">🖨</span> Cetak Data
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20"
                                         fill="currentColor">
@@ -261,9 +271,9 @@ export default {
                     <div v-if="showExportDropdown" @click="closeExportDropdown" class="fixed inset-0 z-0"></div>
 
                     <!-- Filter -->
-                    <div class="flex flex-wrap gap-4 mb-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         <!-- Dropdown Role -->
-                        <div class="w-full sm:w-1 min-w-[200px]">
+                        <div class="w-full">
                             <Multiselect v-model="selectedRole"
                                 :options="['Superadmin', 'Admin Provinsi', 'Admin Kabupaten', 'Admin Kecamatan']"
                                 placeholder="Pilih Role" :searchable="true" class="w-full" :clearable="true"
@@ -271,25 +281,25 @@ export default {
                         </div>
 
                         <!-- Dropdown Provinsi -->
-                        <div class="w-full sm:w-1 min-w-[200px]">
+                        <div class="w-full">
                             <Multiselect v-model="selectedProvinsi" :options="provinsiList" placeholder="Pilih Provinsi"
                                 :searchable="true" class="w-full" :disabled="$page.props.auth.user.role === 'admin-provinsi' ||
                                     $page.props.auth.user.role === 'admin-kabupaten' ||
-                                    $page.props.auth.user.role === 'admin-kecamatan'" @update:modelValue="fetchKabupaten"
-                                @change="currentPage = 1" />
+                                    $page.props.auth.user.role === 'admin-kecamatan'"
+                                @update:modelValue="fetchKabupaten" @change="currentPage = 1" />
                         </div>
 
                         <!-- Dropdown Kabupaten -->
-                        <div class="w-full sm:w-1 min-w-[200px]">
+                        <div class="w-full">
                             <Multiselect v-model="selectedKabupaten" :options="kabupatenList"
                                 placeholder="Pilih Kabupaten" :searchable="true" class="w-full" :disabled="!selectedProvinsi ||
                                     $page.props.auth.user.role === 'admin-kabupaten' ||
-                                    $page.props.auth.user.role === 'admin-kecamatan'" @update:modelValue="fetchKecamatan"
-                                @change="currentPage = 1" />
+                                    $page.props.auth.user.role === 'admin-kecamatan'"
+                                @update:modelValue="fetchKecamatan" @change="currentPage = 1" />
                         </div>
 
                         <!-- Dropdown Kecamatan -->
-                        <div class="w-full sm:w-1 min-w-[200px]">
+                        <div class="w-full">
                             <Multiselect v-model="selectedKecamatan" :options="kecamatanList"
                                 placeholder="Pilih Kecamatan" :searchable="true" class="w-full" :disabled="!selectedKabupaten ||
                                     $page.props.auth.user.role === 'admin-kecamatan'" @change="currentPage = 1" />
@@ -297,41 +307,40 @@ export default {
                     </div>
 
                     <!-- Data table -->
-                    <div class="overflow-auto rounded-lg border border-gray-200 mb-4">
-                        <table class="w-full min-w-[600px] border-collapse">
+                    <div class="overflow-x-auto rounded-lg border border-gray-200 mb-4">
+                        <table class="w-full border-collapse">
                             <thead>
                                 <tr class="bg-gray-200">
-                                    <th class="border p-2">No</th>
+                                    <th class="border p-2 text-center">No</th>
                                     <th class="border p-2">Nama</th>
-                                    <th class="border p-2">Email</th>
-                                    <th class="border p-2">Alamat</th>
-                                    <th class="border p-2">No. Telepon</th>
-                                    <th class="border p-2">Role</th>
-                                    <th class="border p-2">Provinsi</th>
-                                    <th class="border p-2">Kabupaten</th>
-                                    <th class="border p-2">Kecamatan</th>
+                                    <th class="border p-2 hidden sm:table-cell">Username</th>
+                                    <th class="border p-2 hidden md:table-cell">Alamat</th>
+                                    <th class="border p-2 hidden lg:table-cell">No. Telp</th>
+                                    <th class="border p-2 hidden sm:table-cell">Role</th>
+                                    <th class="border p-2 hidden lg:table-cell">Provinsi</th>
+                                    <th class="border p-2 hidden xl:table-cell">Kabupaten</th>
+                                    <th class="border p-2 hidden xl:table-cell">Kecamatan</th>
                                     <th class="border p-2">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(admin, index) in paginatedAdmins" :key="admin.id"
-                                    class="text-left hover:bg-gray-50">
-                                    <td class="border p-2 text-center">{{ (currentPage - 1) * perPage + index + 1 }}
-                                    </td>
+                                <tr v-for="(admin, index) in paginatedAdmins" :key="admin.id" class="text-left hover:bg-gray-50">
+                                    <td class="border p-2 text-center">{{ (currentPage - 1) * perPage + index + 1 }}</td>
                                     <td class="border px-2 py-3">{{ admin.name }}</td>
-                                    <td class="border px-2 py-3">{{ admin.email }}</td>
-                                    <td class="border px-2 py-3">{{ admin.alamat }}</td>
-                                    <td class="border px-2 py-3">{{ admin.nomor_telepon }}</td>
-                                    <td class="border px-2 py-3">{{ formatRole(admin.role) }}</td>
-                                    <td class="border px-2 py-3">{{ admin.nama_provinsi }}</td>
-                                    <td class="border px-2 py-3">{{ admin.nama_kabupaten }}</td>
-                                    <td class="border px-2 py-3">{{ admin.nama_kecamatan }}</td>
-                                    <td class="border p-2 text-center w-20">
+                                    <td class="border px-2 py-3 hidden sm:table-cell">{{ admin.username }}</td>
+                                    <td class="border px-2 py-3 hidden md:table-cell">{{ admin.alamat }}</td>
+                                    <td class="border px-2 py-3 hidden lg:table-cell">{{ admin.nomor_telepon }}</td>
+                                    <td class="border px-2 py-3 hidden sm:table-cell">{{ formatRole(admin.role) }}</td>
+                                    <td class="border px-2 py-3 hidden lg:table-cell">{{ admin.nama_provinsi }}</td>
+                                    <td class="border px-2 py-3 hidden xl:table-cell">{{ admin.nama_kabupaten }}</td>
+                                    <td class="border px-2 py-3 hidden xl:table-cell">{{ admin.nama_kecamatan }}</td>
+                                    <td class="border p-2 text-center whitespace-nowrap">
                                         <a :href="route('admin.edit', admin.id)" class="text-blue-500 mr-2">✏</a>
                                         <button @click="selectedAdminId = admin.id; showPopupHapus = true"
-                                            class="text-red-500">
-                                            🗑
-                                        </button>
+                                            class="text-red-500">🗑</button>
+                                        <button v-if="$page.props.auth.user.role === 'superadmin'"
+                                            @click="resetPassword(admin.id)" class="text-red-500 hover:text-red-700"
+                                            title="Reset Password">🔐</button>
                                     </td>
                                     <!-- Popup Konfirmasi Hapus -->
                                     <div v-if="showPopupHapus && selectedAdminId !== null"
@@ -365,7 +374,7 @@ export default {
                                     </div>
                                 </tr>
                                 <tr v-if="filteredAdmins.length === 0">
-                                    <td colspan="9" class="border p-2 text-center">
+                                    <td colspan="10" class="border p-2 text-center">
                                         Tidak ada data yang sesuai
                                     </td>
                                 </tr>
@@ -378,17 +387,58 @@ export default {
                         <div class="text-sm text-gray-600">
                             {{ paginationInfo }}
                         </div>
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1 flex-wrap justify-center">
                             <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
                                 class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
                                 &lt;
                             </button>
-                            <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
-                                'px-3 py-1 rounded',
-                                currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
-                            ]">
-                                {{ page }}
-                            </button>
+                            <template v-if="totalPages <= 5">
+                                <button v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="[
+                                    'px-3 py-1 rounded',
+                                    currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                ]">
+                                    {{ page }}
+                                </button>
+                            </template>
+                            <template v-else>
+                                <button v-if="currentPage <= 3" v-for="page in Math.min(4, totalPages)" :key="page" 
+                                    @click="goToPage(page)" :class="[
+                                        'px-3 py-1 rounded',
+                                        currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                    ]">
+                                    {{ page }}
+                                </button>
+                                <span v-if="currentPage <= 3" class="px-2">...</span>
+                                
+                                <template v-if="currentPage > 3 && currentPage < totalPages - 2">
+                                    <button @click="goToPage(1)" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                                        1
+                                    </button>
+                                    <span class="px-2">...</span>
+                                    <button @click="goToPage(currentPage - 1)" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                                        {{ currentPage - 1 }}
+                                    </button>
+                                    <button class="px-3 py-1 bg-blue-500 text-white rounded">
+                                        {{ currentPage }}
+                                    </button>
+                                    <button @click="goToPage(currentPage + 1)" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                                        {{ currentPage + 1 }}
+                                    </button>
+                                    <span class="px-2">...</span>
+                                    <button @click="goToPage(totalPages)" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300">
+                                        {{ totalPages }}
+                                    </button>
+                                </template>
+                                
+                                <span v-if="currentPage >= totalPages - 2" class="px-2">...</span>
+                                <button v-if="currentPage >= totalPages - 2" v-for="page in range(Math.max(1, totalPages - 3), totalPages)" 
+                                    :key="page" @click="goToPage(page)" :class="[
+                                        'px-3 py-1 rounded',
+                                        currentPage === page ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'
+                                    ]">
+                                    {{ page }}
+                                </button>
+                            </template>
                             <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
                                 class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
                                 &gt;
@@ -413,7 +463,7 @@ export default {
                             <tr class="bg-gray-200">
                                 <th class="border px-2 py-1">No</th>
                                 <th class="border px-2 py-1">Nama Lengkap</th>
-                                <th class="border px-2 py-1">Email</th>
+                                <th class="border px-2 py-1">Username</th>
                                 <th class="border px-2 py-1">Alamat</th>
                                 <th class="border px-2 py-1">No. Telepon</th>
                                 <th class="border px-2 py-1">Provinsi</th>
@@ -425,7 +475,7 @@ export default {
                             <tr v-for="(admin, i) in filteredAdmins" :key="admin.id">
                                 <td class="border px-2 py-1 text-center">{{ i + 1 }}</td>
                                 <td class="border px-2 py-1">{{ admin.name }}</td>
-                                <td class="border px-2 py-1">{{ admin.email }}</td>
+                                <td class="border px-2 py-1">{{ admin.username }}</td>
                                 <td class="border px-2 py-1">{{ admin.alamat }}</td>
                                 <td class="border px-2 py-1">{{ admin.nomor_telepon }}</td>
                                 <td class="border px-2 py-1">{{ admin.nama_provinsi }}</td>
@@ -481,5 +531,22 @@ export default {
 
 .overflow-auto::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+}
+
+/* Responsive table cell padding */
+@media (max-width: 640px) {
+    .border.p-2 {
+        padding: 0.25rem;
+    }
+}
+
+/* Better pagination for mobile */
+@media (max-width: 640px) {
+    .flex.items-center.gap-1 {
+        gap: 0.25rem;
+    }
+    .px-3.py-1 {
+        padding: 0.25rem 0.5rem;
+    }
 }
 </style>

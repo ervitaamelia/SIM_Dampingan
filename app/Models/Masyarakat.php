@@ -27,6 +27,7 @@ class Masyarakat extends Model
         'nomor_telepon',
         'alamat',
         'status',
+        'peran',
         'foto',
         'id_pekerjaan',
         'id_bidang',

@@ -191,9 +191,10 @@ const handleSubmit = () => {
 
           <form @submit.prevent="handleSubmit" class="mt-6 w-full">
 
-            <!-- Keterangan bintang merah -->
-            <p class="text-sm text-gray-500 mb-7"><span class="text-red-500">*</span> = wajib diisi</p>
-            
+            <p class="text-sm text-gray-600 mb-4">
+              Kolom yang ditandai dengan <span class="text-red-500 font-semibold">*</span> wajib diisi.
+            </p>
+
             <!-- Nama Grup Dampingan -->
             <div class="flex flex-col gap-2 pb-2">
               <label class="text-sm font-medium text-gray-600">Nama Grup Dampingan <span class="text-red-500">*</span>

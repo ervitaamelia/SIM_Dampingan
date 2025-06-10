@@ -188,16 +188,21 @@ const handleSubmit = () => {
           </h2>
 
           <form @submit.prevent="handleSubmit" enctype="multipart/form-data" class="mt-6 w-full">
+
+            <p class="text-sm text-gray-600 mb-4">
+              Kolom yang ditandai dengan <span class="text-red-500 font-semibold">*</span> wajib diisi.
+            </p>
+
             <!-- Judul kegiatan -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Judul Kegiatan</label>
+              <label class="text-sm font-medium text-gray-600">Judul Kegiatan <span class="text-red-500">*</span></label>
               <input v-model="form.judul" type="text" placeholder="Masukkan Judul Kegiatan di sini"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" required />
             </div>
 
             <!-- Deskripsi -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Deskripsi</label>
+              <label class="text-sm font-medium text-gray-600">Deskripsi <span class="text-red-500">*</span></label>
               <textarea v-model="form.deskripsi" placeholder="Masukkan Deskripsi (minimal 500 karakter)"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm"
                 :class="{ 'border-red-500': !isDeskripsiValid && form.deskripsi }"></textarea>
@@ -207,21 +212,21 @@ const handleSubmit = () => {
 
             <!-- Masalah -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Masalah (Opsional)</label>
+              <label class="text-sm font-medium text-gray-600">Masalah</label>
               <textarea v-model="form.masalah" placeholder="Masukkan Masalah"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm"></textarea>
             </div>
 
             <!-- Solusi -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Solusi (Opsional)</label>
+              <label class="text-sm font-medium text-gray-600">Solusi</label>
               <textarea v-model="form.solusi" placeholder="Masukkan Solusi"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm"></textarea>
             </div>
 
             <!-- Alamat -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Alamat</label>
+              <label class="text-sm font-medium text-gray-600">Alamat <span class="text-red-500">*</span></label>
               <p class="text-xs text-blue-500 mb-1">
                 Masukkan No / Nama jalan, RT, RW, Dusun / Kelurahan setempat secara rinci. <br />
                 Contoh: No. 6 Jl. Pracanda 6, RT.05/RW.02, Purwodiningratan, Jebres
@@ -232,7 +237,7 @@ const handleSubmit = () => {
 
             <!-- Provinsi -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Provinsi</label>
+              <label class="text-sm font-medium text-gray-600">Provinsi <span class="text-red-500">*</span></label>
               <Multiselect v-model="form.kode_provinsi" :options="provinsiList" :searchable="true"
                 placeholder="Pilih Provinsi" class="w-full border border-gray-300 rounded-md shadow-sm text-sm"
                 @update:modelValue="fetchKabupaten" />
@@ -240,7 +245,7 @@ const handleSubmit = () => {
 
             <!-- Kabupaten -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Kabupaten</label>
+              <label class="text-sm font-medium text-gray-600">Kabupaten <span class="text-red-500">*</span></label>
               <Multiselect v-model="form.kode_kabupaten" :options="kabupatenList" :searchable="true"
                 placeholder="Pilih Kabupaten" class="w-full border border-gray-300 rounded-md shadow-sm text-sm"
                 :disabled="!form.kode_provinsi" @update:modelValue="fetchKecamatan" />
@@ -248,7 +253,7 @@ const handleSubmit = () => {
 
             <!-- Kecamatan -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Kecamatan</label>
+              <label class="text-sm font-medium text-gray-600">Kecamatan <span class="text-red-500">*</span></label>
               <Multiselect v-model="form.kode_kecamatan" :options="kecamatanList" :searchable="true"
                 placeholder="Pilih Kecamatan" class="w-full border border-gray-300 rounded-md shadow-sm text-sm"
                 :disabled="!form.kode_kabupaten" />
@@ -257,21 +262,21 @@ const handleSubmit = () => {
             <div class="mb-2 flex gap-4">
               <!-- Tanggal -->
               <div class="w-1/3">
-                <label class="text-sm font-medium text-gray-600">Tanggal</label>
+                <label class="text-sm font-medium text-gray-600">Tanggal <span class="text-red-500">*</span></label>
                 <input v-model="form.tanggal" type="date"
                   class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" required />
               </div>
 
               <!-- Waktu -->
               <div class="w-1/3">
-                <label class="text-sm font-medium text-gray-600">Waktu</label>
+                <label class="text-sm font-medium text-gray-600">Waktu <span class="text-red-500">*</span></label>
                 <input v-model="form.waktu" type="time"
                   class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" required />
               </div>
 
               <!-- Jumlah peserta -->
               <div class="w-1/3">
-                <label class="text-sm font-medium text-gray-600">Jumlah Peserta</label>
+                <label class="text-sm font-medium text-gray-600">Jumlah Peserta <span class="text-red-500">*</span></label>
                 <div class="flex items-center">
                   <input type="number" v-model.number="form.jumlah_peserta"
                     class="w-full py-2 px-3 rounded-md border-y border-gray-400 text-center text-sm" min="0" />
@@ -281,14 +286,14 @@ const handleSubmit = () => {
 
             <!-- Bidang dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Bidang Dampingan</label>
+              <label class="text-sm font-medium text-gray-600">Bidang Dampingan <span class="text-red-500">*</span></label>
               <Multiselect v-model="form.id_bidang" :options="bidangOptions" placeholder="Pilih Bidang"
                 class="w-full border border-gray-300 rounded-md shadow-sm text-sm" />
             </div>
 
             <!-- Grup dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Grup Dampingan</label>
+              <label class="text-sm font-medium text-gray-600">Grup Dampingan <span class="text-red-500">*</span></label>
 
               <div v-for="(item, index) in form.id_grup_dampingan" :key="index"
                 class="flex gap-2 items-center gap-2 mb-2">
@@ -310,7 +315,7 @@ const handleSubmit = () => {
 
             <!-- Foto -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Foto Dokumentasi</label>
+              <label class="text-sm font-medium text-gray-600">Foto Dokumentasi <span class="text-red-500">*</span></label>
               <div v-for="(input, index) in fileInputs" :key="index" class="mb-2">
                 <input type="file" @change="(e) => handleFileChange(e, index)"
                   class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" />
@@ -330,7 +335,7 @@ const handleSubmit = () => {
 
             <!-- Laporan -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Laporan Kegiatan (Opsional)</label>
+              <label class="text-sm font-medium text-gray-600">Laporan Kegiatan</label>
               <input type="file" @change="e => form.laporan = e.target.files[0]"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" />
             </div>

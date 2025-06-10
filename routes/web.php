@@ -49,9 +49,12 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
         Route::get('/data-fasilitator/create', [DataFasilitatorController::class, 'create'])->name('fasilitator.create');
         Route::post('/data-fasilitator', [DataFasilitatorController::class, 'store'])->name('fasilitator.store');
         Route::get('/data-fasilitator/{id}/edit', [DataFasilitatorController::class, 'edit'])->name('fasilitator.edit');
-        Route::post('/data-fasilitator/{id}', [DataFasilitatorController::class, 'update'])->name('fasilitator.update');
+        Route::put('/data-fasilitator/{id}', [DataFasilitatorController::class, 'update'])->name('fasilitator.update');
         Route::delete('/data-fasilitator/{id}', [DataFasilitatorController::class, 'destroy'])->name('fasilitator.destroy');
     });
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    Route::post('/fasilitator/{id}/reset-password', [DataFasilitatorController::class, 'resetPassword'])->name('fasilitator.reset-password');
+});
 
 //Data admin route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
@@ -64,6 +67,9 @@ Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admi
         Route::put('/data-admin/{id}', [DataAdminController::class, 'update'])->name('admin.update'); // Update Admin
         Route::delete('/data-admin/{id}', [DataAdminController::class, 'destroy'])->name('admin.destroy'); // Hapus Admin
     });
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    Route::post('/admin/{id}/reset-password', [DataAdminController::class, 'resetPassword'])->name('admin.reset-password');
+});
 
 //Data masyarakat route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
@@ -123,6 +129,7 @@ Route::get('/api/provinsi', [WilayahController::class, 'getProvinsi']);
 Route::get('/api/kabupaten/{kode_provinsi}', [WilayahController::class, 'getKabupaten']);
 Route::get('/api/kecamatan/{kode_kabupaten}', [WilayahController::class, 'getKecamatan']);
 Route::get('/api/check-nama-grup', [DataDampinganController::class, 'checkNamaGrup']);
+Route::get('/api/check-username', [DataFasilitatorController::class, 'checkUsername']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

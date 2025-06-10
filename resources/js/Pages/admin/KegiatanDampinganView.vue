@@ -6,24 +6,34 @@ import { ref, computed } from 'vue';
 const page = usePage();
 const allKegiatans = computed(() => page.props.data || []);
 
-const selectedDate = ref('');
+const startDate = ref('');
+const endDate = ref('');
+const sortOption = ref('terbaru');
 const currentPage = ref(1);
 const perPage = 6;
 
-// Filter berdasarkan tanggal jika dipilih
+// Filter berdasarkan rentang tanggal
 const filteredKegiatans = computed(() => {
-  if (!selectedDate.value) return allKegiatans.value;
   return allKegiatans.value.filter((k) => {
-    const kegiatanDate = new Date(k.tanggal).toISOString().split('T')[0];
-    return kegiatanDate === selectedDate.value;
+    const kegiatanDate = new Date(k.tanggal);
+    const start = startDate.value ? new Date(startDate.value) : null;
+    const end = endDate.value ? new Date(endDate.value) : null;
+
+    return (!start || kegiatanDate >= start) && (!end || kegiatanDate <= end);
   });
 });
 
-// Urutkan dari terbaru ke terlama (default)
+// Sorting berdasarkan opsi yang dipilih
 const sortedKegiatans = computed(() => {
-  return [...filteredKegiatans.value].sort(
-    (a, b) => new Date(b.tanggal) - new Date(a.tanggal)
-  );
+  const data = [...filteredKegiatans.value];
+  switch (sortOption.value) {
+    case 'terlama':
+      return data.sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+    case 'judul':
+      return data.sort((a, b) => a.judul.localeCompare(b.judul));
+    default:
+      return data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)); // terbaru
+  }
 });
 
 const totalPages = computed(() =>
@@ -48,22 +58,62 @@ const goToPage = (page) => {
   }
 };
 
+const resetFilter = () => {
+  startDate.value = '';
+  endDate.value = '';
+  sortOption.value = 'terbaru';
+  currentPage.value = 1;
+};
+
 const getArtikelLink = (id) => `/artikel/${id}`;
+
+// Kegiatan terdekat dari hari ini
+const today = new Date();
+const upcomingKegiatan = computed(() => {
+  return allKegiatans.value
+    .filter(k => new Date(k.tanggal) >= today)
+    .sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal))[0];
+});
 </script>
 
 <template>
   <AdminLayout>
 
     <Head title="Kegiatan Dampingan" />
-
     <div class="flex bg-gray-100">
       <main class="grow px-10 py-6 bg-white rounded-lg shadow-md max-md:p-4 max-md:m-3 h-auto overflow-y-auto">
         <h2 class="mb-6 text-2xl font-semibold text-black">Kegiatan Dampingan</h2>
 
-        <!-- Sort by calendar -->
-        <div class="mb-4 flex justify-end items-center gap-2">
-          <label class="text-sm text-gray-700">Filter berdasarkan tanggal:</label>
-          <input type="date" v-model="selectedDate" class="border text-sm rounded px-2 py-1" />
+        <!-- NOTES: Kegiatan Terdekat -->
+        <div v-if="upcomingKegiatan"
+          class="mb-4 p-4 rounded-lg bg-blue-50 border border-blue-300 text-blue-800 text-sm">
+          <div class="flex items-center gap-2">
+            <span class="text-base">📌</span>
+            <span><strong class="font-semibold">Kegiatan terdekat:</strong>
+              {{ new Date(upcomingKegiatan.tanggal).toLocaleDateString('id-ID') }} – {{ upcomingKegiatan.judul }}</span>
+          </div>
+        </div>
+
+        <!-- FILTER SECTION -->
+        <div class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+          <div>
+            <label class="block text-sm text-gray-700 mb-1">Dari tanggal:</label>
+            <input type="date" v-model="startDate" class="w-full border text-sm rounded px-3 py-2" />
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-700 mb-1">Sampai tanggal:</label>
+            <input type="date" v-model="endDate" class="w-full border text-sm rounded px-3 py-2" />
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-700 mb-1">Urutkan:</label>
+            <select v-model="sortOption" class="w-full border text-sm rounded px-3 py-2">
+              <option value="terbaru">Terbaru</option>
+              <option value="terlama">Terlama</option>
+              <option value="judul">Judul (A-Z)</option>
+            </select>
+          </div>
         </div>
 
         <!-- Grid Artikel -->

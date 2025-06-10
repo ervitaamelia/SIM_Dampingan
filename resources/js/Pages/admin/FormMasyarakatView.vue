@@ -10,6 +10,16 @@ const props = defineProps({
   pekerjaans: Object,
   bidangs: Array,
   grups: Array,
+  grupKoordinators: Object,
+})
+
+const koordinatorInfo = computed(() => {
+  const idGrup = form.id_grup_dampingan
+  const koordinatorNama = props.grupKoordinators[idGrup]
+
+  if (!idGrup) return null
+  if (koordinatorNama) return `Grup ini sudah memiliki koordinator: ${koordinatorNama}`
+  return 'Grup ini belum memiliki koordinator.'
 })
 
 // Inisialisasi form dengan data masyarakat jika ada
@@ -22,6 +32,7 @@ const form = useForm(props.masyarakat ? {
   nomor_telepon: props.masyarakat.nomor_telepon,
   alamat: props.masyarakat.alamat,
   status: props.masyarakat.status,
+  peran: props.masyarakat?.peran ?? 'anggota',
   foto: null, // Tetap null untuk file upload
   id_pekerjaan: props.masyarakat.id_pekerjaan,
   id_bidang: props.masyarakat.id_bidang,
@@ -36,6 +47,7 @@ const form = useForm(props.masyarakat ? {
   nomor_telepon: "",
   alamat: "",
   status: "",
+  peran: "anggota",
   foto: null,
   id_pekerjaan: "",
   id_bidang: "",
@@ -54,7 +66,7 @@ const bidangOptions = props.bidangs.map(b => ({
 
 const grupOptions = computed(() => {
   if (!form.id_bidang) return []
-  return props.grups
+  return (props.grups || [])
     .filter(grup => grup.id_bidang === form.id_bidang)
     .map(grup => ({
       value: grup.id_grup_dampingan,
@@ -63,7 +75,7 @@ const grupOptions = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  const allFieldsFilled = 
+  const allFieldsFilled =
     form.nama_lengkap &&
     form.tempat_lahir &&
     form.tanggal_lahir &&
@@ -106,10 +118,12 @@ function handleSubmit() {
           <h2 class="self-center text-2xl font-bold text-black">
             {{ masyarakat ? "Form Edit Masyarakat" : "Form Tambah Masyarakat" }}
           </h2>
+
           <form @submit.prevent="handleSubmit" enctype="multipart/form-data" class="mt-6 w-full">
 
-            <!-- Keterangan bintang merah -->
-            <p class="text-sm text-gray-500 mb-7"><span class="text-red-500">*</span> = wajib diisi</p>
+            <p class="text-sm text-gray-600 mb-4">
+              Kolom yang ditandai dengan <span class="text-red-500 font-semibold">*</span> wajib diisi.
+            </p>
 
             <!-- Nama Lengkap -->
             <div class="flex flex-col gap-2 pb-2">
@@ -254,6 +268,11 @@ function handleSubmit() {
               </div>
             </div>
 
+            <!-- Keterangan status koordinator -->
+            <div v-if="form.id_grup_dampingan" class="text-sm mt-1" :class="koordinatorInfo.includes('belum') ? 'text-green-600' : 'text-red-600'">
+              {{ koordinatorInfo }}
+            </div>
+
             <!-- Foto -->
             <div class="flex flex-col gap-2 pb-2">
               <label class="text-sm font-medium text-gray-600">Foto</label>
@@ -266,6 +285,26 @@ function handleSubmit() {
             <div v-if="props.masyarakat?.foto" class="mb-4">
               <img :src="`/storage/${props.masyarakat.foto}`" alt="Foto Masyarakat" class="w-32 rounded" />
               <p class="text-xs text-gray-500 mt-1">Foto saat ini</p>
+            </div>
+
+            <!-- Tetapkan sebagai Koordinator -->
+            <div class="flex flex-col gap-2 pb-2">
+              <label class="text-sm font-medium text-gray-600">Tetapkan  Peran sebagai Koordinator / Anggota </label>
+              <div class="flex items-center gap-4">
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" class="sr-only peer" v-model="form.peran" true-value="koordinator" false-value="anggota">
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-sky-400 rounded-full peer peer-checked:bg-sky-600 relative transition-all duration-300">
+                    <div
+                      class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 transform peer-checked:translate-x-5">
+                    </div>
+                  </div>
+                </label>
+                <span class="text-sm text-gray-600">
+                  <strong>{{ form.peran === 'koordinator' ? 'Koordinator (On)' : 'Anggota (Off)' }}</strong> —
+                  {{ form.peran === 'koordinator' ? 'Tetapkan menjadi koordinator di grup dampingan.' : 'Anggota di grup dampingan.' }}
+                </span>
+              </div>
             </div>
 
             <!-- Tombol Submit -->
