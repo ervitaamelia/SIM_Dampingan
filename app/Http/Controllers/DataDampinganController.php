@@ -27,7 +27,8 @@ class DataDampinganController extends Controller
             )
             ->leftJoin('provinsis', 'grup_dampingan.kode_provinsi', '=', 'provinsis.kode')
             ->leftJoin('kabupatens', 'grup_dampingan.kode_kabupaten', '=', 'kabupatens.kode')
-            ->leftJoin('kecamatans', 'grup_dampingan.kode_kecamatan', '=', 'kecamatans.kode');
+            ->leftJoin('kecamatans', 'grup_dampingan.kode_kecamatan', '=', 'kecamatans.kode')
+            ->orderBy('nama_grup_dampingan', 'asc');
 
         if ($user->role === 'admin-provinsi') {
             $query->where('grup_dampingan.kode_provinsi', $user->kode_provinsi);
@@ -149,6 +150,36 @@ class DataDampinganController extends Controller
         return redirect()->route('dampingan.index')->with('success', 'Data grup dampingan berhasil dihapus!');
     }
 
+    /**
+     * @OA\Get(
+     *  path="/api/check-nama-grup",
+     *  tags={"Grup Dampingan"},
+     *  summary="Cek apakah nama grup dampingannya sudah digunakan",
+     *  description="Mengecek apakah nama grup dampingannya sudah ada di database. Bisa digunakan saat create dan edit, dengan pengecualian id.",
+     *  operationId="checkNamaGrup",
+     *  @OA\Parameter(
+     *      name="nama",
+     *      in="query",
+     *      required=true,
+     *      description="Nama grup dampingannya yang ingin dicek",
+     *      @OA\Schema(type="string")
+     *  ),
+     *  @OA\Parameter(
+     *      name="id",
+     *      in="query",
+     *      required=false,
+     *      description="ID grup untuk pengecualian saat edit (opsional)",
+     *      @OA\Schema(type="integer")
+     *  ),
+     *  @OA\Response(
+     *      response=200,
+     *      description="Hasil pengecekan apakah nama grup sudah digunakan",
+     *      @OA\JsonContent(
+     *          @OA\Property(property="exists", type="boolean", example=true)
+     *      )
+     *  )
+     * )
+     */
     public function checkNamaGrup(Request $request)
     {
         $nama = $request->query('nama');
@@ -164,5 +195,4 @@ class DataDampinganController extends Controller
 
         return response()->json(['exists' => $exists]);
     }
-
 }

@@ -179,6 +179,12 @@ watch(() => form.username, async (newValue) => {
 
   if (!newValue) return;
 
+  // Cek apakah ada spasi
+  if (/\s/.test(newValue)) {
+    usernameError.value = "Username tidak boleh mengandung spasi.";
+    return;
+  }
+
   try {
     const query = new URLSearchParams({
       username: newValue,
@@ -205,6 +211,8 @@ const isFormIncomplete = computed(() => {
 
   if (form.role === 'admin-kabupaten' && !form.kode_kabupaten) return true
   if (form.role === 'admin-kecamatan' && !form.kode_kecamatan) return true
+
+  if (usernameError.value) return true
 
   return false
 })

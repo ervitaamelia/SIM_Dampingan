@@ -205,10 +205,10 @@ export default {
             this.showExportDropdown = false;
         },
         resetPassword(id) {
-            if (confirm('Apakah yakin ingin mereset password user ini ke "12345678"?')) {
+            if (confirm('Apakah Anda yakin ingin mereset password pengguna ini ke password default?')) {
                 router.post(`/admin/${id}/reset-password`, {}, {
                     onSuccess: () => {
-                        alert('Password berhasil direset!')
+                        alert('Password berhasil direset.')
                     },
                     preserveScroll: true,
                 });
@@ -226,7 +226,7 @@ export default {
 
         <Head title="Data Admin" />
         <div class="bg-gray-100 min-h-screen">
-            <main class="container mx-auto px-4 py-6">
+            <main class="container mx-auto p-1">
                 <div class="bg-white shadow-md rounded-lg p-4 md:p-6">
                     <!-- Header actions -->
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -334,14 +334,15 @@ export default {
                                     <td class="border px-2 py-3 hidden lg:table-cell">{{ admin.nama_provinsi }}</td>
                                     <td class="border px-2 py-3 hidden xl:table-cell">{{ admin.nama_kabupaten }}</td>
                                     <td class="border px-2 py-3 hidden xl:table-cell">{{ admin.nama_kecamatan }}</td>
-                                    <td class="border p-2 text-center whitespace-nowrap">
-                                        <a :href="route('admin.edit', admin.id)" class="text-blue-500 mr-2">✏</a>
+                                    <td class="border p-2 text-center whitespace-nowrap space-x-1">
+                                        <a :href="route('admin.edit', admin.id)" class="text-blue-500" title="Edit">✏</a>
                                         <button @click="selectedAdminId = admin.id; showPopupHapus = true"
-                                            class="text-red-500">🗑</button>
+                                            class="text-red-500" title="Hapus">🗑</button>
                                         <button v-if="$page.props.auth.user.role === 'superadmin'"
                                             @click="resetPassword(admin.id)" class="text-red-500 hover:text-red-700"
                                             title="Reset Password">🔐</button>
                                     </td>
+                                    
                                     <!-- Popup Konfirmasi Hapus -->
                                     <div v-if="showPopupHapus && selectedAdminId !== null"
                                         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">

@@ -11,6 +11,7 @@ class KegiatanDampinganController extends Controller
     public function index()
     {
         $kegiatans = Kegiatan::with('user', 'provinsi', 'kabupaten', 'kecamatan', 'bidang', 'galeris', 'grups')
+            ->where('status_kegiatan','=','divalidasi')
             ->latest()
             ->get();
 

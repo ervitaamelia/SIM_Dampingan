@@ -330,7 +330,7 @@ export default {
                   <th class="border p-2">Kabupaten</th>
                   <th class="border p-2">Kecamatan</th>
                   <th class="border p-2">Fasilitator</th>
-                  <th class="border p-2">Aksi</th>
+                  <th class="border p-2 w-20">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -358,11 +358,10 @@ export default {
                       </button>
                     </div>
                   </td>
-
-                  <td class="border p-2 text-center">
-                    <a :href="route('dampingan.edit', grup.id_grup_dampingan)" class="text-blue-500">✏</a>
+                  <td class="border p-2 text-center space-x-1">
+                    <a :href="route('dampingan.edit', grup.id_grup_dampingan)" class="text-blue-500" title="Edit">✏</a>
                     <button @click="selectedDampinganId = grup.id_grup_dampingan; showPopupHapus = true"
-                      class="text-red-500">
+                      class="text-red-500" title="Hapus">
                       🗑
                     </button>
                   </td>

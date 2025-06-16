@@ -41,7 +41,7 @@ export default {
     formatTanggal(tanggal) {
       const date = new Date(tanggal);
       const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0'); // Januari = 0
+      const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
       return `${day}-${month}-${year}`;
     },
@@ -72,19 +72,19 @@ export default {
 
       <!-- Header Tabel -->
       <div
-        class="grid gap-4 px-0 py-4 text-sm border-b border-solid border-b-zinc-100 grid-cols-[210px_1fr_1fr_140px_80px_40px] text-zinc-500 max-md:grid-cols-[150px_1fr_1fr_120px_80px_40px] max-sm:grid-cols-[120px_1fr_1fr_100px_70px_40px] max-sm:min-w-[800px]">
+        class="grid gap-4 px-0 py-4 text-sm border-b border-solid border-b-zinc-100 grid-cols-[200px_180px_1fr_140px_80px_40px_80px] text-zinc-500 min-w-[900px]">
         <div>Foto Dokumentasi</div>
         <div>Judul Kegiatan</div>
         <div>Deskripsi</div>
         <div>Tanggal Pelaksanaan</div>
         <div>Waktu</div>
         <div>Aksi</div>
+        <div>Status</div>
       </div>
 
       <!-- Kontainer Scroll -->
       <div class="max-h-[530px] overflow-y-auto scrollbar-hidden">
-        <div v-for="kegiatan in kegiatans" :key="kegiatan.id_kegiatan"
-          class="grid gap-4 px-0 py-6 border-b border-solid border-b-zinc-100 grid-cols-[210px_0.5fr_1fr_140px_80px_40px] max-md:grid-cols-[150px_1fr_1fr_120px_80px_40px] max-sm:grid-cols-[120px_1fr_1fr_100px_70px_40px] max-sm:min-w-[800px]">
+        <div v-for="kegiatan in kegiatans" :key="kegiatan.id_kegiatan" class="grid gap-4 px-0 py-6 border-b border-solid border-b-zinc-100 grid-cols-[200px_180px_1fr_140px_80px_40px_80px] min-w-[900px]">
           <img :src="`/storage/${kegiatan.galeris[0]?.foto}`" :alt="kegiatan.judul"
             class="object-cover rounded h-[120px] w-[210px] max-md:w-[150px] max-sm:w-[120px]" />
           <div class="text-sm text-zinc-800">{{ kegiatan.judul }}</div>
@@ -109,6 +109,13 @@ export default {
                 fill="#0080C5" />
             </svg>
           </a>
+          <!-- Status -->
+          <div class="text-xs font-semibold px-2 py-1 rounded w-fit" :class="{
+            'text-sky-500': kegiatan.status_kegiatan === 'divalidasi',
+            'text-red-800': kegiatan.status_kegiatan === 'ditolak',
+          }">
+            {{ kegiatan.status_kegiatan }}
+          </div>
         </div>
       </div>
     </section>
@@ -119,13 +126,10 @@ export default {
 /* Menghilangkan scrollbar tapi tetap bisa di-scroll */
 .scrollbar-hidden {
   -ms-overflow-style: none;
-  /* IE & Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari */
 }
 </style>

@@ -51,6 +51,7 @@ class DashboardFasilitatorController extends Controller
 
         $kegiatans = Kegiatan::with('user', 'provinsi', 'kabupaten', 'kecamatan', 'bidang', 'galeris', 'grups')
             ->where('id_user', $user->id)
+            ->where('status_kegiatan','=','divalidasi')
             ->orderBy('tanggal', 'desc')
             ->take(3)
             ->get();

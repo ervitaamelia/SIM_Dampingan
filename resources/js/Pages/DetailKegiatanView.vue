@@ -33,8 +33,17 @@ onBeforeUnmount(stopAutoSlide);
 const goBack = () => window.history.back();
 
 function formatTanggal(tanggal) {
+  const bulanIndonesia = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+
   const date = new Date(tanggal);
-  return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = bulanIndonesia[date.getMonth()];
+  const year = date.getFullYear();
+
+  return `${day} ${month} ${year}`;
 }
 
 function formatWaktu(waktu) {
@@ -76,10 +85,32 @@ function formatWaktu(waktu) {
             </div>
           </div>
 
+          <!-- Informasi Pembuat -->
+          <section class="mb-6">
+            <div class="flex items-center gap-4 mb-2">
+              <img :src="kegiatan.user?.foto ? `/storage/${kegiatan.user.foto}` : '/images/default-profile.png'"
+                alt="Foto User" class="w-10 h-10 rounded-full object-cover border" />
+              <div>
+                <p class="text-sm font-semibold text-gray-800">{{ kegiatan.user?.name }}</p>
+                <p class="text-xs text-gray-500">Dibuat pada {{ formatTanggal(kegiatan.created_at) }}</p>
+              </div>
+            </div>
+          </section>
+
           <!-- Deskripsi -->
           <p class="text-base leading-relaxed text-gray-800 whitespace-pre-line text-justify">
             {{ kegiatan.deskripsi }}
           </p>
+
+          <!-- Daftar Grup Dampingan -->
+          <section v-if="kegiatan.grups && kegiatan.grups.length" class="mt-6">
+            <h4 class="text-sm font-semibold text-gray-800 mb-2">Diikuti oleh Grup Dampingan:</h4>
+            <ol class="list-decimal list-inside text-gray-700 text-sm space-y-1">
+              <li v-for="grup in kegiatan.grups" :key="grup.id_grup_dampingan">
+                {{ grup.nama_grup_dampingan }}
+              </li>
+            </ol>
+          </section>
 
           <!-- Tombol Lihat Laporan -->
           <div class="mt-6 text-center">

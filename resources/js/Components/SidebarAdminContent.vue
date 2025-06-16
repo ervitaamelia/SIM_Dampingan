@@ -131,6 +131,17 @@ export default {
         <span>Kegiatan Dampingan</span>
         </Link>
       </li>
+
+      <li>
+        <Link href="/admin/kelola-kegiatan" :class="isPrefixActive('/admin/kelola-kegiatan').value
+          ? 'flex items-center gap-3 px-4 py-3 w-full text-white bg-sky-600 rounded-lg hover:bg-sky-700'
+          : 'flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-blue-200'">
+          <img
+           src="https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/c089238d6fd542b8b9009bfa90175af913a34227304625c56c5947f0d0805040"
+            class="w-6 shrink-0" alt="Kelola icon" />
+          <span>Kelola Kegiatan</span>
+        </Link>
+      </li>
     </ul>
 
     <!-- Logout -->

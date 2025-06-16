@@ -26,7 +26,8 @@ class DataAdminController extends Controller
             ->leftJoin('provinsis', 'users.kode_provinsi', '=', 'provinsis.kode')
             ->leftJoin('kabupatens', 'users.kode_kabupaten', '=', 'kabupatens.kode')
             ->leftJoin('kecamatans', 'users.kode_kecamatan', '=', 'kecamatans.kode')
-            ->whereIn('users.role', ['superadmin', 'admin-provinsi', 'admin-kabupaten', 'admin-kecamatan']);
+            ->whereIn('users.role', ['superadmin', 'admin-provinsi', 'admin-kabupaten', 'admin-kecamatan'])
+            ->orderBy('name', 'asc');
 
         if ($user->role === 'admin-provinsi') {
             $query->where('users.kode_provinsi', $user->kode_provinsi);
@@ -66,8 +67,8 @@ class DataAdminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'username' => 'required|string|unique:users,username',
-            'password' => 'required|min:6',
+            'username' => 'required|string|regex:/^\S*$/u|unique:users,username',
+            'password' => 'required|min:8',
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
             'role' => 'required|in:superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan',
@@ -112,7 +113,7 @@ class DataAdminController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:100',
-            'username' => 'required|string|unique:users,username,' . $id,
+            'username' => 'required|string|regex:/^\S*$/u|unique:users,username,' . $id,
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
         ]);
@@ -144,6 +145,7 @@ class DataAdminController extends Controller
         $admin = User::findOrFail($id);
 
         $admin->password = Hash::make('12345678');
+        $admin->must_change_password = true;
         $admin->save();
 
         return redirect()->route('admin.index')->with('success', 'Password berhasil direset ke default');

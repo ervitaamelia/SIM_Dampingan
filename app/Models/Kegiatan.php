@@ -23,6 +23,7 @@ class Kegiatan extends Model
         'alamat',
         'jumlah_peserta',
         'laporan',
+        'status_kegiatan',
         'id_user',
         'kode_provinsi',
         'kode_kabupaten',

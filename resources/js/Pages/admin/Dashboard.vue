@@ -6,7 +6,6 @@ import ChartKegiatan from '@/Components/ChartKegiatan.vue'
 import ChartGrupJenis from '@/Components/ChartGrupJenis.vue'
 import StatCard from '@/Components/StatCard.vue'
 
-
 export default {
   components: {
     AdminLayout,
@@ -24,6 +23,40 @@ export default {
     anggotaTerbanyak: Array,
     kegiatanPerGrup: Array,
     grupPerJenis: Array,
+    jumlahKegiatanBulanan: Number,
+    selectedMonth: Number,
+    selectedYear: Number,
+  },
+
+  data() {
+    return {
+      selectedMonthLocal: this.selectedMonth,
+      selectedYearLocal: this.selectedYear,
+    }
+  },
+
+  computed: {
+    months() {
+      return Array.from({ length: 12 }, (_, i) =>
+        new Intl.DateTimeFormat('id-ID', { month: 'long' }).format(new Date(2000, i))
+      )
+    },
+    years() {
+      const currentYear = new Date().getFullYear()
+      return Array.from({ length: 5 }, (_, i) => currentYear - i)
+    }
+  },
+
+  methods: {
+    fetchKegiatanByMonth() {
+      this.$inertia.get('/admin', {
+        month: this.selectedMonthLocal,
+        year: this.selectedYearLocal
+      }, {
+        preserveState: true,
+        preserveScroll: true
+      });
+    }
   }
 }
 </script>
@@ -33,25 +66,25 @@ export default {
 
     <Head title="Dashboard" />
 
-    <!-- Grid Statistik -->
+    <!-- Statistik -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
       <StatCard icon="👥" label="Total Masyarakat Dampingan" :value="totalMasyarakat" />
       <StatCard icon="🧑‍🏫" label="Total Fasilitator" :value="totalFasilitator" />
       <StatCard icon="🏠" label="Total Grup Dampingan" :value="totalGrup" />
     </div>
 
-    <!-- Tabel & Statistik Masyarakat -->
+    <!-- Tabel dan Chart Anggota -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-      <!-- Tabel -->
+      <!-- Tabel Grup -->
       <div class="lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
         <h2 class="text-base font-semibold mb-3">Grup Dampingan MPM Muhammadiyah</h2>
         <div class="overflow-auto max-h-64">
           <table class="min-w-full text-sm text-left border-collapse">
             <thead>
               <tr class="bg-sky-600 text-white">
-                <th class="p-2">Grup</th>
-                <th class="p-2">Bidang</th>
-                <th class="p-2">Jumlah</th>
+                <th class="p-2">Grup Dampingan</th>
+                <th class="p-2">Bidang Dampingan</th>
+                <th class="p-2">Jumlah Masyarakat</th>
               </tr>
             </thead>
             <tbody>
@@ -65,7 +98,7 @@ export default {
         </div>
       </div>
 
-      <!-- Diagram Masyarakat -->
+      <!-- Chart Anggota -->
       <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
         <h3 class="text-sm font-medium text-gray-700 mb-3 text-center">Statistik Masyarakat per Grup</h3>
         <div class="w-full h-48">
@@ -74,15 +107,36 @@ export default {
       </div>
     </div>
 
-    <!-- Diagram Kegiatan & Grup per Jenis -->
+    <!-- Chart Kegiatan dan Grup Jenis -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
-        <h3 class="text-sm font-medium text-gray-700 mb-3 text-center">Jumlah Kegiatan per Grup</h3>
+      <!-- Chart Kegiatan -->
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-sm font-medium text-gray-700">Jumlah Kegiatan per Grup</h3>
+          <div class="flex gap-2">
+            <select v-model="selectedMonthLocal" @change="fetchKegiatanByMonth"
+              class="border text-sm rounded px-7 py-1">
+              <option v-for="(month, index) in months" :key="index" :value="index + 1">{{ month }}</option>
+            </select>
+            <select v-model="selectedYearLocal" @change="fetchKegiatanByMonth" class="border text-sm rounded px-7 py-1">
+              <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="text-gray-600 text-sm mb-2">
+          Total kegiatan bulan ini: <span class="font-semibold">{{ jumlahKegiatanBulanan }}</span>
+        </p>
+
         <div class="w-full h-48">
-          <ChartKegiatan :dataKegiatan="kegiatanPerGrup" />
+          <div v-if="kegiatanPerGrup.length === 0" class="flex items-center justify-center h-full text-gray-500 italic">
+            📭 Kegiatan tidak ditemukan pada bulan ini.
+          </div>
+          <ChartKegiatan v-else :dataKegiatan="kegiatanPerGrup" />
         </div>
       </div>
 
+      <!-- Chart Grup per Jenis -->
       <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center">
         <h3 class="text-sm font-medium text-gray-700 mb-3 text-center">Jumlah Grup per Jenis Dampingan</h3>
         <div class="w-full h-48">

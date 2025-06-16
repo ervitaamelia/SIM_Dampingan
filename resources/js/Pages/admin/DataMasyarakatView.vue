@@ -288,10 +288,10 @@ export default {
                   <td>{{ masyarakat.alamat }}</td>
                   <td>{{ masyarakat.bidang?.nama_bidang }}</td>
                   <td>{{ masyarakat.grup?.nama_grup_dampingan }}</td>
-                  <td class="text-center">
-                    <a :href="route('masyarakat.edit', masyarakat.nomor_anggota)" class="text-blue-500">✏</a>
-                    <button @click="confirmDelete(masyarakat.nomor_anggota)" class="text-red-500">🗑</button>
-                    <button @click="downloadKartu(masyarakat)" class="text-green-500">🖨</button>
+                  <td class="text-center space-x-1">
+                    <a :href="route('masyarakat.edit', masyarakat.nomor_anggota)" class="text-blue-500" title="Edit">✏</a>
+                    <button @click="confirmDelete(masyarakat.nomor_anggota)" class="text-red-500" title="Hapus">🗑</button>
+                    <button @click="downloadKartu(masyarakat)" class="text-green-500" title="Cetak Kartu">🖨</button>
                   </td>
                   <td class="text-center">
                     <button @click="showDetails(masyarakat)"

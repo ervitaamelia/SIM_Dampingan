@@ -119,7 +119,7 @@ export default {
         })
         .catch(err => {
           console.error(err);
-          alert('Gagal menghapus bidang');
+          alert('Bidang tidak dapat dihapus karena masih terhubung dengan grup, masyarakat, atau fasillitator');
         });
     },
 
@@ -159,10 +159,10 @@ export default {
     },
 
     resetPassword(id) {
-      if (confirm('Apakah yakin ingin mereset password user ini ke "12345678"?')) {
+      if (confirm('Apakah Anda yakin ingin mereset password pengguna ini ke password default?')) {
         router.post(`/fasilitator/${id}/reset-password`, {}, {
           onSuccess: () => {
-            alert('Password berhasil direset!')
+            alert('Password berhasil direset.')
           },
           preserveScroll: true,
         });
@@ -246,6 +246,7 @@ export default {
                   <th class="border p-2">Bidang Dampingan</th>
                   <th class="border p-2">Grup Dampingan</th>
                   <th class="border p-2">Aksi</th>
+                  <th class="border p-2">Detail</th>
                 </tr>
               </thead>
               <tbody>
@@ -264,14 +265,14 @@ export default {
                     </span>
                   </td>
                   <td class="border p-2 text-center space-x-1">
-                    <button @click="showDetail(f)">
-                      👁
-                    </button>
                     <a :href="route('fasilitator.edit', f.id)" class="text-blue-500" title="Edit">✏️</a>
-                    <button @click="selectedFasilitatorId = f.id; showPopupHapus = true" class="text-red-500"
-                      title="Hapus">🗑️</button>
+                    <button @click="selectedFasilitatorId = f.id; showPopupHapus = true" class="text-red-500" title="Hapus">🗑️</button>
                     <button v-if="$page.props.auth.user.role === 'superadmin'" @click="resetPassword(f.id)"
                       class="text-red-500 hover:text-red-700" title="Reset Password">🔐</button>
+                  </td>
+                  <td class="text-center">
+                    <button @click="showDetail(f)"
+                      class="bg-blue-500 text-white px-3 py-2 rounded-lg">Detail</button>
                   </td>
                 </tr>
                 <tr v-if="filteredFasilitators.length === 0">
@@ -296,7 +297,7 @@ export default {
 
                   <div>
                     <h3 class="text-2xl font-bold">{{ selectedFasilDetail.name }}</h3>
-                    <p class="text-base">{{ selectedFasilDetail.email }}</p>
+                    <p class="text-base text-gray-700">@{{ selectedFasilDetail.username }}</p>
                   </div>
                 </div>
 

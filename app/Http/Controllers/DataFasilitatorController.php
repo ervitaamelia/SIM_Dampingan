@@ -59,8 +59,8 @@ class DataFasilitatorController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'username' => 'required|string|unique:users,username',
-            'password' => 'required|min:6',
+            'username' => 'required|string|regex:/^\S*$/u|unique:users,username',
+            'password' => 'required|min:8',
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
             'foto' => 'nullable|image',
@@ -112,7 +112,7 @@ class DataFasilitatorController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:100',
-            'username' => 'required|string|unique:users,username,' . $id,
+            'username' => 'required|string|regex:/^\S*$/u|unique:users,username,' . $id,
             'nomor_telepon' => 'required|max:15',
             'alamat' => 'required|string|max:255',
             'bidang_dampingan' => 'required|array|min:1',
@@ -167,11 +167,42 @@ class DataFasilitatorController extends Controller
         $fasilitator = User::findOrFail($id);
 
         $fasilitator->password = Hash::make('12345678');
+        $fasilitator->must_change_password = true;
         $fasilitator->save();
 
         return redirect()->route('fasilitator.index')->with('success', 'Password berhasil direset ke default');
     }
 
+    /**
+     * @OA\Get(
+     *  path="/api/check-username",
+     *  tags={"User"},
+     *  summary="Cek apakah username sudah digunakan",
+     *  description="Mengecek apakah username sudah ada di database. Digunakan saat create dan edit, dengan pengecualian berdasarkan ID.",
+     *  operationId="checkUsername",
+     *  @OA\Parameter(
+     *      name="username",
+     *      in="query",
+     *      required=true,
+     *      description="Username yang ingin dicek",
+     *      @OA\Schema(type="string")
+     *  ),
+     *  @OA\Parameter(
+     *      name="id",
+     *      in="query",
+     *      required=false,
+     *      description="ID user untuk pengecualian saat edit (opsional)",
+     *      @OA\Schema(type="integer")
+     *  ),
+     *  @OA\Response(
+     *      response=200,
+     *      description="Hasil pengecekan apakah username sudah digunakan",
+     *      @OA\JsonContent(
+     *          @OA\Property(property="exists", type="boolean", example=true)
+     *      )
+     *  )
+     * )
+     */
     public function checkUsername(Request $request)
     {
         $username = $request->query('username');

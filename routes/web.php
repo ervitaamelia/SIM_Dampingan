@@ -1,5 +1,4 @@
 <?php
-
 use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\DashboardFasilitatorController;
 use App\Http\Controllers\DataAdminController;
@@ -12,8 +11,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\BidangController;
+use App\Http\Controllers\PasswordChangeController;
+use App\Http\Controllers\KelolaKegiatanController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Middleware\EnsureUserRole;
+use App\Http\Middleware\CheckMustChangePassword;
 use Illuminate\Support\Facades\Route;
 
 // Login route
@@ -23,14 +25,18 @@ Route::get('/', [AuthenticatedSessionController::class, 'create'])
 Route::post('/', [AuthenticatedSessionController::class, 'store']);
 
 //Dashboard fasilitator route
-Route::middleware(['auth', 'role:fasilitator'])
+Route::middleware(['auth', 'role:fasilitator', CheckMustChangePassword::class])
     ->get('/fasilitator', [DashboardFasilitatorController::class, 'index'])
     ->name('fasilitator.dashboard');
 
 //Dashboard admin route
 Route::get('/admin', [DashboardAdminController::class, 'index'])
-    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
+    ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan', CheckMustChangePassword::class])
     ->name('admin.dashboard');
+
+//Ubah password route
+Route::middleware('auth')->get('/ubah-password', [PasswordChangeController::class, 'edit'])->name('password.change.edit');
+Route::middleware('auth')->post('/ubah-password', [PasswordChangeController::class, 'update'])->name('password.change.update');
 
 //Logout route
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
@@ -100,6 +106,17 @@ Route::get('/admin/kegiatan-dampingan', [KegiatanDampinganController::class, 'in
     ->middleware(['auth', 'verified', EnsureUserRole::class . ':superadmin,admin-provinsi,admin-kabupaten,admin-kecamatan'])
     ->name('kegiatan-dampingan');
 Route::get('/artikel/{id}', [KegiatanDampinganController::class, 'show']);
+
+Route::middleware(['auth', 'verified'])->prefix('admin/kelola-kegiatan')->name('admin.kegiatan.')->group(function () {
+    // Halaman utama (bisa berupa komponen Vue langsung atau via controller)
+    Route::get('/', [KelolaKegiatanController::class, 'index'])->name('index');
+
+    // Validasi kegiatan
+    Route::put('/{id}/validasi', [KelolaKegiatanController::class, 'validasi'])->name('validasi');
+
+    // Tolak kegiatan
+    Route::put('/{id}/tolak', [KelolaKegiatanController::class, 'tolak'])->name('tolak');
+});
 
 //Data kegiatan route
 Route::middleware(['auth', 'verified', EnsureUserRole::class . ':fasilitator'])

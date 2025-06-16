@@ -149,6 +149,7 @@ class DataKegiatanController extends Controller
             'waktu' => $request->waktu,
             'alamat' => $request->alamat,
             'jumlah_peserta' => $request->jumlah_peserta,
+            'status_kegiatan' => 'diproses',
             'kode_provinsi' => $request->kode_provinsi,
             'kode_kabupaten' => $request->kode_kabupaten,
             'kode_kecamatan' => $request->kode_kecamatan,

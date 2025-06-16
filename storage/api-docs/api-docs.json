@@ -1,0 +1,194 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Documentation My API",
+        "version": "1.0"
+    },
+    "paths": {
+        "/api/check-nama-grup": {
+            "get": {
+                "tags": [
+                    "Grup Dampingan"
+                ],
+                "summary": "Cek apakah nama grup dampingannya sudah digunakan",
+                "description": "Mengecek apakah nama grup dampingannya sudah ada di database. Bisa digunakan saat create dan edit, dengan pengecualian id.",
+                "operationId": "checkNamaGrup",
+                "parameters": [
+                    {
+                        "name": "nama",
+                        "in": "query",
+                        "description": "Nama grup dampingannya yang ingin dicek",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID grup untuk pengecualian saat edit (opsional)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hasil pengecekan apakah nama grup sudah digunakan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "exists": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/check-username": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Cek apakah username sudah digunakan",
+                "description": "Mengecek apakah username sudah ada di database. Digunakan saat create dan edit, dengan pengecualian berdasarkan ID.",
+                "operationId": "checkUsername",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "query",
+                        "description": "Username yang ingin dicek",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID user untuk pengecualian saat edit (opsional)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hasil pengecekan apakah username sudah digunakan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "exists": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/provinsi": {
+            "get": {
+                "tags": [
+                    "Provinsi"
+                ],
+                "summary": "Mengambil daftar provinsi",
+                "description": "Mengambil data semua provinsi",
+                "operationId": "getProvinsi",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil data provinsi"
+                    }
+                }
+            }
+        },
+        "/api/kabupaten/{kode_provinsi}": {
+            "get": {
+                "tags": [
+                    "Kabupaten"
+                ],
+                "summary": "Mengambil daftar kabupaten berdasarkan provinsi",
+                "description": "Mengambil data kabupaten sesuai kode provinsi",
+                "operationId": "getKabupaten",
+                "parameters": [
+                    {
+                        "name": "kode_provinsi",
+                        "in": "path",
+                        "description": "Kode provinsi",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil data kabupaten"
+                    }
+                }
+            }
+        },
+        "/api/kecamatan/{kode_kabupaten}": {
+            "get": {
+                "tags": [
+                    "Kecamatan"
+                ],
+                "summary": "Mengambil daftar kecamatan berdasarkan kabupaten",
+                "description": "Mengambil data kecamatan sesuai kode kabupaten",
+                "operationId": "getKecamatan",
+                "parameters": [
+                    {
+                        "name": "kode_kabupaten",
+                        "in": "path",
+                        "description": "Kode kabupaten",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil mengambil data kecamatan"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Grup Dampingan",
+            "description": "Grup Dampingan"
+        },
+        {
+            "name": "User",
+            "description": "User"
+        },
+        {
+            "name": "Provinsi",
+            "description": "Provinsi"
+        },
+        {
+            "name": "Kabupaten",
+            "description": "Kabupaten"
+        },
+        {
+            "name": "Kecamatan",
+            "description": "Kecamatan"
+        }
+    ]
+}

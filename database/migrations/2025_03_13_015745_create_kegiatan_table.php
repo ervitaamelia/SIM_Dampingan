@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('alamat');
             $table->unsignedSmallInteger('jumlah_peserta');
             $table->string('laporan', 100)->nullable();
+            $table->enum('status_kegiatan', ['diproses', 'divalidasi', 'ditolak'])->default('diproses');
             $table->unsignedBigInteger('id_user');
             $table->string('kode_provinsi');
             $table->string('kode_kabupaten');

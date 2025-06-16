@@ -64,6 +64,12 @@ watch(() => form.username, async (newValue) => {
 
   if (!newValue) return;
 
+  // Cek apakah ada spasi
+  if (/\s/.test(newValue)) {
+    usernameError.value = "Username tidak boleh mengandung spasi.";
+    return;
+  }
+
   try {
     const query = new URLSearchParams({
       username: newValue,
@@ -87,6 +93,7 @@ const isFormValid = computed(() => {
   return (
     form.name.trim() !== "" &&
     form.username.trim() !== "" &&
+    !usernameError.value &&
     (props.fasilitator || form.password.trim() !== "") &&
     form.nomor_telepon.trim() !== "" &&
     form.alamat.trim() !== "" &&
