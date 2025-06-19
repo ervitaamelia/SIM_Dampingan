@@ -35,7 +35,7 @@ class DashboardAdminController extends Controller
             )
             ->groupBy('grup_dampingan.nama_grup_dampingan', 'bidang.nama_bidang')
             ->orderByDesc('jumlah_anggota')
-            ->take(10)
+            ->take(5)
             ->get();
 
         $kegiatanPerGrup = DB::table('grup_dampingan')

@@ -276,7 +276,7 @@ export default {
                   </td>
                 </tr>
                 <tr v-if="filteredFasilitators.length === 0">
-                  <td colspan="7" class="border p-4 text-center text-gray-500">
+                  <td colspan="7" class="border p-4 text-center">
                     Tidak ada data yang sesuai
                   </td>
                 </tr>

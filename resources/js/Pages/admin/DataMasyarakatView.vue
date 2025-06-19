@@ -100,6 +100,11 @@ export default {
       return `${day}-${month}-${year}`;
     },
 
+    capitalize(text) {
+      if (!text) return '';
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    },
+
     deleteItem(id) {
       this.$inertia.delete(route('masyarakat.destroy', id))
       this.showPopupHapus = false
@@ -299,7 +304,7 @@ export default {
                   </td>
                 </tr>
                 <tr v-if="filteredMasyarakats.length === 0">
-                  <td colspan="8" class="border p-2 text-center text-gray-500">
+                  <td colspan="8" class="border p-2 text-center">
                     Tidak ada data yang sesuai
                   </td>
                 </tr>
@@ -536,7 +541,7 @@ export default {
                   </tr>
                   <tr>
                     <td class="font-semibold py-2 pr-4">Peran</td>
-                    <td class="py-2">{{ selectedMasyarakat.peran }}</td>
+                    <td class="py-2">{{ capitalize(selectedMasyarakat.peran) }}</td>
                   </tr>
                 </tbody>
               </table>

@@ -79,12 +79,12 @@ export default {
       <div class="lg:col-span-2 bg-white p-4 rounded-lg shadow-md">
         <h2 class="text-base font-semibold mb-3">Grup Dampingan MPM Muhammadiyah</h2>
         <div class="overflow-auto max-h-64">
-          <table class="min-w-full text-sm text-left border-collapse">
+          <table class="min-w-full text-sm text-left border-collapse rounded-lg overflow-hidden shadow-sm">
             <thead>
               <tr class="bg-sky-600 text-white">
-                <th class="p-2">Grup Dampingan</th>
-                <th class="p-2">Bidang Dampingan</th>
-                <th class="p-2">Jumlah Masyarakat</th>
+                <th class="p-3">Grup Dampingan</th>
+                <th class="p-3">Bidang Dampingan</th>
+                <th class="p-3">Jumlah Masyarakat</th>
               </tr>
             </thead>
             <tbody>

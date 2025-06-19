@@ -157,6 +157,7 @@ const removeFasilitator = (index) => {
 const isFormValid = computed(() => {
   return (
     form.nama_grup_dampingan &&
+    !namaGrupError.value &&
     form.id_bidang &&
     form.jenis_dampingan &&
     form.kode_provinsi &&

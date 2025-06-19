@@ -206,7 +206,7 @@ watch(() => form.username, async (newValue) => {
 
 const isFormIncomplete = computed(() => {
   if (!form.name || !form.username || !form.nomor_telepon || !form.alamat) return true
-  if (!admin && !form.password) return true
+  if (!admin && (!form.password || form.password.length < 8)) return true
   if (!form.role) return true
 
   if (form.role === 'admin-kabupaten' && !form.kode_kabupaten) return true
@@ -284,8 +284,7 @@ const handleSubmit = () => {
                 class="w-full py-3 px-3 mt-1 border rounded-md outline-none text-base" :class="{
                   'border-gray-400': !usernameError,
                   'border-red-500': usernameError
-                }"
-                placeholder="Masukkan Username" />
+                }" placeholder="Masukkan Username" />
               <div v-if="usernameError" class="text-red-500 text-sm">
                 {{ usernameError }}
               </div>
@@ -300,7 +299,8 @@ const handleSubmit = () => {
                   class="text-red-500">*</span></label>
               <div class="relative">
                 <input :type="showPassword ? 'text' : 'password'" v-model="form.password"
-                  placeholder="Masukkan Password" class="w-full py-2 px-3 border border-gray-400 rounded-md" />
+                  placeholder="Masukkan Password" class="w-full py-2 px-3 border border-gray-400 rounded-md"
+                  :class="{ 'border-red-500': form.password && form.password.length < 8 }" />
                 <button type="button" @click="togglePassword"
                   class="absolute inset-y-0 right-3 flex items-center focus:outline-none">
                   <svg v-if="showPassword" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
@@ -316,6 +316,9 @@ const handleSubmit = () => {
                       d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.944 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </button>
+              </div>
+              <div v-if="form.password && form.password.length < 8" class="text-red-500 text-sm">
+                Password harus terdiri dari minimal 8 karakter.
               </div>
             </div>
 
