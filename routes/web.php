@@ -7,8 +7,6 @@ use App\Http\Controllers\DataFasilitatorController;
 use App\Http\Controllers\DataKegiatanController;
 use App\Http\Controllers\DataMasyarakatController;
 use App\Http\Controllers\KegiatanDampinganController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\BidangController;
 use App\Http\Controllers\PasswordChangeController;
@@ -148,17 +146,13 @@ Route::get('/nomor-telepon', function () {
 });
 
 //api
-Route::get('/dropdown-data', [AdminController::class, 'getDropdownData']);
+
 Route::get('/api/provinsi', [WilayahController::class, 'getProvinsi']);
 Route::get('/api/kabupaten/{kode_provinsi}', [WilayahController::class, 'getKabupaten']);
 Route::get('/api/kecamatan/{kode_kabupaten}', [WilayahController::class, 'getKecamatan']);
 Route::get('/api/check-nama-grup', [DataDampinganController::class, 'checkNamaGrup']);
 Route::get('/api/check-username', [DataFasilitatorController::class, 'checkUsername']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+
 
 require __DIR__ . '/auth.php';
