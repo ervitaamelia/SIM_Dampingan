@@ -128,23 +128,18 @@ class DataKegiatanController extends Controller
             'id_bidang' => 'required|exists:bidang,id_bidang',
             'id_grup_dampingan' => 'required|array|min:1',
             'id_grup_dampingan.*' => 'exists:grup_dampingan,id_grup_dampingan',
-            'foto' => 'nullable|array|min:1',
-            'foto.*' => 'image'
+            'foto.*' => 'nullable|image',
+            'edited_galeris.*' => 'nullable|image',
+            'deleted_galeris' => 'nullable|array',
+            'deleted_galeris.*' => 'exists:galeri,id_galeri'
         ]);
 
-        // Hapus file laporan lama dan simpan file laporan baru
-        if ($request->hasFile('laporan')) {
-            if ($kegiatan->laporan && Storage::disk('public')->exists($kegiatan->laporan)) {
-                Storage::disk('public')->delete($kegiatan->laporan);
-            }
-            $kegiatan->laporan = $request->file('laporan')->store('laporan_kegiatan', 'public');
-        }
-
+        // Update data kegiatan
         $kegiatan->update([
             'judul' => $request->judul,
             'deskripsi' => $request->deskripsi,
-            'masalah' => $request->masalah ?? null,
-            'solusi' => $request->solusi ?? null,
+            'masalah' => $request->masalah,
+            'solusi' => $request->solusi,
             'tanggal' => $request->tanggal,
             'waktu' => $request->waktu,
             'alamat' => $request->alamat,
@@ -156,18 +151,51 @@ class DataKegiatanController extends Controller
             'id_bidang' => $request->id_bidang,
         ]);
 
-        // Sinkronisasi grup dampingan
+        // Update grup dampingan
         $kegiatan->grups()->sync($request->id_grup_dampingan);
 
-        // Simpan foto
-        if ($request->hasFile('foto')) {
-            foreach ($request->foto as $foto) {
-                $fotoPath = $foto->store('foto_kegiatan', 'public');
-                $kegiatan->galeris()->create(['foto' => $fotoPath]);
+        // Proses foto yang dihapus
+        if ($request->has('deleted_galeris')) {
+            foreach ($request->deleted_galeris as $galeriId) {
+                $galeri = $kegiatan->galeris()->find($galeriId);
+                if ($galeri) {
+                    Storage::disk('public')->delete($galeri->foto);
+                    $galeri->delete();
+                }
             }
         }
 
-        return redirect()->route('kegiatan.index')->with('success', 'Data kegiatan berhasil diperbarui!');
+        // Proses foto yang diedit
+        if ($request->hasFile('edited_galeris')) {
+            foreach ($request->file('edited_galeris') as $galeriId => $file) {
+                $galeri = $kegiatan->galeris()->find($galeriId);
+                if ($galeri) {
+                    Storage::disk('public')->delete($galeri->foto);
+                    $path = $file->store('foto_kegiatan', 'public');
+                    $galeri->update(['foto' => $path]);
+                }
+            }
+        }
+
+        // Proses foto baru
+        if ($request->hasFile('foto')) {
+            foreach ($request->file('foto') as $foto) {
+                $path = $foto->store('foto_kegiatan', 'public');
+                $kegiatan->galeris()->create(['foto' => $path]);
+            }
+        }
+
+        // Proses laporan baru jika ada
+        if ($request->hasFile('laporan')) {
+            if ($kegiatan->laporan) {
+                Storage::disk('public')->delete($kegiatan->laporan);
+            }
+            $path = $request->file('laporan')->store('laporan_kegiatan', 'public');
+            $kegiatan->update(['laporan' => $path]);
+        }
+
+        return redirect()->route('kegiatan.index')
+            ->with('success', 'Data kegiatan berhasil diperbarui!');
     }
 
     public function destroy($id)

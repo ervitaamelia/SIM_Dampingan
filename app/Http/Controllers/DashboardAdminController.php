@@ -57,6 +57,8 @@ class DashboardAdminController extends Controller
             ->groupBy('jenis_dampingan')
             ->get();
 
+        $nomorTelepon = DB::table('kontak')->value('nomor_telepon');
+
         return Inertia::render('admin/Dashboard', [
             'totalMasyarakat' => $totalMasyarakat,
             'totalFasilitator' => $totalFasilitator,
@@ -67,6 +69,7 @@ class DashboardAdminController extends Controller
             'jumlahKegiatanBulanan' => $jumlahKegiatanBulanan,
             'selectedMonth' => (int) $month,
             'selectedYear' => (int) $year,
+            'nomor_telepon_admin' => $nomorTelepon,
         ]);
     }
 }

@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
-import { Head, useForm } from '@inertiajs/vue3'
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue'
+import { Head, useForm, router } from '@inertiajs/vue3'
 import FasilitatorLayout from '@/Layouts/FasilitatorLayout.vue'
 import Multiselect from '@vueform/multiselect'
 import '@vueform/multiselect/themes/default.css'
@@ -38,8 +38,17 @@ onMounted(() => {
   if (form.kode_provinsi) fetchKabupaten(form.kode_provinsi);
   if (form.kode_kabupaten) fetchKecamatan(form.kode_kabupaten);
 
-  fileInputs.value = props.kegiatan?.galeris?.map(() => ({ file: null })) || [{ file: null }];
+  fileInputs.value = [{ file: null }];
 })
+
+onUnmounted(() => {
+  // Cleanup object URLs
+  Object.values(editedGaleriFiles.value).forEach(file => {
+    if (file) {
+      URL.revokeObjectURL(URL.createObjectURL(file));
+    }
+  });
+});
 
 const provinsiList = ref([])
 const kabupatenList = ref([])
@@ -100,7 +109,7 @@ function fetchKecamatan(kodeKabupaten) {
 }
 
 const bidangOptions = props.bidangs.map(b => ({
-  value: b.id_bidang,
+  value: String(b.id_bidang),
   label: b.nama_bidang,
 }));
 
@@ -113,11 +122,11 @@ const getGrupOptions = (index) => {
 
   return props.grups
     .filter(grup =>
-      grup.id_bidang === form.id_bidang &&
-      !selectedIds.includes(grup.id_grup_dampingan)
+      String(grup.id_bidang) === String(form.id_bidang) &&
+      !selectedIds.includes(String(grup.id_grup_dampingan))
     )
     .map(grup => ({
-      value: grup.id_grup_dampingan,
+      value: String(grup.id_grup_dampingan),
       label: grup.nama_grup_dampingan
     }))
 }
@@ -143,36 +152,93 @@ const handleFileChange = (event, index) => {
 }
 
 const isFormValid = computed(() => {
-  const isFileValid = props.kegiatan || fileInputs.value.every(input => input.file instanceof File);
+  // Validasi file hanya untuk form baru, bukan edit
+  const isFileValid = props.kegiatan ? true : fileInputs.value.some(input => input.file instanceof File);
 
-  return form.judul &&
+  // Validasi grup dampingan
+  const isGrupValid = form.id_grup_dampingan.length > 0 &&
+    form.id_grup_dampingan.every(grup => grup !== null && grup !== "");
+
+  return (
+    // Basic field validations
+    form.judul?.trim() &&
     isDeskripsiValid.value &&
     form.tanggal &&
     form.waktu &&
-    form.alamat &&
-    form.jumlah_peserta &&
+    form.alamat?.trim() &&
+    form.jumlah_peserta > 0 &&
     form.kode_provinsi &&
     form.kode_kabupaten &&
     form.kode_kecamatan &&
     form.id_bidang &&
-    form.id_grup_dampingan &&
-    isFileValid;
+    isGrupValid &&
+    isFileValid
+  );
 });
 
 const handleSubmit = () => {
-  form.foto = fileInputs.value
+  const formData = new FormData();
+  
+  // Append all form fields
+  Object.keys(form).forEach(key => {
+    if (key !== 'foto') {
+      if (Array.isArray(form[key])) {
+        form[key].forEach((value, index) => {
+          formData.append(`${key}[${index}]`, value);
+        });
+      } else {
+        formData.append(key, form[key] || '');
+      }
+    }
+  });
+
+  // Append new photos
+  fileInputs.value
     .map(input => input.file)
-    .filter(file => file !== null);
+    .filter(file => file !== null)
+    .forEach((file, index) => {
+      formData.append(`foto[${index}]`, file);
+    });
+
+  // Append edited photos
+  Object.entries(editedGaleriFiles.value).forEach(([galeriId, file]) => {
+    if (file) {
+      formData.append(`edited_galeris[${galeriId}]`, file);
+    }
+  });
+
+  // Append deleted photo IDs
+  deletedGaleriIds.value.forEach(id => {
+    formData.append('deleted_galeris[]', id);
+  });
 
   if (props.kegiatan) {
-    form.post(`/fasilitator/data-kegiatan/${props.kegiatan.id_kegiatan}`, {
-      _method: 'put',
-      forceFormData: true
-    });
+    // Using POST directly without _method field
+    router.post(`/fasilitator/data-kegiatan/${props.kegiatan.id_kegiatan}`, formData);
   } else {
-    form.post('/fasilitator/data-kegiatan')
+    router.post('/fasilitator/data-kegiatan', formData);
   }
 }
+
+const deletedGaleriIds = ref([]);
+const editedGaleriFiles = ref({});
+const showEditInput = ref({});
+
+const handleEditGaleriFile = (event, galeriId) => {
+  const file = event.target.files[0];
+  if (file) {
+    editedGaleriFiles.value[galeriId] = file;
+    showEditInput.value[galeriId] = false;
+  }
+};
+
+const getPreviewUrl = (galeriId, originalFoto) => {
+  const editedFile = editedGaleriFiles.value[galeriId];
+  if (editedFile) {
+    return URL.createObjectURL(editedFile);
+  }
+  return `/storage/${originalFoto}`;
+};
 </script>
 
 <template>
@@ -195,7 +261,8 @@ const handleSubmit = () => {
 
             <!-- Judul kegiatan -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Judul Kegiatan <span class="text-red-500">*</span></label>
+              <label class="text-sm font-medium text-gray-600">Judul Kegiatan <span
+                  class="text-red-500">*</span></label>
               <input v-model="form.judul" type="text" placeholder="Masukkan Judul Kegiatan di sini"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" required />
             </div>
@@ -206,8 +273,10 @@ const handleSubmit = () => {
               <textarea v-model="form.deskripsi" placeholder="Masukkan Deskripsi (minimal 500 karakter)"
                 class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm"
                 :class="{ 'border-red-500': !isDeskripsiValid && form.deskripsi }"></textarea>
-              <p class="text-xs text-blue-500 mt-1">Minimal 500 karakter. Saat ini: {{ form.deskripsi.trim().length }} karakter</p>
-              <p v-if="form.deskripsi && !isDeskripsiValid" class="text-xs text-red-500 mt-1">Deskripsi terlalu pendek.</p>
+              <p class="text-xs text-blue-500 mt-1">Minimal 500 karakter. Saat ini: {{ form.deskripsi.trim().length }}
+                karakter</p>
+              <p v-if="form.deskripsi && !isDeskripsiValid" class="text-xs text-red-500 mt-1">Deskripsi terlalu pendek.
+              </p>
             </div>
 
             <!-- Masalah -->
@@ -276,7 +345,8 @@ const handleSubmit = () => {
 
               <!-- Jumlah peserta -->
               <div class="w-1/3">
-                <label class="text-sm font-medium text-gray-600">Jumlah Peserta <span class="text-red-500">*</span></label>
+                <label class="text-sm font-medium text-gray-600">Jumlah Peserta <span
+                    class="text-red-500">*</span></label>
                 <div class="flex items-center">
                   <input type="number" v-model.number="form.jumlah_peserta"
                     class="w-full py-2 px-3 rounded-md border-y border-gray-400 text-center text-sm" min="0" />
@@ -286,20 +356,22 @@ const handleSubmit = () => {
 
             <!-- Bidang dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Bidang Dampingan <span class="text-red-500">*</span></label>
+              <label class="text-sm font-medium text-gray-600">Bidang Dampingan <span
+                  class="text-red-500">*</span></label>
               <Multiselect v-model="form.id_bidang" :options="bidangOptions" placeholder="Pilih Bidang"
                 class="w-full border border-gray-300 rounded-md shadow-sm text-sm" />
             </div>
 
             <!-- Grup dampingan -->
             <div class="flex flex-col gap-2 pb-2">
-              <label class="text-sm font-medium text-gray-600">Grup Dampingan <span class="text-red-500">*</span></label>
+              <label class="text-sm font-medium text-gray-600">Grup Dampingan <span
+                  class="text-red-500">*</span></label>
 
               <div v-for="(item, index) in form.id_grup_dampingan" :key="index"
                 class="flex gap-2 items-center gap-2 mb-2">
-                <Multiselect v-model="form.id_grup_dampingan[index]" :options="getGrupOptions(index)" placeholder="Pilih Grup"
-                  :disabled="!form.id_bidang" class="w-full border border-gray-300 rounded-md shadow-sm text-sm"
-                  :searchable="true" />
+                <Multiselect v-model="form.id_grup_dampingan[index]" :options="getGrupOptions(index)"
+                  placeholder="Pilih Grup" :disabled="!form.id_bidang"
+                  class="w-full border border-gray-300 rounded-md shadow-sm text-sm" :searchable="true" />
                 <button type="button" @click="addGrup"
                   class="bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600"
                   v-if="index === form.id_grup_dampingan.length - 1">
@@ -315,7 +387,8 @@ const handleSubmit = () => {
 
             <!-- Foto -->
             <div class="mb-2">
-              <label class="text-sm font-medium text-gray-600">Foto Dokumentasi <span class="text-red-500">*</span></label>
+              <label class="text-sm font-medium text-gray-600">Foto Dokumentasi <span
+                  class="text-red-500">*</span></label>
               <div v-for="(input, index) in fileInputs" :key="index" class="mb-2">
                 <input type="file" @change="(e) => handleFileChange(e, index)"
                   class="w-full py-2 px-3 border border-gray-400 rounded-md outline-none text-sm" />
@@ -327,9 +400,69 @@ const handleSubmit = () => {
             <div v-if="props.kegiatan?.galeris?.length" class="mb-4">
               <label class="text-sm font-medium text-gray-600">Foto Dokumentasi Sebelumnya:</label>
               <div class="flex flex-wrap gap-2 mt-2">
-                <img v-for="(foto, idx) in props.kegiatan.galeris" :key="idx"
-                  :src="`/storage/${foto.foto}`" alt="Foto Kegiatan"
-                  class="w-32 h-32 object-cover border rounded-md" />
+                <div v-for="foto in props.kegiatan.galeris" :key="foto.id_galeri" class="relative group">
+                  <!-- Foto -->
+                  <div v-if="!deletedGaleriIds.includes(foto.id_galeri)" class="w-32 h-32 relative">
+                    <img :src="getPreviewUrl(foto.id_galeri, foto.foto) " alt="Foto Kegiatan"
+                      class="w-32 h-32 object-cover border rounded-md" />
+
+                    <!-- Badge untuk foto yang diedit -->
+                    <div v-if="editedGaleriFiles[foto.id_galeri]"
+                      class="absolute top-0 right-0 bg-yellow-500 text-white text-xs px-2 py-1 rounded-bl-md">
+                      Edited
+                    </div>
+
+                    <!-- Overlay buttons -->
+                    <div
+                      class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <button type="button" @click="showEditInput[foto.id_galeri] = true"
+                        class="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                          stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
+                      <button type="button" @click="deletedGaleriIds.push(foto.id_galeri)"
+                        class="bg-red-500 text-white p-2 rounded-full hover:bg-red-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                          stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- Edit input -->
+                    <div v-if="showEditInput[foto.id_galeri]"
+                      class="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center p-2">
+                      <input type="file" accept="image/*" @change="(e) => handleEditGaleriFile(e, foto.id_galeri)"
+                        class="text-xs w-full" />
+                      <div class="flex gap-2 mt-2">
+                        <button type="button" @click="() => {
+                                  showEditInput[foto.id_galeri] = false;
+                                  editedGaleriFiles[foto.id_galeri] = null;
+                                }" class="text-xs text-red-500">
+                          Batal
+                        </button>
+                        <button type="button" @click="showEditInput[foto.id_galeri] = false"
+                          class="text-xs text-green-500">
+                          Selesai
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Deleted state -->
+                  <div v-else class="w-32 h-32 border rounded-md bg-gray-100 flex flex-col items-center justify-center">
+                    <span class="text-xs text-red-500">Akan dihapus</span>
+                    <button type="button"
+                      @click="deletedGaleriIds = deletedGaleriIds.filter(id => id !== foto.id_galeri)"
+                      class="mt-2 text-xs text-blue-500">
+                      Batalkan
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -349,7 +482,8 @@ const handleSubmit = () => {
             <div class="flex gap-4 mt-4 justify-end">
               <a :href="route('kegiatan.index')"
                 class="px-6 py-2 text-sm font-medium text-white bg-gray-500 rounded-md">Batal</a>
-              <button type="submit" :disabled="!isFormValid" class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
+              <button type="submit" :disabled="!isFormValid"
+                class="px-6 py-2 text-sm font-medium text-white bg-sky-600 rounded-md disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ props.kegiatan ? "Simpan Perubahan" : "Tambah" }}
               </button>
             </div>

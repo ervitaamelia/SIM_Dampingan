@@ -44,7 +44,7 @@ const getFasilitatorOptions = (index) => {
 
   return props.users
     .filter(user =>
-      user.bidangs.some(b => b.id_bidang === form.id_bidang) &&
+      user.bidangs.some(b => String(b.id_bidang) === String(form.id_bidang)) &&
       !selectedIds.includes(String(user.id))
     )
     .map(user => ({
@@ -54,7 +54,7 @@ const getFasilitatorOptions = (index) => {
 }
 
 const bidangOptions = props.bidangs.map(b => ({
-  value: b.id_bidang,
+  value: String(b.id_bidang),
   label: b.nama_bidang,
 }));
 

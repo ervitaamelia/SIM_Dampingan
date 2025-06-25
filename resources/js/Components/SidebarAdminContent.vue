@@ -6,10 +6,18 @@ export default {
   components: {
     Link,
   },
+  mounted() {
+    this.currentPhone = this.$page.props.nomor_telepon_admin || 'Belum tersedia';
+  },
   data() {
     return {
       isMenuOpen: false,
       isDropdownOpen: false,
+      isMenuOpen: false,
+      showPhoneModal: false,
+      currentPhone: '',
+      newPhone: '',
+
     };
   },
   methods: {
@@ -22,14 +30,20 @@ export default {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
     },
+    savePhone() {
+      this.$inertia.post('/simpan-nomor-telepon', { nomor_telepon: this.newPhone }, {
+        onSuccess: () => {
+          this.currentPhone = this.newPhone;
+          this.newPhone = '';
+          this.showPhoneModal = false;
+        }
+      });
+    },
   },
   setup() {
     const page = usePage();
 
-    function isExactActive(path) {
-      const currentPath = usePage().url.split('?')[0]
-      return computed(() => currentPath === path)
-    };
+    const isExactActive = href => computed(() => page.url === href);
     const isPrefixActive = prefix => computed(() => page.url.startsWith(prefix));
 
     return {
@@ -64,6 +78,10 @@ export default {
       <div>
         <h2 class="text-md font-semibold text-gray-800">{{ $page.props.auth.user.name }}</h2>
         <p class="text-sm text-gray-500">{{ formatRole($page.props.auth.user.role) }}</p>
+        <button v-if="$page.props.auth.user.role === 'superadmin'" @click="showPhoneModal = true"
+          class="mt-1 text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1">
+          📞 <span>Kontak Admin</span>
+        </button>
       </div>
     </div>
 
@@ -153,4 +171,25 @@ export default {
     Keluar
     </Link>
   </aside>
+
+  <!-- Modal Pop-up -->
+  <div v-if="showPhoneModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-md w-96">
+      <h2 class="text-lg font-semibold mb-4">Nomor Telepon Admin</h2>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm mb-1">Nomor Telepon Saat Ini:</label>
+        <input type="text" v-model="currentPhone" disabled class="w-full p-2 border rounded bg-gray-100" />
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm mb-1">Nomor Telepon Baru:</label>
+        <input type="text" v-model="newPhone" placeholder="Masukkan nomer telepon yang baru"
+          class="w-full p-2 border rounded" />
+      </div>
+      <div class="flex justify-end gap-2">
+        <button @click="showPhoneModal = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Batal</button>
+        <button @click="savePhone" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">OK</button>
+      </div>
+    </div>
+  </div>
+
 </template>

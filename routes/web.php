@@ -13,10 +13,12 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\BidangController;
 use App\Http\Controllers\PasswordChangeController;
 use App\Http\Controllers\KelolaKegiatanController;
+use App\Http\Controllers\KontakController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Middleware\EnsureUserRole;
 use App\Http\Middleware\CheckMustChangePassword;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 // Login route
 Route::get('/', [AuthenticatedSessionController::class, 'create'])
@@ -138,6 +140,11 @@ Route::get('/api/dampingan-list', function () {
             'label' => $bidang->nama_bidang,
         ];
     });
+});
+
+Route::post('/simpan-nomor-telepon', [KontakController::class, 'simpan']);
+Route::get('/nomor-telepon', function () {
+    return DB::table('kontak')->value('nomor_telepon');
 });
 
 //api

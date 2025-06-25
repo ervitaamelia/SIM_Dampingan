@@ -15,12 +15,15 @@ const togglePassword = () => {
 }
 
 const page = usePage()
-const adminPhone = '6289507291774'
+const adminPhone = page.props.adminPhone
 
 const waResetLink = computed(() => {
-  const message = `Halo Admin, saya ingin mereset password akun saya dengan username:`
-  return `https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`
-})
+  const cleanedPhone = adminPhone.startsWith('08')
+    ? '62' + adminPhone.slice(1)
+    : adminPhone
+    const message = `Halo Admin, saya ingin mereset password akun saya dengan username:`
+    return `https://wa.me/${cleanedPhone}?text=${encodeURIComponent(message)}`
+  })
 
 const submit = () => {
   form.post(route('login'), {
@@ -30,13 +33,16 @@ const submit = () => {
 </script>
 
 <template>
-
   <Head title="Login" />
   <main class="flex h-screen w-screen bg-white max-md:flex-col">
-
     <!-- Form Login -->
-    <section class="w-1/2 h-full flex items-center justify-center px-10 max-md:w-full max-md:h-auto max-md:py-10">
+    <section class="w-full md:w-1/2 h-full flex items-center justify-center px-10 max-md:py-10">
       <form @submit.prevent="submit" class="flex flex-col w-full max-w-md text-sm tracking-wide" method="POST">
+        <!-- Logo MPM -->
+        <div class="flex justify-center mb-6">
+          <img src="/images/logo-mpm.png" class="object-contain w-12" alt="Logo MPM" />
+        </div>
+        
         <header class="text-center mb-10">
           <h1 class="text-4xl font-medium tracking-wider text-black uppercase max-md:text-3xl">
             login
@@ -117,8 +123,8 @@ const submit = () => {
       </form>
     </section>
 
-    <!-- Gambar Samping -->
-    <section class="w-full md:w-1/2 h-full overflow-hidden">
+    <!-- Gambar Samping - Hidden on mobile -->
+    <section class="hidden md:block w-1/2 h-full overflow-hidden">
       <img
         src="https://cdn.builder.io/api/v1/image/assets/99e98c75e74449b086557677558acabb/565513d8e8b2eff5bf3fd018f49e7907f07b7b0998074991ec9da8a42f4ad693?placeholderIfAbsent=true"
         alt="Login illustration" class="w-full h-full object-cover object-[50%_30%]" />

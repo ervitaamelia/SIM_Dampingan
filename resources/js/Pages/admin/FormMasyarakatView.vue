@@ -60,14 +60,14 @@ const pekerjaanOptions = props.pekerjaans.map(b => ({
 }))
 
 const bidangOptions = props.bidangs.map(b => ({
-  value: b.id_bidang,
+  value: String(b.id_bidang),
   label: b.nama_bidang,
 }))
 
 const grupOptions = computed(() => {
   if (!form.id_bidang) return []
   return (props.grups || [])
-    .filter(grup => grup.id_bidang === form.id_bidang)
+    .filter(grup => String(grup.id_bidang) === String(form.id_bidang))
     .map(grup => ({
       value: grup.id_grup_dampingan,
       label: grup.nama_grup_dampingan
