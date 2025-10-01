@@ -146,13 +146,10 @@ Route::get('/nomor-telepon', function () {
 });
 
 //api
-
 Route::get('/api/provinsi', [WilayahController::class, 'getProvinsi']);
 Route::get('/api/kabupaten/{kode_provinsi}', [WilayahController::class, 'getKabupaten']);
 Route::get('/api/kecamatan/{kode_kabupaten}', [WilayahController::class, 'getKecamatan']);
 Route::get('/api/check-nama-grup', [DataDampinganController::class, 'checkNamaGrup']);
 Route::get('/api/check-username', [DataFasilitatorController::class, 'checkUsername']);
-
-
 
 require __DIR__ . '/auth.php';

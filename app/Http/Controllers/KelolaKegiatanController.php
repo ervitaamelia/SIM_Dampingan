@@ -11,44 +11,36 @@ class KelolaKegiatanController extends Controller
     {
         $user = auth()->user();
 
-        // Map role user ke jenis_dampingan di grup
-        $roleToJenisDampingan = [
-            'superadmin' => 'Pusat',
-            'admin-provinsi' => 'Provinsi',
-            'admin-kabupaten' => 'Kabupaten',
-            'admin-kecamatan' => 'Kecamatan',
-        ];
+        if ($user->role === 'superadmin') {
+            $kegiatan = Kegiatan::with(['user', 'galeris', 'grups'])->get();
+        } else {
+            $kegiatan = Kegiatan::with(['user', 'galeris', 'grups'])
+                ->where('status_kegiatan', 'diproses')
+                ->whereHas('grups', function ($query) use ($user) {
+                    if ($user->role === 'admin-provinsi') {
+                        $query->where(function ($q) {
+                            $q->where('jenis_dampingan', 'Pusat')
+                                ->orWhere('jenis_dampingan', 'Provinsi');
+                        })
+                            ->where('kode_provinsi', $user->kode_provinsi);
+                    }
 
-        $jenisDampingan = $roleToJenisDampingan[$user->role] ?? null;
+                    if ($user->role === 'admin-kabupaten') {
+                        $query->where('jenis_dampingan', 'Kabupaten')
+                            ->where('kode_kabupaten', $user->kode_kabupaten);
+                    }
 
-        $kegiatanDiproses = Kegiatan::with(['user', 'galeris', 'grups'])
-            ->where('status_kegiatan', 'diproses')
-            ->whereHas('grups', function ($query) use ($user, $jenisDampingan) {
-                $query->where('jenis_dampingan', $jenisDampingan)
-                    ->when($user->role === 'admin-provinsi', function ($q) use ($user) {
-                        $q->where('kode_provinsi', $user->kode_provinsi);
-                    })
-                    ->when($user->role === 'admin-kabupaten', function ($q) use ($user) {
-                        $q->where('kode_kabupaten', $user->kode_kabupaten);
-                    })
-                    ->when($user->role === 'admin-kecamatan', function ($q) use ($user) {
-                        $q->where('kode_kecamatan', $user->kode_kecamatan);
-                    });
-            })
-            ->get();
+                    if ($user->role === 'admin-kecamatan') {
+                        $query->where('jenis_dampingan', 'Kecamatan')
+                            ->where('kode_kecamatan', $user->kode_kecamatan);
+                    }
+                })
+                ->get();
+        }
 
         return Inertia::render('admin/KelolaKegiatan', [
-            'data' => $kegiatanDiproses
+            'data' => $kegiatan
         ]);
-    }
-
-    public function validasi($id)
-    {
-        $kegiatan = Kegiatan::findOrFail($id);
-        $kegiatan->status_kegiatan = 'divalidasi';
-        $kegiatan->save();
-
-        return redirect()->back()->with('message', 'Kegiatan berhasil divalidasi.');
     }
 
     public function tolak($id)
